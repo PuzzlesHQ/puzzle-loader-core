@@ -1,0 +1,16 @@
+buildscript {
+    repositories {
+        maven {
+            name "JitPack"
+            url "https://jitpack.io"
+        }
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "com.github.johnrengelman:shadow:8.1.1"
+    }
+}
+
+rootProject.name = 'PuzzleLoaderCore'

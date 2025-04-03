@@ -1,0 +1,147 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow'
+}
+
+group = 'com.github.PuzzlesHQ'
+
+repositories {
+    mavenCentral()
+    maven { url "https://libraries.minecraft.net" }
+    maven {
+        url = "https://jitpack.io"
+    }
+    maven {
+        name = "meteor-maven"
+        url = "https://maven.meteordev.org/releases"
+    }
+}
+
+sourceSets {
+    common
+    client
+}
+
+configurations {
+
+    allCompileOnly
+    clientCompilyOnly.extendsFrom(allCompileOnly)
+    commonCompilyOnly.extendsFrom(allCompileOnly)
+
+    clientBundle
+    clientImplementation.extendsFrom(clientBundle)
+
+    commonBundle
+    commonImplementation.extendsFrom(commonBundle)
+    clientImplementation.extendsFrom(commonBundle)
+
+    clientInternal
+    clientImplementation.extendsFrom(clientInternal)
+
+}
+
+def natives(String lwjgl_natives) {
+    dependencies {
+        clientImplementation "org.lwjgl:lwjgl::$lwjgl_natives"
+        clientImplementation "org.lwjgl:lwjgl-opengl::$lwjgl_natives"
+        clientImplementation "org.lwjgl:lwjgl-glfw::$lwjgl_natives"
+    }
+}
+
+// Client Dependencies
+dependencies {
+    clientImplementation 'org.jetbrains:annotations:24.0.0'
+    clientImplementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
+
+    clientImplementation "org.lwjgl:lwjgl"
+    clientImplementation "org.lwjgl:lwjgl-opengl"
+    clientImplementation "org.lwjgl:lwjgl-glfw"
+    natives("natives-linux")
+    natives("natives-linux-arm32")
+    natives("natives-linux-arm64")
+    natives("natives-macos")
+    natives("natives-macos-arm64")
+    natives("natives-windows")
+    natives("natives-windows-arm64")
+    natives("natives-windows-x86")
+    clientBundle "org.joml:joml:${joml_version}"
+
+    clientInternal sourceSets.common.output
+}
+
+// Common Dependencies
+dependencies {
+    commonImplementation 'org.jetbrains:annotations:24.0.0'
+
+    commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
+    commonBundle "net.fabricmc:sponge-mixin:$mixin_version"
+    commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
+
+    commonBundle "org.apache.logging.log4j:log4j-api:$log4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-core:$log4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version"
+
+    commonBundle "org.reflections:reflections:$reflections_version"
+    commonBundle "meteordevelopment:orbit:$eventbus_version"
+
+    commonBundle "org.ow2.asm:asm:$asm_version"
+    commonBundle "org.ow2.asm:asm-tree:$asm_version"
+    commonBundle "org.ow2.asm:asm-util:$asm_version"
+    commonBundle "org.ow2.asm:asm-analysis:$asm_version"
+    commonBundle "org.ow2.asm:asm-commons:$asm_version"
+
+    commonBundle "org.hjson:hjson:$hjson_version"
+}
+
+
+tasks.register("buildMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    ArrayList t = new ArrayList();
+    Collections.addAll(t, project.configurations.clientInternal, project.configurations.commonBundle, project.configurations.clientBundle)
+    configurations = t
+
+    archiveClassifier = "merged"
+    mergeServiceFiles()
+
+    from sourceSets.client.output
+}
+
+tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    configurations = Collections.singletonList(project.configurations.commonBundle)
+
+    archiveClassifier = "common"
+    mergeServiceFiles()
+
+    from sourceSets.common.output
+}
+
+tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+//    ArrayList t = new ArrayList();
+//    Collections.addAll(t, project.configurations.commonBundle, project.configurations.clientBundle)
+//    configurations = t
+
+    configurations = Collections.singletonList(project.configurations.clientBundle)
+
+    archiveClassifier = "client"
+    mergeServiceFiles()
+
+    from sourceSets.client.output
+}
+
+processCommonResources {
+    def replacement_properties = [
+            "version": ((String)version).contains(".") ? version : "69.69.69"
+    ]
+
+    inputs.properties replacement_properties
+    replacement_properties.put("project", project)
+
+    filesMatching(["assets/puzzle-loader/core-version.txt"]) {
+        expand replacement_properties
+    }
+}
+
+wrapper {
+    gradleVersion = "8.5"
+    distributionType = Wrapper.DistributionType.ALL
+}
