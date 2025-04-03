@@ -1,7 +1,7 @@
 package com.github.puzzle.loader.loading.events;
 
-import com.github.puzzle.loader.loading.stage.AbstractStage;
 import com.github.puzzle.loader.loading.GameLoader;
+import com.github.puzzle.loader.loading.stage.AbstractStage;
 
 /**
  * An event that is called before the game-loader starts to collect game-loading stages.

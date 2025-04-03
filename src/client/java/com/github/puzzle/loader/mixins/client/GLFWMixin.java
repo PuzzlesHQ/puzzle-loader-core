@@ -3,12 +3,8 @@ package com.github.puzzle.loader.mixins.client;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.NativeType;
-import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static org.lwjgl.glfw.GLFW.nglfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.nglfwSetWindowTitle;
@@ -29,7 +25,6 @@ public abstract class GLFWMixin {
         long var11;
         try {
             stack.nUTF8("Puzzle Loader: " + title, true);
-            LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
             long titleEncoded = stack.getPointerAddress();
             var11 = nglfwCreateWindow(width, height, titleEncoded, monitor, share);
         } finally {
@@ -43,32 +38,8 @@ public abstract class GLFWMixin {
      * @author Mr_Zombii
      * @reason add "Puzzle Loader: " infront of titles.
      */
-    @Inject(method = "glfwSetWindowTitle(JLjava/lang/CharSequence;)V", at = @At("HEAD"), cancellable = true)
-    private static void glfwSetWindowTitle(long window, CharSequence title, CallbackInfo ci) {
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-        LoggerFactory.getLogger("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").info(String.valueOf(title));
-
+    @Overwrite
+    public static void glfwSetWindowTitle(long window, CharSequence title) {
         MemoryStack stack = MemoryStack.stackGet();
         int stackPointer = stack.getPointer();
 
@@ -79,8 +50,6 @@ public abstract class GLFWMixin {
         } finally {
             stack.setPointer(stackPointer);
         }
-        ci.cancel();
-
     }
 
 }

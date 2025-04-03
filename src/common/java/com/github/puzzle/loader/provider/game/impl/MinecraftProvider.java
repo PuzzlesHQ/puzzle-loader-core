@@ -10,16 +10,18 @@ import com.github.puzzle.loader.mod.info.ModInfo;
 import com.github.puzzle.loader.provider.game.IGameProvider;
 import com.github.puzzle.loader.util.*;
 import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
-import java.util.*;
-
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 @Note("You thought lol, you should see the look on your face. (This thing worked first try when I made it & it supports loading Mixins and Mods)")
 public class MinecraftProvider implements IGameProvider {

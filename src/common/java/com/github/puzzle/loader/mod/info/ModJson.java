@@ -1,9 +1,9 @@
 package com.github.puzzle.loader.mod.info;
 
-import com.github.puzzle.loader.util.EnvType;
 import com.github.puzzle.loader.mod.info.spec.ModJsonV0;
 import com.github.puzzle.loader.mod.info.spec.ModJsonV1;
 import com.github.puzzle.loader.mod.info.spec.ModJsonV2;
+import com.github.puzzle.loader.util.EnvType;
 import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
