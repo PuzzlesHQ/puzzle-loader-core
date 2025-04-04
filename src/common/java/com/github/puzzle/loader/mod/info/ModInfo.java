@@ -51,25 +51,25 @@ public class ModInfo {
         Authors = ImmutableList.copyOf(JSON.authors());
 
         if (JSON.meta() != null) {
-            var MetadataBuilder = ImmutableMap.<String, JsonValue>builder();
+            ImmutableMap.Builder<String, JsonValue> MetadataBuilder = ImmutableMap.builder();
             for (String key : JSON.meta().keySet()) {
                 MetadataBuilder.put(key, JSON.meta().get(key));
             }
             Metadata = MetadataBuilder.build();
         } else Metadata = ImmutableMap.<String, JsonValue>builder().build();
 
-        var EntrypointsBuilder = ImmutableMap.<String, ImmutableCollection<AdapterPathPair>>builder();
+        ImmutableMap.Builder<String, ImmutableCollection<AdapterPathPair>> EntrypointsBuilder = ImmutableMap.builder();
         for (String key : JSON.entrypoints().keySet()) {
             EntrypointsBuilder.put(key, ImmutableList.copyOf(JSON.entrypoints().get(key)));
         }
         Entrypoints = EntrypointsBuilder.build();
 
         if (JSON.mixins() != null)
-            MixinConfigs = Arrays.stream(JSON.mixins()).toList();
+            MixinConfigs = Arrays.asList(JSON.mixins());
         else MixinConfigs = new ArrayList<>();
 
         if (JSON.dependencies() != null) {
-            var DependenciesBuilder = ImmutableMap.<String, Pair<Version, Boolean>>builder();
+            ImmutableMap.Builder<String, Pair<Version, Boolean>> DependenciesBuilder = ImmutableMap.builder();
             for (String key : JSON.dependencies().keySet()) {
                 DependenciesBuilder.put(key, new ImmutablePair<>(
                         Version.parse(JSON.dependencies().get(key).getLeft()),
@@ -144,17 +144,17 @@ public class ModInfo {
         }
 
         public Builder setAuthors(String[] authors) {
-            this.authors = new ArrayList<>(List.of(authors));
+            this.authors = Arrays.asList(authors);
             return this;
         }
 
         public Builder setAuthors(@NotNull Collection<String> authors) {
-            this.authors = authors.stream().toList();
+            this.authors = Arrays.asList(authors.stream().toArray(String[]::new));
             return this;
         }
 
         public Builder addAuthors(String... names) {
-            this.authors.addAll(List.of(names));
+            this.authors.addAll(Arrays.asList(names));
             return this;
         }
 

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -128,7 +129,8 @@ public class ModLocator {
     public static @NotNull Collection<URL> getUrlsOnClasspath(Collection<URL> urlz) {
         Set<URL> urls = new HashSet<>(urlz);
 
-        if (ModLocator.class.getClassLoader() instanceof URLClassLoader loader) {
+        if (ModLocator.class.getClassLoader() instanceof URLClassLoader) {
+            URLClassLoader loader = (URLClassLoader) ModLocator.class.getClassLoader();
             Collections.addAll(urls, loader.getURLs());
         } else {
             for (String url : System.getProperty("java.class.path").split(File.pathSeparator)) {
@@ -154,7 +156,7 @@ public class ModLocator {
             }
         } else if (file.getName().equals("puzzle.mod.json")) {
             try {
-                String strInfo = new String(new FileInputStream(file).readAllBytes());
+                String strInfo = new String(NativeArrayUtil.readNBytes(new FileInputStream(file), Integer.MAX_VALUE));
                 ModJson json = ModJson.fromString(strInfo);
                 addMod(env, json, null, true);
             } catch (IOException e) {
@@ -173,14 +175,19 @@ public class ModLocator {
         Collection<URL> urls = getUrlsOnClasspath(classPath);
 
         for (URL url : urls) {
-            File file = new File(URLDecoder.decode(url.getFile(), Charset.defaultCharset()));
+            File file = null;
+            try {
+                file = new File(URLDecoder.decode(url.getFile(), Charset.defaultCharset().name()));
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
             if (!file.isDirectory()) {
                 try {
                     if (file.exists()) {
                         ZipFile jar = new ZipFile(file, ZipFile.OPEN_READ);
                         ZipEntry modJson = jar.getEntry("puzzle.mod.json");
                         if (modJson != null) {
-                            ModJson json = ModJson.fromString(new String(jar.getInputStream(modJson).readAllBytes()));
+                            ModJson json = ModJson.fromString(new String(NativeArrayUtil.readNBytes(jar.getInputStream(modJson), Integer.MAX_VALUE)));
                             if (!locatedMods.containsKey(json.id()))
                                 addMod(env, json, jar, false);
                         }
@@ -209,7 +216,7 @@ public class ModLocator {
 
     public static boolean hasDependencyVersion(@NotNull Version current, @NotNull String wanted){
 
-        if(wanted.isEmpty() || wanted.isBlank()) {
+        if(wanted.isEmpty()) {
             throw new RuntimeException("Invalid dependency version identifier");
 
         }
@@ -254,14 +261,14 @@ public class ModLocator {
 
     public static void verifyDependencies() {
         LOGGER.warn("Warning! Only partial semantic versioning support");
-        for(var mod : locatedMods.values()){
+        for(ModContainer mod : locatedMods.values()){
             if (mod.INFO.JSON.dependencies() == null) continue;
             if (mod.INFO.JSON.dependencies().isEmpty()) continue;
             LOGGER.info("Mod deps for {}", mod.ID);
             for (Map.Entry<String, Pair<String, Boolean>> entry : mod.INFO.JSON.dependencies().entrySet()) {
                 LOGGER.info("\t{}: {}", entry.getKey(), entry.getValue());
                 if (entry.getValue().getRight()) {
-                    var modDep = locatedMods.get(entry.getKey());
+                    ModContainer modDep = locatedMods.get(entry.getKey());
                     if (modDep == null) {
                         throw new RuntimeException(String.format("can not find mod dependency: %s for mod id: %s", entry.getKey(), mod.ID));
                     } else {

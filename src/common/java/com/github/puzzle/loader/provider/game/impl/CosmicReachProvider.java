@@ -14,13 +14,8 @@ import org.hjson.JsonValue;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
-import java.lang.module.Configuration;
-import java.lang.module.ModuleReference;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -28,8 +23,6 @@ public class CosmicReachProvider implements IGameProvider {
 
     public CosmicReachProvider() {
         Piece.provider = this;
-
-        MixinUtil.start();
     }
 
     @Override
@@ -83,26 +76,18 @@ public class CosmicReachProvider implements IGameProvider {
         return "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
     }
 
-    private URI getLocation(Module module) {
-        if (module.isNamed() && module.getLayer() != null) {
-            Configuration cf = module.getLayer().configuration();
-            ModuleReference mref
-                    = cf.findModule(module.getName()).get().reference();
-            return mref.location().orElse(null);
-        }
-        return null;
-    }
-
     public Collection<String> getArgs() {
         MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
-        return List.of(args);
+        return Arrays.asList(args);
     }
 
     @Override
     public void registerTransformers(PuzzleClassLoader classLoader) {
-        ModLocator.getMods(Constants.SIDE, List.of(classLoader.getURLs()));
+        ModLocator.getMods(Constants.SIDE, Arrays.asList(classLoader.getURLs()));
 
         CommonTransformerInitializer.invokeTransformers(classLoader);
+
+        MixinUtil.start();
     }
 
     String[] args;

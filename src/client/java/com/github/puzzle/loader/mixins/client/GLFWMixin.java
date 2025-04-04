@@ -1,5 +1,6 @@
 package com.github.puzzle.loader.mixins.client;
 
+import com.github.puzzle.loader.util.GLFWUtil;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.NativeType;
@@ -22,16 +23,16 @@ public abstract class GLFWMixin {
         MemoryStack stack = MemoryStack.stackGet();
         int stackPointer = stack.getPointer();
 
-        long var11;
+        long windowPtr;
         try {
             stack.nUTF8("Puzzle Loader: " + title, true);
             long titleEncoded = stack.getPointerAddress();
-            var11 = nglfwCreateWindow(width, height, titleEncoded, monitor, share);
+            windowPtr = nglfwCreateWindow(width, height, titleEncoded, monitor, share);
         } finally {
             stack.setPointer(stackPointer);
         }
 
-        return var11;
+        return windowPtr;
     }
 
     /**

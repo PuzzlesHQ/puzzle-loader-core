@@ -144,14 +144,14 @@ final class PuzzleClassLoaderUtil implements IClassTracker {
      * Get the classloader exclusions from the target classloader
      */
     Set<String> getClassLoaderExceptions() {
-        return Objects.requireNonNullElse(this.classLoaderExceptions, Collections.<String>emptySet());
+        return this.classLoaderExceptions == null ? Collections.emptySet() : this.classLoaderExceptions;
     }
     
     /**
      * Get the transformer exclusions from the target classloader
      */
     Set<String> getTransformerExceptions() {
-        return Objects.requireNonNullElse(this.transformerExceptions, Collections.emptySet());
+        return this.transformerExceptions == null ? Collections.emptySet() : this.transformerExceptions;
     }
 
     @SuppressWarnings("unchecked")

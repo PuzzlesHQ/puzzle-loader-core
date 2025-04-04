@@ -52,47 +52,47 @@ public enum AnsiColours {
     }
 
     public AnsiColours getBright() {
-        return switch (this) {
-            case BLACK -> BRIGHT_BLACK;
-            case RED -> BRIGHT_RED;
-            case GREEN -> BRIGHT_GREEN;
-            case YELLOW -> BRIGHT_YELLOW;
-            case BLUE -> BRIGHT_BLUE;
-            case PURPLE -> BRIGHT_PURPLE;
-            case CYAN -> BRIGHT_CYAN;
-            case WHITE -> BRIGHT_WHITE;
-            case BG_BLACK -> BRIGHT_BG_BLACK;
-            case BG_RED -> BRIGHT_BG_RED;
-            case BG_GREEN -> BRIGHT_BG_GREEN;
-            case BG_YELLOW -> BRIGHT_BG_YELLOW;
-            case BG_BLUE -> BRIGHT_BG_BLUE;
-            case BG_PURPLE -> BRIGHT_BG_PURPLE;
-            case BG_CYAN -> BRIGHT_BG_CYAN;
-            case BG_WHITE -> BRIGHT_BG_WHITE;
-            default -> this;
-        };
+        switch (this) {
+            case BLACK: return BRIGHT_BLACK;
+            case RED: return BRIGHT_RED;
+            case GREEN: return BRIGHT_GREEN;
+            case YELLOW: return BRIGHT_YELLOW;
+            case BLUE: return BRIGHT_BLUE;
+            case PURPLE: return BRIGHT_PURPLE;
+            case CYAN: return BRIGHT_CYAN;
+            case WHITE: return BRIGHT_WHITE;
+            case BG_BLACK: return BRIGHT_BG_BLACK;
+            case BG_RED: return BRIGHT_BG_RED;
+            case BG_GREEN: return BRIGHT_BG_GREEN;
+            case BG_YELLOW: return BRIGHT_BG_YELLOW;
+            case BG_BLUE: return BRIGHT_BG_BLUE;
+            case BG_PURPLE: return BRIGHT_BG_PURPLE;
+            case BG_CYAN: return BRIGHT_BG_CYAN;
+            case BG_WHITE: return BRIGHT_BG_WHITE;
+            default: return this;
+        }
     }
     
     public AnsiColours getBackground() {
-        return switch (this) {
-            case BLACK -> BG_BLACK;
-            case RED -> BG_RED;
-            case GREEN -> BG_GREEN;
-            case YELLOW -> BG_YELLOW;
-            case BLUE -> BG_BLUE;
-            case PURPLE -> BG_PURPLE;
-            case CYAN -> BG_CYAN;
-            case WHITE -> BG_WHITE;
-            case BRIGHT_BLACK -> BRIGHT_BG_BLACK;
-            case BRIGHT_RED -> BRIGHT_BG_RED;
-            case BRIGHT_GREEN -> BRIGHT_BG_GREEN;
-            case BRIGHT_YELLOW -> BRIGHT_BG_YELLOW;
-            case BRIGHT_BLUE -> BRIGHT_BG_BLUE;
-            case BRIGHT_PURPLE -> BRIGHT_BG_PURPLE;
-            case BRIGHT_CYAN -> BRIGHT_BG_CYAN;
-            case BRIGHT_WHITE -> BRIGHT_BG_WHITE;
-            default -> this;
-        };
+        switch (this) {
+            case BLACK: return BG_BLACK;
+            case RED: return BG_RED;
+            case GREEN: return BG_GREEN;
+            case YELLOW: return BG_YELLOW;
+            case BLUE: return BG_BLUE;
+            case PURPLE: return BG_PURPLE;
+            case CYAN: return BG_CYAN;
+            case WHITE: return BG_WHITE;
+            case BRIGHT_BLACK: return BRIGHT_BG_BLACK;
+            case BRIGHT_RED: return BRIGHT_BG_RED;
+            case BRIGHT_GREEN: return BRIGHT_BG_GREEN;
+            case BRIGHT_YELLOW: return BRIGHT_BG_YELLOW;
+            case BRIGHT_BLUE: return BRIGHT_BG_BLUE;
+            case BRIGHT_PURPLE: return BRIGHT_BG_PURPLE;
+            case BRIGHT_CYAN: return BRIGHT_BG_CYAN;
+            case BRIGHT_WHITE: return BRIGHT_BG_WHITE;
+            default: return this;
+        }
     }
     
     public String toString(){

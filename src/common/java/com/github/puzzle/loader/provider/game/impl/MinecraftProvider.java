@@ -18,18 +18,13 @@ import org.hjson.JsonValue;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Note("You thought lol, you should see the look on your face. (This thing worked first try when I made it & it supports loading Mixins and Mods)")
 public class MinecraftProvider implements IGameProvider {
 
     public MinecraftProvider() {
         Piece.provider = this;
-
-        MixinUtil.start();
     }
 
     @Override
@@ -66,9 +61,28 @@ public class MinecraftProvider implements IGameProvider {
         try {
             launcher = "/net/minecraft/client/main/Main.class";
             RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-        } catch (Exception ignore) {
-            throw new RuntimeException("Minecraft Client Main does not exist.");
+        } catch (Exception e) {
+            try {
+                launcher = "/net/minecraft/client/MinecraftApplet.class";
+                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            } catch (Exception a) {
+                try {
+                    launcher = "/com/mojang/MinecraftApplet.class";
+                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                } catch (Exception ignore) {
+                    throw new RuntimeException("Minecraft Client Main does not exist.");
+                }
+            }
         }
+
+        if (launcher.contains("MinecraftApplet.class")) {
+            if (args != null && !args.contains("--puzzleEdition")) {
+                args.add("--puzzleEdition");
+                args.add(launcher);
+            }
+            return "net.minecraft.launch.MinecraftAppletLauncher";
+        }
+
         return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
     }
 
@@ -77,17 +91,18 @@ public class MinecraftProvider implements IGameProvider {
     @Override
     public Collection<String> getArgs() {
         MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
-        return List.of(args);
+        return args;
     }
 
     @Override
     public void registerTransformers(PuzzleClassLoader classLoader) {
-        ModLocator.getMods(Constants.SIDE, List.of(classLoader.getURLs()));
+        MixinUtil.start();
+        ModLocator.getMods(Constants.SIDE, Arrays.asList(classLoader.getURLs()));
 
         CommonTransformerInitializer.invokeTransformers(classLoader);
     }
 
-    String[] args;
+    List<String> args;
 
     @Override
     public void initArgs(String[] args) {
@@ -98,7 +113,7 @@ public class MinecraftProvider implements IGameProvider {
 
         version = versionSpec.value(optionSet);
 
-        this.args = args;
+        this.args = new ArrayList<>(Arrays.asList(args));
     }
 
     @Override
@@ -148,6 +163,10 @@ public class MinecraftProvider implements IGameProvider {
             puzzleCoreModInfo.setAuthors(new String[]{
                     "Mr-Zombii"
             });
+
+            if (Constants.SIDE == EnvType.CLIENT) {
+                puzzleCoreModInfo.addEntrypoint("transformers", "com.github.puzzle.loader.transformers.CoreClientTransformers");
+            }
 
             puzzleCoreModInfo.addSidedMixinConfigs(
                     EnvType.UNKNOWN,

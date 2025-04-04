@@ -41,7 +41,7 @@ public class EntrypointContainer {
                         throw new RuntimeException(e);
                     }
 
-                    Constants.EVENT_BUS.registerLambdaFactory(instClass.getPackageName(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+                    Constants.EVENT_BUS.registerLambdaFactory(instClass.getPackage().getName(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
                     inst = ILangProvider.PROVDERS.get(pair.getAdapter()).create(container.INFO, pair.getValue(), type);
                     EntrypointContainer.INSTANCE_MAP.put(pair.getValue(), inst);
                 }

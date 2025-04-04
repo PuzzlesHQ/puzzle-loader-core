@@ -32,13 +32,12 @@ configurations {
     clientBundle
     clientImplementation.extendsFrom(clientBundle)
 
-    commonBundle
-    commonImplementation.extendsFrom(commonBundle)
-    clientImplementation.extendsFrom(commonBundle)
-
     clientInternal
     clientImplementation.extendsFrom(clientInternal)
 
+    commonBundle
+    commonImplementation.extendsFrom(commonBundle)
+    clientImplementation.extendsFrom(commonBundle)
 }
 
 def natives(String lwjgl_natives) {
@@ -78,9 +77,12 @@ dependencies {
     commonBundle "net.fabricmc:sponge-mixin:$mixin_version"
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
-    commonBundle "org.apache.logging.log4j:log4j-api:$log4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-core:$log4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-slf4j2-impl:$log4j_version"
+//    commonImplementation "org.apache.logging.log4j:log4j-api:$log4j_version"
+//    commonImplementation "org.apache.logging.log4j:log4j-core:$log4j_version"
+//    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-slf4j2-impl:$slf4j2_version"
+    commonBundle "org.apache.logging.log4j:log4j-api:$slf4j2_version"
+    commonBundle "org.apache.logging.log4j:log4j-core:$slf4j2_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
     commonBundle "meteordevelopment:orbit:$eventbus_version"
@@ -93,7 +95,6 @@ dependencies {
 
     commonBundle "org.hjson:hjson:$hjson_version"
 }
-
 
 tasks.register("buildMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     ArrayList t = new ArrayList();
@@ -116,10 +117,6 @@ tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.task
 }
 
 tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-//    ArrayList t = new ArrayList();
-//    Collections.addAll(t, project.configurations.commonBundle, project.configurations.clientBundle)
-//    configurations = t
-
     configurations = Collections.singletonList(project.configurations.clientBundle)
 
     archiveClassifier = "client"
@@ -144,4 +141,19 @@ processCommonResources {
 wrapper {
     gradleVersion = "8.5"
     distributionType = Wrapper.DistributionType.ALL
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+compileClientJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.7'
+}
+
+compileCommonJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.7'
 }

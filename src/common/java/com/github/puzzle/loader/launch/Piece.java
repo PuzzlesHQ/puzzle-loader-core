@@ -10,6 +10,8 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.util.asm.ASM;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -27,7 +29,7 @@ public class Piece {
     public static Map<String, Object> blackboard;
     public static PuzzleClassLoader classLoader;
 
-    static AtomicReference<EnvType> env = new AtomicReference<>();
+    static AtomicReference<EnvType> env = new AtomicReference();
 
     public static final Logger LOGGER = LogManager.getLogger("Puzzle | Loader");
 
@@ -39,13 +41,13 @@ public class Piece {
 
     private Piece() {
         if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
-        List<URL> classPath = new ArrayList<>();
+        List<URL> classPath = new ArrayList();
 
         classPath.addAll(ModLocator.getUrlsOnClasspath());
         ModLocator.crawlModsFolder(classPath);
 
         classLoader = new PuzzleClassLoader(classPath);
-        blackboard = new HashMap<>();
+        blackboard = new HashMap();
         Thread.currentThread().setContextClassLoader(classLoader);
     }
 
@@ -92,6 +94,7 @@ public class Piece {
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.provider");
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.mod");
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.util");
+            classLoader.addClassLoaderExclusion("com.github.puzzle.loader.transformers");
 
             classLoader.addClassLoaderExclusion("com.github.puzzle.core.loader.launch");
             classLoader.addClassLoaderExclusion("com.github.puzzle.core.loader.loading");
@@ -111,14 +114,16 @@ public class Piece {
                 provider = (IGameProvider) Class.forName(COSMIC_PROVIDER, true, classLoader).newInstance();
             }
 
+            System.out.println(ASM.API_VERSION + " " + Opcodes.ASM5 + " " + Opcodes.ASM9 + " " + ASM.getApiVersionString());
+
             provider.initArgs(args);
             provider.registerTransformers(classLoader);
             if (MixinUtil.WAS_STARTED) MixinUtil.doInit(args);
             provider.inject(classLoader);
 
-            String[] providerArgs = provider.getArgs().toArray(new String[0]);
-
             Class<?> clazz = Class.forName(provider.getEntrypoint(), false, classLoader);
+
+            String[] providerArgs = provider.getArgs().toArray(new String[0]);
             Method main = Reflection.getMethod(clazz,"main", String[].class);
             LOGGER.info("Launching {} version {}", provider.getName(), provider.getRawVersion());
             Reflection.runStaticMethod(main, (Object) providerArgs);
@@ -136,8 +141,10 @@ public class Piece {
             return;
         }
 
-        if (f.isDirectory())
-            for (File fc : Objects.requireNonNull(f.listFiles()))
+        if (f.isDirectory()) {
+            for (File fc : f.listFiles()) {
                 addFile(fc);
+            }
+        }
     }
 }

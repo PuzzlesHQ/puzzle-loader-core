@@ -2,8 +2,8 @@ package com.github.puzzle.loader.util;
 
 import com.github.puzzle.loader.Constants;
 import com.github.puzzle.loader.launch.PuzzleClassLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +14,11 @@ import java.util.zip.ZipFile;
 
 public class RawAssetLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | RawAssetLoader");
+    private static final Logger LOGGER = LogManager.getLogger("Puzzle | RawAssetLoader");
 
     private static byte[] getBytesFromStream(InputStream stream) {
         try {
-            byte[] bytes = stream.readAllBytes();
+            byte[] bytes = NativeArrayUtil.readNBytes(stream, Integer.MAX_VALUE);
             stream.close();
             return bytes;
         } catch (Exception ignore) {

@@ -19,12 +19,13 @@ public abstract class ModJson {
         JsonObject obj = (JsonObject) JsonValue.readHjson(string);
         int version = obj.getInt("formatVersion", 0);
 
-        ModJson json = switch (version) {
-            case 0 -> ModJsonV0.fromString(string);
-            case 1 -> ModJsonV1.fromString(string);
-            case 2 -> ModJsonV2.fromString(string);
-            default -> throw new RuntimeException("Invalid ModJson Version $" + version);
-        };
+        ModJson json;
+        switch (version) {
+            case 0: json = ModJsonV0.fromString(string); break;
+            case 1: json = ModJsonV1.fromString(string); break;
+            case 2: json = ModJsonV2.fromString(string); break;
+            default: throw new RuntimeException("Invalid ModJson Version $" + version);
+        }
 
         return convert(json, latestRevision);
     }
@@ -58,11 +59,11 @@ public abstract class ModJson {
     public static ModJson convert(ModJson old, int revision) {
         if (old.getRevision() == revision) return old;
 
-        return switch (revision) {
-            case 0 -> ModJsonV0.transform(old);
-            case 1 -> ModJsonV1.transform(old);
-            case 2 -> ModJsonV2.transform(old);
-            default -> throw new IllegalStateException("Unexpected revision: " + revision);
-        };
+        switch (revision) {
+            case 0: return ModJsonV0.transform(old);
+            case 1: return ModJsonV1.transform(old);
+            case 2: return ModJsonV2.transform(old);
+            default: throw new IllegalStateException("Unexpected revision: " + revision);
+        }
     }
 }

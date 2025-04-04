@@ -49,8 +49,8 @@ public class GameLoader {
 
     public void register(Stage stage) {
         if (
-                stage.getClass().getPackageName().startsWith("com.github.puzzle") ||
-                        stage.getClass().getPackageName().startsWith("io.github.puzzle")
+                stage.getClass().getPackage().getName().startsWith("com.github.puzzle") ||
+                        stage.getClass().getPackage().getName().startsWith("io.github.puzzle")
         ) {
             coreStages.add(stage);
             return;

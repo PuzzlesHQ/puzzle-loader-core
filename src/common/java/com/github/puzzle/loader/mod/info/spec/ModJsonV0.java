@@ -215,9 +215,9 @@ public class ModJsonV0 extends ModJson {
                 getMixins(old.mixins()),
                 getRequired(old.dependencies()),
                 getOptional(old.dependencies()),
-                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".manipulator")).toList().get(0),
-                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".cfg")).toList().get(0),
-                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".accesswidener")).toList().get(0)
+                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".manipulator")).toArray(String[]::new)[0],
+                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".cfg")).toArray(String[]::new)[0],
+                Arrays.stream(old.accessTransformers()).filter(s -> s.endsWith(".accesswidener")).toArray(String[]::new)[0]
         );
     }
 

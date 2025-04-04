@@ -5,12 +5,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 
-public record Version(
-        int major,
-        int minor,
-        int patch,
-        Type type
-) implements Comparator<Version>, Comparable<Version> {
+public class Version implements Comparator<Version>, Comparable<Version> {
+
+    private final int major, minor, patch;
+    private final Type type;
+
+    public Version(int major, int minor, int patch, Type t) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.type = t;
+    }
 
     @Override
     public int compare(Version o1, Version o2) {
@@ -31,7 +36,8 @@ public record Version(
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Version v) {
+        if (obj instanceof Version) {
+            Version v = (Version) obj;
             return v.major == major && v.minor == minor && v.patch == patch && v.type == type;
         }
         return false;

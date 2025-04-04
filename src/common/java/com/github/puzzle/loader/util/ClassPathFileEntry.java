@@ -38,7 +38,7 @@ public class ClassPathFileEntry {
         if (stream == null && file.canRead() && file.isFile()) stream = new FileInputStream(file);
         if (stream == null) throw new IOException("Could Not Read \"" + name + "\"");
 
-        bytes = stream.readAllBytes();
+        bytes = NativeArrayUtil.readNBytes(stream, Integer.MAX_VALUE);
         stream.close();
         return bytes;
     }

@@ -11,7 +11,13 @@ import com.github.puzzle.loader.loading.stage.AbstractStage;
  *
  * @see GameLoader
  */
-public record RegisterStagesEvent(GameLoader loader) {
+public class RegisterStagesEvent {
+
+    public final GameLoader loader;
+
+    public RegisterStagesEvent(GameLoader loader){
+        this.loader = loader;
+    }
 
     /**
      * A register method that adds the stage to the game-loader before execution,

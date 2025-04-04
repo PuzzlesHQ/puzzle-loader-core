@@ -32,18 +32,18 @@ public class PuzzleClassLoader extends URLClassLoader {
     private final List<URL> sources;
     private final ClassLoader parent = getClass().getClassLoader();
 
-    private final List<IClassTransformer> transformers = new ArrayList<>(2);
-    private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap<>();
-    private final Set<String> invalidClasses = new HashSet<>(1000);
+    private final List<IClassTransformer> transformers = new ArrayList(2);
+    private final Map<String, Class<?>> cachedClasses = new ConcurrentHashMap();
+    private final Set<String> invalidClasses = new HashSet(1000);
 
-    private final Set<String> classLoaderExceptions = new HashSet<>();
-    private final Set<String> transformerExceptions = new HashSet<>();
-    private final Map<String, byte[]> resourceCache = new ConcurrentHashMap<>(1000);
-    private final Set<String> negativeResourceCache = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    public final Set<String> classLoaderExceptions = new HashSet();
+    private final Set<String> transformerExceptions = new HashSet();
+    private final Map<String, byte[]> resourceCache = new ConcurrentHashMap(1000);
+    private final Set<String> negativeResourceCache = new ConcurrentHashMap().keySet();
 
     private IClassNameTransformer renameTransformer;
 
-    private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal<>();
+    private final ThreadLocal<byte[]> loadBuffer = new ThreadLocal();
 
     private static final String[] RESERVED_NAMES = {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"};
 
@@ -56,7 +56,7 @@ public class PuzzleClassLoader extends URLClassLoader {
 
     public PuzzleClassLoader(URL[] sources) {
         super(sources, null);
-        this.sources = new ArrayList<>(Arrays.asList(sources));
+        this.sources = new ArrayList(Arrays.asList(sources));
 
         // classloader exclusions
         addClassLoaderExclusion("java.");
@@ -65,6 +65,8 @@ public class PuzzleClassLoader extends URLClassLoader {
         addClassLoaderExclusion("org.slf4j");
         addClassLoaderExclusion("com.google.");
         addClassLoaderExclusion("org.hjson");
+        addClassLoaderExclusion("com.github.puzzle.access_manipulator.");
+        addClassLoaderExclusion("com.github.puzzle.paradox.loader.");
 
         // transformer exclusions
         addTransformerExclusion("javax.");
@@ -73,8 +75,8 @@ public class PuzzleClassLoader extends URLClassLoader {
         addTransformerExclusion("com.google.common.");
         addTransformerExclusion("org.bouncycastle.");
         addTransformerExclusion("org.bouncycastle.");
-        addClassLoaderExclusion("com.github.puzzle.access_manipulator.");
-        addClassLoaderExclusion("com.github.puzzle.paradox.loader.");
+        addTransformerExclusion("com.github.puzzle.access_manipulator.");
+        addTransformerExclusion("com.github.puzzle.paradox.loader.");
     }
 
     public void registerTransformer(IClassTransformer transformer) {
@@ -100,7 +102,7 @@ public class PuzzleClassLoader extends URLClassLoader {
         }
     }
 
-    public void registerTransformers(String @NotNull ... transformerClassNames) {
+    public void registerTransformers(String... transformerClassNames) {
         for (String transformerClassName : transformerClassNames) {
             registerTransformer(transformerClassName);
         }
@@ -155,14 +157,16 @@ public class PuzzleClassLoader extends URLClassLoader {
             CodeSigner[] signers = null;
 
             if (lastDot > -1 && !untransformedName.startsWith("net.minecraft.launchwrapper")) {
-                if (urlConnection instanceof JarURLConnection jarURLConnection) {
+                if (urlConnection instanceof JarURLConnection) {
+                    JarURLConnection jarURLConnection = (JarURLConnection) urlConnection;
+
                     final JarFile jarFile = jarURLConnection.getJarFile();
 
                     if (jarFile != null && jarFile.getManifest() != null) {
                         final Manifest manifest = jarFile.getManifest();
                         final JarEntry entry = jarFile.getJarEntry(fileName);
 
-                        Package pkg = getDefinedPackage(packageName);
+                        Package pkg = getPackage(packageName);
                         getClassBytes(untransformedName);
                         signers = entry.getCodeSigners();
                         if (pkg == null) {
@@ -176,7 +180,7 @@ public class PuzzleClassLoader extends URLClassLoader {
                         }
                     }
                 } else {
-                    Package pkg = getDefinedPackage(packageName);
+                    Package pkg = getPackage(packageName);
                     if (pkg == null) {
                         pkg = definePackage(packageName, null, null, null, null, null, null, null);
                     } else if (pkg.isSealed()) {
@@ -274,7 +278,7 @@ public class PuzzleClassLoader extends URLClassLoader {
         return sources;
     }
 
-    private byte @NotNull [] readFully(InputStream stream) {
+    private byte[] readFully(InputStream stream) {
         try {
             byte[] buffer = getOrCreateBuffer();
 

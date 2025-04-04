@@ -5,6 +5,7 @@ import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.launch.platform.CommandLineOptions;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
+import java.util.Arrays;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -27,7 +28,7 @@ public class MixinUtil {
     }
 
     public static void doInit(String[] args) {
-        Reflection.runStaticMethod(Reflection.getMethod(MixinBootstrap.class, MIXIN_DO_INIT, CommandLineOptions.class), CommandLineOptions.of(List.of(args)));
+        Reflection.runStaticMethod(Reflection.getMethod(MixinBootstrap.class, MIXIN_DO_INIT, CommandLineOptions.class), CommandLineOptions.of(Arrays.asList(args)));
     }
 
     public static void doInit(List<String> args) {

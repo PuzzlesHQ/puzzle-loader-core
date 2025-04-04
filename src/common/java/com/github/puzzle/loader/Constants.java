@@ -16,7 +16,7 @@ public class Constants {
     public static final IEventBus EVENT_BUS = new EventBus();
 
     public static final EnvType SIDE = Piece.getSide();
-    public static final MixinEnvironment.CompatibilityLevel MIXIN_COMPATIBILITY_LEVEL = MixinEnvironment.CompatibilityLevel.JAVA_17;
+    public static final MixinEnvironment.CompatibilityLevel MIXIN_COMPATIBILITY_LEVEL = MixinEnvironment.CompatibilityLevel.JAVA_8;
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
