@@ -120,7 +120,7 @@ public class Piece {
 
             provider.initArgs(args);
             provider.registerTransformers(classLoader);
-            if (MixinUtil.WAS_STARTED) MixinUtil.doInit(args);
+            if (MixinUtil.WAS_STARTED) MixinUtil.doInit(new String[0]);
             provider.inject(classLoader);
 
             String entryPoint = provider.getEntrypoint();
