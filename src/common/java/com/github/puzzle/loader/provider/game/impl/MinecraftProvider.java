@@ -69,18 +69,22 @@ public class MinecraftProvider implements IGameProvider {
                 try {
                     launcher = "/com/mojang/MinecraftApplet.class";
                     RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-                } catch (Exception ignore) {
-                    throw new RuntimeException("Minecraft Client Main does not exist.");
+                } catch (Exception sports) {
+                    try {
+                        launcher = "/com/mojang/rubydung/RubyDung.class";
+                        RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    } catch (Exception ignore) {
+                        throw new RuntimeException("Minecraft Client Main does not exist.");
+                    }
                 }
             }
         }
 
         if (launcher.contains("MinecraftApplet.class")) {
             if (args != null && !args.contains("--puzzleEdition")) {
-                args.add("--puzzleEdition");
-                args.add(launcher);
+                args.addFirst(launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", ""));
+                args.addFirst("--puzzleEdition");
             }
-            return "net.minecraft.launch.MinecraftAppletLauncher";
         }
 
         return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
@@ -168,10 +172,10 @@ public class MinecraftProvider implements IGameProvider {
                 puzzleCoreModInfo.addEntrypoint("transformers", "com.github.puzzle.loader.transformers.CoreClientTransformers");
             }
 
-            puzzleCoreModInfo.addSidedMixinConfigs(
-                    EnvType.UNKNOWN,
-                    "mixins/client/loader_internal.client.mixins.json"
-            );
+//            puzzleCoreModInfo.addSidedMixinConfigs(
+//                    EnvType.UNKNOWN,
+//                    "mixins/client/loader_internal.client.mixins.json"
+//            );
 
             puzzleCoreModInfo.setVersion(Constants.PUZZLE_CORE_VERSION);
         }
@@ -187,7 +191,36 @@ public class MinecraftProvider implements IGameProvider {
     @Override
     public boolean isValid() {
         try {
-            getEntrypoint();
+            String launcher = "/net/minecraft/server/Main.class";
+            if (Constants.SIDE == EnvType.SERVER) {
+                try {
+                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    return true;
+                } catch (Exception ignore) {
+                    throw new RuntimeException("Minecraft Server Main does not exist.");
+                }
+            }
+            try {
+                launcher = "/net/minecraft/client/main/Main.class";
+                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            } catch (Exception e) {
+                try {
+                    launcher = "/net/minecraft/client/MinecraftApplet.class";
+                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                } catch (Exception a) {
+                    try {
+                        launcher = "/com/mojang/MinecraftApplet.class";
+                        RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    } catch (Exception sports) {
+                        try {
+                            launcher = "/com/mojang/rubydung/RubyDung.class";
+                            RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                        } catch (Exception ignore) {
+                            throw new RuntimeException("Minecraft Client Main does not exist.");
+                        }
+                    }
+                }
+            }
             return true;
         } catch (Exception ignore) {
             return false;

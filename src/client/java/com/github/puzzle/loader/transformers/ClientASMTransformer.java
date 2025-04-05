@@ -18,6 +18,15 @@ public class ClientASMTransformer implements IClassTransformer {
             reader.accept(new Lwjgl2DisplayTransformer(writer), ClassReader.EXPAND_FRAMES);
             return writer.toByteArray();
         }
+        if (
+                name.equals("org.lwjgl.glfw.GLFW")
+        ) {
+            ClassReader reader = new ClassReader(basicClass);
+            ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+
+            reader.accept(new GLFWTransformer(writer), ClassReader.EXPAND_FRAMES);
+            return writer.toByteArray();
+        }
         return basicClass;
     }
 

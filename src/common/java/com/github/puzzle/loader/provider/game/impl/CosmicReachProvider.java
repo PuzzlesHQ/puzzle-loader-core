@@ -145,10 +145,10 @@ public class CosmicReachProvider implements IGameProvider {
                     "Mr-Zombii"
             });
 
-            puzzleCoreModInfo.addSidedMixinConfigs(
-                    EnvType.UNKNOWN,
-                    "mixins/client/loader_internal.client.mixins.json"
-            );
+//            puzzleCoreModInfo.addSidedMixinConfigs(
+//                    EnvType.UNKNOWN,
+//                    "mixins/client/loader_internal.client.mixins.json"
+//            );
 
             puzzleCoreModInfo.setVersion(Constants.PUZZLE_CORE_VERSION);
         }

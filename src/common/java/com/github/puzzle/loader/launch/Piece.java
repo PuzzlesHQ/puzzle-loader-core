@@ -39,9 +39,10 @@ public class Piece {
         piece.launch(args);
     }
 
+    List<URL> classPath = new ArrayList();
+
     private Piece() {
         if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
-        List<URL> classPath = new ArrayList();
 
         classPath.addAll(ModLocator.getUrlsOnClasspath());
         ModLocator.crawlModsFolder(classPath);
@@ -77,6 +78,9 @@ public class Piece {
             OptionSpec<String> provider_option = parser.accepts("gameProvider").withOptionalArg().ofType(String.class);
             OptionSpec<String> modFolder_option = parser.accepts("modFolder").withOptionalArg().ofType(String.class);
             OptionSpec<String> modPaths = parser.accepts("mod-paths").withOptionalArg().ofType(String.class);
+
+            classLoader = new PuzzleClassLoader(classPath);
+            Thread.currentThread().setContextClassLoader(classLoader);
 
             if (options.has(modPaths)) {
                 String v = modPaths.value(options);
@@ -114,19 +118,23 @@ public class Piece {
                 provider = (IGameProvider) Class.forName(COSMIC_PROVIDER, true, classLoader).newInstance();
             }
 
-            System.out.println(ASM.API_VERSION + " " + Opcodes.ASM5 + " " + Opcodes.ASM9 + " " + ASM.getApiVersionString());
-
             provider.initArgs(args);
             provider.registerTransformers(classLoader);
             if (MixinUtil.WAS_STARTED) MixinUtil.doInit(args);
             provider.inject(classLoader);
 
-            Class<?> clazz = Class.forName(provider.getEntrypoint(), false, classLoader);
+            String entryPoint = provider.getEntrypoint();
+            String ranEntrypoint = entryPoint;
+            if (entryPoint.contains("MinecraftApplet")) {
+                ranEntrypoint = "net.minecraft.launch.MinecraftAppletLauncher";
+            }
+
+            Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
 
             String[] providerArgs = provider.getArgs().toArray(new String[0]);
             Method main = Reflection.getMethod(clazz,"main", String[].class);
             LOGGER.info("Launching {} version {}", provider.getName(), provider.getRawVersion());
-            Reflection.runStaticMethod(main, (Object) providerArgs);
+            main.invoke(null, (Object) providerArgs);
         } catch (Exception e) {
             LOGGER.error("Unable To Launch", e);
             System.exit(1);

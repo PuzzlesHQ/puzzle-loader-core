@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Comparator;
 import java.util.regex.Pattern;
 
+import static com.github.puzzle.loader.util.RDVersion.RDValidator;
+
 public class Version implements Comparator<Version>, Comparable<Version> {
 
     private final int major, minor, patch;
@@ -77,11 +79,19 @@ public class Version implements Comparator<Version>, Comparable<Version> {
     static final Pattern dotSplit = Pattern.compile("\\.");
     static final Pattern dashSplit = Pattern.compile("-");
 
-    static final Pattern validator = Pattern.compile("^([0-9]+\\.[0-9]+\\.[0-9]+){1}(-[PRGprgA-Ba-b]|-rc|-RC|)$");
+    static final Pattern validator = Pattern.compile("^([0-9]+\\.[0-9]+\\.[0-9]+){1}(-pre[0-9]|-pre|-[PRGprgA-Ba-b]|-rc|-rc[0-9]}|-RC|-RC[0-9]|)$");
+    static final Pattern validator2 = Pattern.compile("^([0-9]+\\.[0-9]+){1}(-pre[0-9]|-pre|-[PRGprgA-Ba-b]|-rc|-rc[0-9]}|-RC|-RC[0-9]|)$");
 
     public static Version parse(String version) {
+        if (version.equals("3D Shareware v1.34"))
+            return new V3DSharewarev134();
+        if (RDVersion.RDValidator.matcher(version).matches())
+            return new RDVersion(version);
+        if (MCSnapshot.MCSValidator.matcher(version).matches())
+            return MCSnapshot.parse(version);
         if (!validator.matcher(version).matches())
-            throw new IllegalArgumentException("Invalid version \"" + version + "\", Version must fit within \"number.number\" or \"number.number.number\" with an optional -a, -b, -r, -p ex:0.4.0-rc");
+            if (!validator2.matcher(version).matches())
+                throw new IllegalArgumentException("Invalid version \"" + version + "\", Version must fit within \"number.number\" or \"number.number.number\" with an optional -a, -b, -r, -p ex:0.4.0-rc");
 
         String[] parts = dotSplit.split(version);
         String endPart = parts[parts.length - 1];
@@ -93,12 +103,14 @@ public class Version implements Comparator<Version>, Comparable<Version> {
         Type t = Type.NONE;
 
         if (endPart.contains("-")) {
-            String typeString = dashSplit.split(endPart, 1)[0];
+            String patchThing = dashSplit.split(endPart)[0];
+            String typeString = dashSplit.split(endPart)[1];
 
             t = Type.find(typeString);
 
+            System.out.println(patchThing);
             if (parts.length > 2)
-                patch = Integer.parseInt(endPart.replaceAll("-" + typeString, ""));
+                patch = Integer.parseInt(patchThing);
         } else {
             if (parts.length > 2)
                 patch = Integer.parseInt(endPart);
@@ -124,8 +136,28 @@ public class Version implements Comparator<Version>, Comparable<Version> {
         return SIZE_COMP.SMALLER;
     }
 
+    public String asString() {
+        return major + "." + minor + "." + patch + (type == Type.NONE ? "" : "-" + type);
+    }
+
     @Override
     public String toString() {
         return major + "." + minor + "." + patch + (type == Type.NONE ? "" : "-" + type);
+    }
+
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
+    }
+
+    public Type getType() {
+        return type;
     }
 }

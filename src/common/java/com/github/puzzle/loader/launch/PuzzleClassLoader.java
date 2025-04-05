@@ -173,9 +173,9 @@ public class PuzzleClassLoader extends URLClassLoader {
                             pkg = definePackage(packageName, manifest, jarURLConnection.getJarFileURL());
                         } else {
                             if (pkg.isSealed() && !pkg.isSealed(jarURLConnection.getJarFileURL())) {
-                                LOGGER.error("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
+//                                LOGGER.error("The jar file {} is trying to seal already secured path {}", jarFile.getName(), packageName);
                             } else if (isSealed(packageName, manifest)) {
-                                LOGGER.error("The jar file {} has a security seal for path {}, but that path is defined and not secure", jarFile.getName(), packageName);
+//                                LOGGER.error("The jar file {} has a security seal for path {}, but that path is defined and not secure", jarFile.getName(), packageName);
                             }
                         }
                     }
@@ -376,4 +376,5 @@ public class PuzzleClassLoader extends URLClassLoader {
     public void clearNegativeEntries(Set<String> entriesToClear) {
         negativeResourceCache.removeAll(entriesToClear);
     }
+
 }

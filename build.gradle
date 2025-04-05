@@ -144,16 +144,16 @@ wrapper {
 }
 
 compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 compileClientJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 compileCommonJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
