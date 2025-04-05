@@ -37,8 +37,6 @@ public class Lwjgl2DisplayTransformer extends ClassVisitor {
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
                     super.visitMethodInsn(Opcodes.INVOKESTATIC, "net/minecraft/launch/MinecraftAppletLauncher", "setTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
-
-//                    visitInsn(Opcodes.ARETURN);
                     return;
                 }
             }

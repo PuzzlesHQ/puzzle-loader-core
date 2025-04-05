@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("removal")
 public class MinecraftAppletLauncher {
 
     public static Applet GAME_APPLET;

@@ -138,6 +138,19 @@ processCommonResources {
     }
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = group
+            artifactId = "puzzle-loader-core"
+
+            artifact source: buildMergeJar, classifier: 'merged', extension: 'jar'
+            artifact source: buildClientJar, classifier: 'client', extension: 'jar'
+            artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
+        }
+    }
+}
+
 wrapper {
     gradleVersion = "8.5"
     distributionType = Wrapper.DistributionType.ALL

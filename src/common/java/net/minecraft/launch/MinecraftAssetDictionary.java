@@ -16,15 +16,13 @@ public class MinecraftAssetDictionary {
             MinecraftAssetDictionary.gameDir = absoluteFile;
             MinecraftAssetDictionary.dir = dir;
             File index = new File(dir, "indexes/" + indexStr + ".json");
-            FileInputStream stream = null;
-            stream = new FileInputStream(index);
+            FileInputStream stream = new FileInputStream(index);
 
             String s = new String(stream.readAllBytes());
             stream.close();
             object = JsonObject.readJSON(s).asObject();
             assets = object.get("objects").asObject();
         } catch (IOException e) {
-            System.out.println(e);
             throw new RuntimeException(e);
         }
     }
@@ -34,10 +32,11 @@ public class MinecraftAssetDictionary {
     }
 
     public static File getAsset(String s) {
-        String hash = assets.get(s).asObject().get("hash").asString();
-        File hashFile = new File(MinecraftAssetDictionary.dir, "objects/" + hash.substring(0, 2) + "/" + hash);
         File assetFile = new File(MinecraftAssetDictionary.gameDir, "resources/" + s);
         if (assetFile.exists()) return assetFile;
+
+        String hash = assets.get(s).asObject().get("hash").asString();
+        File hashFile = new File(MinecraftAssetDictionary.dir, "objects/" + hash.substring(0, 2) + "/" + hash);
         assetFile.getParentFile().mkdirs();
         try {
             assetFile.createNewFile();
@@ -48,7 +47,6 @@ public class MinecraftAssetDictionary {
             out.close();
             in.close();
         } catch (IOException e) {
-            System.out.println(e);
             throw new RuntimeException(e);
         }
 
