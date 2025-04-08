@@ -74,7 +74,7 @@ dependencies {
     commonImplementation 'org.jetbrains:annotations:24.0.0'
 
     commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
-    commonBundle "net.fabricmc:sponge-mixin:$mixin_version"
+    commonBundle "com.github.PuzzlesHQ:Mixin:$mixin_version"
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
 //    commonImplementation "org.apache.logging.log4j:log4j-api:$log4j_version"
@@ -120,6 +120,29 @@ tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.task
     configurations = Collections.singletonList(project.configurations.clientBundle)
 
     archiveClassifier = "client"
+    mergeServiceFiles()
+
+    from sourceSets.client.output
+}
+
+tasks.register("buildStrippedMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    configurations = project.configurations.clientInternal
+
+    archiveClassifier = "merged-stripped"
+    mergeServiceFiles()
+
+    from sourceSets.client.output
+}
+
+tasks.register("buildStrippedCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveClassifier = "common-stripped"
+    mergeServiceFiles()
+
+    from sourceSets.common.output
+}
+
+tasks.register("buildStrippedClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveClassifier = "client-stripped"
     mergeServiceFiles()
 
     from sourceSets.client.output

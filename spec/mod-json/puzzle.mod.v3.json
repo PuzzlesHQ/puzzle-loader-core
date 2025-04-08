@@ -1,0 +1,62 @@
+{
+  "formatVersion": 3,
+
+  "display-name": "Example Mod",
+  "id": "example-mod",
+  "version": "1.0.0",
+  "description": "This is an example mod",
+  "authors": [ "YOU :D" ],
+  "meta": {
+    "icon": "example-mod:icons/icon.png",
+    "language-provider": {
+      "groovy": "com.example.mod.providers.lang.GroovyLanguageProvider"
+    }
+  },
+  "entrypoints": {
+    "transformers": [
+      "com.example.mod.ExampleTransformerRegistrar"
+    ],
+    "preLaunch": [
+      "com.example.mod.ExamplePreLaunch"
+    ]
+  },
+  "should-load-on": {
+    "client": true,
+    "server": true
+  },
+  "mixins": [
+    "example-mod.common-mixins.json",
+    {
+      "config": "example-mod.client-mixins.json",
+      "environment": "client"
+    },
+    {
+      "config": "example-mod.server-mixins.json",
+      "environment": "server"
+    }
+  ],
+  "depends": {
+    "puzzle-loader-core": ">=1.0.0",
+
+    "example-dep1": {
+      "ver": "1.0.0...2.0.0", "isRequired": false
+    },
+    "example-dep2": {
+      "ver": ">=1.0.0", "isRequired": false
+    },
+    "example-dep3": {
+      "ver": ">1.0.0", "isRequired": false
+    },
+    "example-dep4": {
+      "ver": "1.0.0", "isRequired": false
+    },
+    "example-dep5": {
+      "ver": "*", "isRequired": false
+    }
+  },
+  "access-transformers": [
+    "example-mod.manipulator",
+    "example-mod.cfg",
+    "example-mod.widener"
+  ]
+}

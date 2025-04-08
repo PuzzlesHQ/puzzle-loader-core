@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
     <Appenders>
-        <Console name="console" target="SYSTEM_OUT">
+        <Console name="SysOut" target="SYSTEM_OUT">
             <PatternLayout pattern="%style{[%t]}{Blue} %highlight{[%level]}{FATAL=white, ERROR=red, WARN=Yellow, INFO=Green, DEBUG=#3fe0a8, TRACE=blue} %style{[%logger{36}]}{Magenta}: %style{%msg}{White}%n" disableAnsi="false" />
         </Console>
+        <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level]: %msg{nolookups}%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <OnStartupTriggeringPolicy />
+            </Policies>
+        </RollingRandomAccessFile>
     </Appenders>
 
     <Loggers>
         <Root level="off">
-            <AppenderRef ref="console" />
+            <AppenderRef ref="SysOut"/>
         </Root>
     </Loggers>
 
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="console" />
+            <AppenderRef ref="SysOut"/>
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>
