@@ -2,8 +2,8 @@ package dev.puzzleshq.loader.util;
 
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.PieceClassLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,13 +12,23 @@ import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Loads raw assets.
+ *
+ * @author Mr_Zombii
+ * @since 1.0.0
+ */
 public class RawAssetLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle | RawAssetLoader");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | RawAssetLoader");
 
+    /**
+     * Gets the bytes from a {@link InputStream}.
+     * @param stream the inputStream to get the bytes from.
+     */
     private static byte[] getBytesFromStream(InputStream stream) {
         try {
-            byte[] bytes = NativeArrayUtil.readNBytes(stream, Integer.MAX_VALUE);
+            byte[] bytes = stream.readAllBytes();
             stream.close();
             return bytes;
         } catch (Exception ignore) {
@@ -26,6 +36,12 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset from a zip file.
+     * @param file the zip file to get the file from.
+     * @param path the path of the file.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getLowLevelZipAsset(ZipFile file, String path) {
         try {
             ZipEntry entry = file.getEntry(path);
@@ -38,6 +54,12 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset from a zip file.
+     * @param file the zip file to get the file from.
+     * @param location the {@link ResourceLocation} of the file.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getZipAsset(ZipFile file, ResourceLocation location) {
         try {
             ZipEntry entry = file.getEntry(location.toPath());
@@ -50,6 +72,11 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset from the class path.
+     * @param path the path of the asset.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getLowLevelClassPathAsset(String path) {
         URL url = Constants.class.getResource(path);
         if (url == null) {
@@ -69,6 +96,11 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset from the class path.
+     * @param location the ResourceLocation of the asset.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getClassPathAsset(ResourceLocation location) {
         URL url = Constants.class.getResource(location.toPath());
         if (url == null) {
@@ -88,6 +120,12 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset relative to the directory.
+     * @param dir the directory to start at.
+     * @param path the asset path.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getLowLevelRelativeAsset(File dir, String path) {
         try {
             URL url = new File(dir, path).toURI().toURL();
@@ -99,6 +137,12 @@ public class RawAssetLoader {
         }
     }
 
+    /**
+     * Gets the asset relative to the directory.
+     * @param dir the directory to start at.
+     * @param location the ResourceLocation of the asset.
+     * @return a {@link RawFileHandle}
+     */
     public static RawFileHandle getRelativeAsset(File dir, ResourceLocation location) {
         try {
             URL url = new File(dir, location.toPath()).toURI().toURL();
@@ -120,18 +164,30 @@ public class RawAssetLoader {
             this.file = file;
         }
 
+        /**
+         * Gets the file of the RawFileHandle.
+         */
         public String getFile() {
             return file;
         }
 
+        /**
+         * Gets the bytes of the RawFileHandle.
+         */
         public byte[] getBytes() {
             return bytes;
         }
 
+        /**
+         * Gets the RawFileHandle as a string.
+         */
         public String getString() {
             return new String(getBytes());
         }
 
+        /**
+         * Dispose of the RawFileHandle.
+         */
         public void dispose() {
             bytes = null;
             file = null;

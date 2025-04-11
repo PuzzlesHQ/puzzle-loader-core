@@ -1,17 +1,17 @@
 package dev.puzzleshq.loader.mod.info;
 
+import com.github.zafarkhaja.semver.Version;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.ImmutablePair;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.mod.ModContainer;
 import dev.puzzleshq.loader.mod.info.spec.ModJsonV2;
 import dev.puzzleshq.loader.util.EnvType;
-import dev.puzzleshq.loader.util.Version;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.ImmutablePair;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.include.com.google.common.collect.ImmutableCollection;
+import org.spongepowered.include.com.google.common.collect.ImmutableList;
+import org.spongepowered.include.com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 import java.util.jar.JarFile;
@@ -48,7 +48,7 @@ public class ModInfo {
         ModVersion = Version.parse(JSON.version());
         Description = JSON.description();
 
-        Authors = ImmutableList.copyOf(JSON.authors());
+        Authors = new ImmutableList.Builder<String>().add(JSON.authors()).build();
 
         if (JSON.meta() != null) {
             ImmutableMap.Builder<String, JsonValue> MetadataBuilder = ImmutableMap.builder();
@@ -60,7 +60,7 @@ public class ModInfo {
 
         ImmutableMap.Builder<String, ImmutableCollection<AdapterPathPair>> EntrypointsBuilder = ImmutableMap.builder();
         for (String key : JSON.entrypoints().keySet()) {
-            EntrypointsBuilder.put(key, ImmutableList.copyOf(JSON.entrypoints().get(key)));
+            EntrypointsBuilder.put(key, new ImmutableList.Builder<AdapterPathPair>().addAll(JSON.entrypoints().get(key)).build());
         }
         Entrypoints = EntrypointsBuilder.build();
 
@@ -245,16 +245,9 @@ public class ModInfo {
             return this;
         }
 
-        protected String makeId() {
-            return id == null ?
-                    makeName().replaceAll(" ", "-").toLowerCase(Locale.ROOT) :
-                    id;
-        }
-
         protected String makeName() {
-            return name == null ? "exampleMod" : name;
+            return name == null ? id.toUpperCase().replaceAll("-", "") : name;
         }
-
 
         public Builder setSideRequirements(SideRequire require) {
             this.require = require;
@@ -264,7 +257,7 @@ public class ModInfo {
         public ModInfo build() {
             return new ModInfo(new ModJsonV2(
                     makeName(),
-                    makeId(),
+                    id,
                     version != null ? version.toString() : "1.0.0",
                     description,
                     authors.toArray(new String[0]),

@@ -1,19 +1,18 @@
 package dev.puzzleshq.loader.provider.game.impl;
 
+import com.github.zafarkhaja.semver.Version;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.launch.PieceClassLoader;
 import dev.puzzleshq.loader.mod.ModContainer;
-import dev.puzzleshq.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.loader.mod.info.ModInfo;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
-import dev.puzzleshq.loader.util.*;
+import dev.puzzleshq.loader.util.EnvType;
+import dev.puzzleshq.loader.util.ModFinder;
 import dev.puzzleshq.loader.util.RawAssetLoader;
-import dev.puzzleshq.loader.util.Version;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.util.*;
@@ -21,6 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class CosmicReachProvider implements IGameProvider {
+
+    public static final String PARADOX_SERVER_ENTRYPOINT = "com.github.puzzle.paradox.loader.launch.PuzzlePiece";
 
     public CosmicReachProvider() {
         Piece.provider = this;
@@ -61,7 +62,7 @@ public class CosmicReachProvider implements IGameProvider {
             }
 
             try {
-                Class.forName(ModLocator.PARADOX_SERVER_ENTRYPOINT, false, Piece.classLoader);
+                Class.forName(CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT, false, Piece.classLoader);
                 paradoxExist.set(true);
                 return true;
             } catch (ClassNotFoundException ignore) {
@@ -71,22 +72,18 @@ public class CosmicReachProvider implements IGameProvider {
         }).get();
 
         if (Constants.SIDE == EnvType.SERVER) {
-            return isRunningOnParadox ? ModLocator.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
+            return isRunningOnParadox ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
         }
 
         return "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
     }
 
     public Collection<String> getArgs() {
-        MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
         return Arrays.asList(args);
     }
 
     @Override
-    public void registerTransformers(PieceClassLoader classLoader) {
-        ModLocator.getMods(Constants.SIDE, Arrays.asList(classLoader.getURLs()));
-        TransformerInitializer.invokeTransformers(classLoader);
-    }
+    public void registerTransformers(PieceClassLoader classLoader) {}
 
     String[] args;
 
@@ -97,10 +94,8 @@ public class CosmicReachProvider implements IGameProvider {
 
     @Override
     public void inject(PieceClassLoader classLoader) {
-        ModLocator.verifyDependencies();
-
         List<Pair<EnvType, String>> mixinConfigs = new ArrayList<>();
-        for (ModContainer mod : ModLocator.locatedMods.values()) {
+        for (ModContainer mod : ModFinder.getModsArray()) {
             if (!mod.INFO.MixinConfigs.isEmpty()) mixinConfigs.addAll(mod.INFO.MixinConfigs);
         }
 
@@ -124,7 +119,7 @@ public class CosmicReachProvider implements IGameProvider {
             HashMap<String, JsonValue> meta = new HashMap<>();
             meta.put("icon", JsonObject.valueOf("icons/logox256.png"));
             cosmicModInfo.setMeta(meta);
-            ModLocator.addMod(cosmicModInfo.build().getOrCreateModContainer());
+            ModFinder.addModWithContainer(cosmicModInfo.build().getOrCreateModContainer());
         }
     }
 

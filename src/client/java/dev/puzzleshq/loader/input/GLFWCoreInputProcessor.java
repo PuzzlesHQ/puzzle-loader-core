@@ -1,6 +1,6 @@
 package dev.puzzleshq.loader.input;
 
-import dev.puzzleshq.loader.threading.MainThreadExecutor;
+import dev.puzzleshq.loader.threading.OffThreadExecutor;
 import org.lwjgl.glfw.GLFW;
 
 public class GLFWCoreInputProcessor {
@@ -16,7 +16,7 @@ public class GLFWCoreInputProcessor {
     }
 
     public static void registerCallbacks(long window) {
-        MainThreadExecutor.add(() -> {
+        OffThreadExecutor.add(() -> {
             try {
                 GLFW.glfwSetMouseButtonCallback(window, GLFWCoreInputProcessor::onMouseClick);
                 GLFW.glfwSetCursorPosCallback(window, GLFWCoreInputProcessor::onCursorMove);

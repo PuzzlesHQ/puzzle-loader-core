@@ -1,28 +1,25 @@
 package dev.puzzleshq.loader.provider.game.impl;
 
+import com.github.zafarkhaja.semver.Version;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.Constants;
-import dev.puzzleshq.loader.annotation.Note;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.launch.PieceClassLoader;
 import dev.puzzleshq.loader.mod.ModContainer;
-import dev.puzzleshq.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.loader.mod.info.ModInfo;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
-import dev.puzzleshq.loader.util.*;
+import dev.puzzleshq.loader.util.EnvType;
+import dev.puzzleshq.loader.util.ModFinder;
 import dev.puzzleshq.loader.util.RawAssetLoader;
-import dev.puzzleshq.loader.util.Version;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 
 import java.util.*;
 
-@Note("You thought lol, you should see the look on your face. (This thing worked first try when I made it & it supports loading Mixins and Mods)")
 public class MinecraftProvider implements IGameProvider {
 
     public MinecraftProvider() {
@@ -41,12 +38,14 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public Version getGameVersion() {
-        return Version.parse(version);
+//        return Version.parse(version);
+        return Version.parse("1.0.0");
     }
 
     @Override
     public String getRawVersion() {
-        return version;
+//        return version;
+        return "1.0.0";
     }
 
     @Override
@@ -96,18 +95,11 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public Collection<String> getArgs() {
-        MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
         return args;
     }
 
     @Override
-    public void registerTransformers(PieceClassLoader classLoader) {
-        ModLocator.getMods(Constants.SIDE, Arrays.asList(classLoader.getURLs()));
-        TransformerInitializer.invokeTransformers(classLoader);
-
-        MixinUtil.start();
-        MixinUtil.doInit(new String[0]);
-    }
+    public void registerTransformers(PieceClassLoader classLoader) {}
 
     List<String> args;
 
@@ -125,10 +117,8 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public void inject(PieceClassLoader classLoader) {
-        ModLocator.verifyDependencies();
-
         List<Pair<EnvType, String>> mixinConfigs = new ArrayList<>();
-        for (ModContainer mod : ModLocator.locatedMods.values()) {
+        for (ModContainer mod : ModFinder.getModsArray()) {
             if (!mod.INFO.MixinConfigs.isEmpty()) mixinConfigs.addAll(mod.INFO.MixinConfigs);
         }
 
@@ -138,7 +128,6 @@ public class MinecraftProvider implements IGameProvider {
                 Mixins.addConfiguration(e.getRight());
             }
         });
-        MixinUtil.inject();
     }
 
     @Override
@@ -153,10 +142,9 @@ public class MinecraftProvider implements IGameProvider {
             HashMap<String, JsonValue> meta = new HashMap<>();
             meta.put("icon", JsonObject.valueOf("pack.png"));
             minecraftModInfo.setMeta(meta);
-            ModLocator.addMod(minecraftModInfo.build().getOrCreateModContainer());
+            ModFinder.addModWithContainer(minecraftModInfo.build().getOrCreateModContainer());
         }
 
-        ModLocator.addMod(minecraftModInfo.build().getOrCreateModContainer());
     }
 
     @Override

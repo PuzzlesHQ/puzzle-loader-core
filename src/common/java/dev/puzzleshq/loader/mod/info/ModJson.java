@@ -1,10 +1,10 @@
 package dev.puzzleshq.loader.mod.info;
 
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.mod.info.spec.ModJsonV0;
 import dev.puzzleshq.loader.mod.info.spec.ModJsonV1;
 import dev.puzzleshq.loader.mod.info.spec.ModJsonV2;
 import dev.puzzleshq.loader.util.EnvType;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 
@@ -19,13 +19,12 @@ public abstract class ModJson {
         JsonObject obj = (JsonObject) JsonValue.readHjson(string);
         int version = obj.getInt("formatVersion", 0);
 
-        ModJson json;
-        switch (version) {
-            case 0: json = ModJsonV0.fromString(string); break;
-            case 1: json = ModJsonV1.fromString(string); break;
-            case 2: json = ModJsonV2.fromString(string); break;
-            default: throw new RuntimeException("Invalid ModJson Version $" + version);
-        }
+        ModJson json = switch (version) {
+            case 0 -> ModJsonV0.fromString(string);
+            case 1 -> ModJsonV1.fromString(string);
+            case 2 -> ModJsonV2.fromString(string);
+            default -> throw new RuntimeException("Invalid ModJson Version $" + version);
+        };
 
         return convert(json, latestRevision);
     }

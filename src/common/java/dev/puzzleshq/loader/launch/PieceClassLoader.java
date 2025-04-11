@@ -3,7 +3,6 @@ package dev.puzzleshq.loader.launch;
 import dev.puzzleshq.loader.launch.fix.IClassTransformer;
 import dev.puzzleshq.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.service.IClassTracker;
 import org.spongepowered.asm.service.ITransformer;
 
@@ -45,9 +44,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         this.sources.addAll(List.of(sources));
 
         addClassLoaderExclusion("java.");
+        addClassLoaderExclusion("javax.");
         addClassLoaderExclusion("sun.");
-//        addClassLoaderExclusion("org.apache.logging.");
-//        addClassLoaderExclusion("org.slf4j");
+        addClassLoaderExclusion("org.apache.logging.");
+        addClassLoaderExclusion("org.slf4j");
         addClassLoaderExclusion("com.google.");
         addClassLoaderExclusion("org.hjson");
 
@@ -66,6 +66,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public void addURL(URL url) {
         super.addURL(url);
         this.sources.add(url);
+    }
+
+    public void addURL(URL... urls) {
+        for (URL u : urls) addURL(u);
     }
 
     public void registerTransformer(IClassTransformer transformer) {
@@ -153,6 +157,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
             }
 
             byte[] bytes = transform(name, name, getResourceBytes(name));
+            if (bytes == null) {
+                missingClasses.add(name);
+                throw new ClassNotFoundException(name);
+            }
             CodeSource source = connection == null ? null : new CodeSource(connection.getURL(), signers);
             Class<?> clazz = defineClass(name, bytes, 0, bytes.length, source);
             classCache.put(name, clazz);

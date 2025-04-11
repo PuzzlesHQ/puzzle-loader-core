@@ -3,6 +3,8 @@ package dev.puzzleshq.loader.loading;
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.loading.events.GameLoaderFinishEvent;
 import dev.puzzleshq.loader.loading.events.RegisterStagesEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,6 +14,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameLoader {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | GameLoader");
 
     public static final ArrayList<GameLoader> INSTANCES = new ArrayList<>();
     public final AtomicBoolean finished = new AtomicBoolean();

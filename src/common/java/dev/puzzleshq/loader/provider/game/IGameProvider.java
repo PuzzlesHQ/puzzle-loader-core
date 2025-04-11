@@ -1,7 +1,7 @@
 package dev.puzzleshq.loader.provider.game;
 
+import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.loader.launch.PieceClassLoader;
-import dev.puzzleshq.loader.util.Version;
 
 import java.util.Collection;
 

@@ -5,9 +5,9 @@ import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.mod.info.AdapterPathPair;
 import dev.puzzleshq.loader.provider.ProviderException;
 import dev.puzzleshq.loader.provider.lang.ILangProvider;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.include.com.google.common.collect.ImmutableCollection;
+import org.spongepowered.include.com.google.common.collect.ImmutableMap;
 
 import java.lang.invoke.MethodHandles;
 import java.util.HashMap;

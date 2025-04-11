@@ -1,18 +1,19 @@
 package dev.puzzleshq.loader.mod.info.spec;
 
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.ImmutablePair;
+import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.mod.info.AdapterPathPair;
 import dev.puzzleshq.loader.mod.info.ModJson;
 import dev.puzzleshq.loader.provider.lang.ILangProvider;
 import dev.puzzleshq.loader.provider.lang.impl.LangProviderWrapper;
 import dev.puzzleshq.loader.util.EnvType;
-import dev.puzzleshq.loader.util.Reflection;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.ImmutablePair;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
+import dev.puzzleshq.loader.util.ReflectionUtil;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class ModJsonV1 extends ModJson {
@@ -126,9 +127,13 @@ public class ModJsonV1 extends ModJson {
                         } catch (ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }
-                        Class<ILangProvider> adClass = (Class<ILangProvider>) clazz;
-                        ILangProvider adapter = new LangProviderWrapper(Reflection.newInstance(adClass));
-                        ILangProvider.PROVDERS.put(id, adapter);
+                        try {
+                            Class<ILangProvider> adClass = (Class<ILangProvider>) clazz;
+                            ILangProvider adapter  = new LangProviderWrapper(ReflectionUtil.getConstructor(adClass).newInstance());
+                            ILangProvider.PROVDERS.put(id, adapter);
+                        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

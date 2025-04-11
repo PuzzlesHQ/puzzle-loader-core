@@ -3,8 +3,6 @@ package dev.puzzleshq.loader.util;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.function.BiConsumer;
-
 public class GLFWUtil {
 
     private static final double[] xStatic = new double[1];

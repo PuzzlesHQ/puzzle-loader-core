@@ -26,11 +26,11 @@ package dev.puzzleshq.loader.provider.mixin;
 
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.provider.mixin.transformers.BetterProxy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.platform.IMixinPlatformAgent;
 import org.spongepowered.asm.launch.platform.IMixinPlatformServiceAgent;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
@@ -82,7 +82,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     /**
      * Log4j2 logger
      */
-    private static final Logger LOGGER = LogManager.getLogger("PuzzleLoader | MixinService");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | MixinService");
 
     /**
      * Local transformer chain, this consists of all transformers present at the

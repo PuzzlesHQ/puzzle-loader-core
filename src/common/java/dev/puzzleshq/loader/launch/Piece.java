@@ -3,21 +3,23 @@ package dev.puzzleshq.loader.launch;
 import dev.puzzleshq.loader.mod.entrypoint.PreLaunchInitializer;
 import dev.puzzleshq.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
+import dev.puzzleshq.loader.threading.OffThreadExecutor;
+import dev.puzzleshq.loader.util.ClassPathUtil;
 import dev.puzzleshq.loader.util.EnvType;
-import dev.puzzleshq.loader.util.MixinUtil;
-import dev.puzzleshq.loader.util.ModLocator;
-import dev.puzzleshq.loader.util.Reflection;
+import dev.puzzleshq.loader.util.ModFinder;
+import dev.puzzleshq.loader.util.ReflectionUtil;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Piece {
@@ -31,7 +33,9 @@ public class Piece {
 
     static AtomicReference<EnvType> env = new AtomicReference();
 
-    public static final Logger LOGGER = LogManager.getLogger("Puzzle | Loader");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | Piece");
+
+    public static Piece INSTANCE;
 
     public static void launch(String[] args, EnvType type) {
         Piece piece = new Piece();
@@ -39,29 +43,19 @@ public class Piece {
         piece.launch(args);
     }
 
-    List<URL> classPath = new ArrayList();
-
     private Piece() {
+        Piece.INSTANCE = this;
+
         if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
 
-        classPath.addAll(ModLocator.getUrlsOnClasspath());
-        ModLocator.crawlModsFolder(classPath);
-
-        List<URL> toRemove = new ArrayList<>();
-        classPath.forEach(a -> {
-            if (a.getFile().contains("log4j")) {
-                toRemove.add(a);
-            }
-        });
-        toRemove.forEach(classPath::remove);
-        classLoader = new PieceClassLoader(classPath);
-        blackboard = new HashMap();
+        classLoader = new PieceClassLoader();
+        classLoader.addURL(ClassPathUtil.getJVMClassPathUrls());
         Thread.currentThread().setContextClassLoader(classLoader);
-    }
 
-    public static void main(String[] args) {
-        Piece piece = new Piece();
-        piece.launch(args);
+        ModFinder.setModFolder(new File("pmods").getAbsoluteFile());
+        ModFinder.crawlModsFolder();
+
+        blackboard = new HashMap<>();
     }
 
     public static EnvType getSide() {
@@ -72,7 +66,7 @@ public class Piece {
         } catch (ClassNotFoundException e) {
             env.set(EnvType.SERVER);
         }
-        env.set(EnvType.CLIENT);;
+        env.set(EnvType.CLIENT);
         return env.get();
     }
 
@@ -86,18 +80,18 @@ public class Piece {
             OptionSpec<String> modFolder_option = parser.accepts("modFolder").withOptionalArg().ofType(String.class);
             OptionSpec<String> modPaths = parser.accepts("mod-paths").withOptionalArg().ofType(String.class);
 
-            if (options.has(modPaths)) {
-                String v = modPaths.value(options);
-                if (!v.contains(File.pathSeparator)) {
-                    addFile(new File(v));
-                } else {
-                    String[] jars = modPaths.value(options).split(File.pathSeparator);
-                    for (String jar : jars) addFile(new File(jar));
-                }
-            }
+//            if (options.has(modPaths)) {
+//                String v = modPaths.value(options);
+//                if (!v.contains(File.pathSeparator)) {
+//                    addFile(new File(v));
+//                } else {
+//                    String[] jars = modPaths.value(options).split(File.pathSeparator);
+//                    for (String jar : jars) addFile(new File(jar));
+//                }
+//            }
 
-            if (options.has(modFolder_option))
-                ModLocator.setModFolder(new File(modFolder_option.value(options)));
+//            if (options.has(modFolder_option))
+//                ModLocator.setModFolder(new File(modFolder_option.value(options)));
 
             /* Support places where the old packages are used */
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.launch");
@@ -123,9 +117,15 @@ public class Piece {
                 provider = (IGameProvider) Class.forName(COSMIC_PROVIDER, true, classLoader).newInstance();
             }
 
+            ModFinder.findMods();
+
             provider.initArgs(args);
+            TransformerInitializer.invokeTransformers(classLoader);
             provider.registerTransformers(classLoader);
+            MixinBootstrap.init();
+
             provider.inject(classLoader);
+            MixinBootstrap.getPlatform().init();
 
             String entryPoint = provider.getEntrypoint();
             String ranEntrypoint = entryPoint;
@@ -134,12 +134,13 @@ public class Piece {
             }
 
             Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
-
+            MixinEnvironment.init(MixinEnvironment.Phase.DEFAULT);
             String[] providerArgs = provider.getArgs().toArray(new String[0]);
 
-            Method main = Reflection.getMethod(clazz,"main", String[].class);
+            Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
 
             PreLaunchInitializer.invoke();
+            OffThreadExecutor.start();
             LOGGER.info("Launching {} version {}", provider.getName(), provider.getRawVersion());
             main.invoke(null, (Object) providerArgs);
         } catch (Exception e) {
@@ -148,18 +149,4 @@ public class Piece {
         }
     }
 
-    private void addFile(File f) throws MalformedURLException {
-        if (!f.exists()) return;
-
-        if (f.getName().endsWith(".jar")) {
-            classLoader.addURL(f.toURL());
-            return;
-        }
-
-        if (f.isDirectory()) {
-            for (File fc : f.listFiles()) {
-                addFile(fc);
-            }
-        }
-    }
 }

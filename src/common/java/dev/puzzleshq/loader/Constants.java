@@ -1,9 +1,10 @@
 package dev.puzzleshq.loader;
 
+import dev.puzzleshq.loader.annotation.Note;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.util.EnvType;
 import dev.puzzleshq.loader.util.RawAssetLoader;
-import dev.puzzleshq.loader.util.Reflection;
+import dev.puzzleshq.loader.util.ReflectionUtil;
 import dev.puzzleshq.loader.util.ResourceLocation;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
@@ -39,15 +40,16 @@ public class Constants {
         }
     }
 
+    @Note("Only works for gdx so far, other game impls need to be added.")
     public static boolean shouldClose() {
         try {
             Class<?> gdxClass = Class.forName("com.badlogic.gdx");
-            Object app = Reflection.getFieldContents(gdxClass, "app");
+            Object app = ReflectionUtil.getField(gdxClass, "app").get(null);
             if (app == null) return false;
 
-            return Reflection.getFieldContents(app, "running");
-        } catch (ClassNotFoundException ignored) {}
-
-        return false;
+            return (boolean) ReflectionUtil.getField(app, "running").get(app);
+        } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+            return false;
+        }
     }
 }

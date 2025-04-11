@@ -1,6 +1,6 @@
 package dev.puzzleshq.minecraft.launch;
 
-import dev.puzzleshq.loader.util.Reflection;
+import dev.puzzleshq.loader.util.ReflectionUtil;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -108,7 +108,7 @@ public class MinecraftAppletLauncher {
             // Load icon from disk
             final File smallIcon = MinecraftAssetDictionary.getAsset("icons/icon_16x16.png");
             final File bigIcon = MinecraftAssetDictionary.getAsset("icons/icon_32x32.png");
-            Reflection.getMethod(Class.forName("org.lwjgl.opengl.Display"), "setIcon", ByteBuffer[].class)
+            ReflectionUtil.getMethod(Class.forName("org.lwjgl.opengl.Display"), "setIcon", ByteBuffer[].class)
                     .invoke(null, (Object) new ByteBuffer[]{
                             loadIcon(smallIcon),
                             loadIcon(bigIcon)
@@ -123,12 +123,11 @@ public class MinecraftAppletLauncher {
                         frame.setIconImages(icons);
                     } catch (Throwable throwable) {
                         throwable.printStackTrace();
-                        System.out.println(throwable);
                     }
                 }
             }
-        } catch (ClassNotFoundException | InvocationTargetException | IOException | IllegalAccessException e) {
-            System.out.println(e);
+        } catch (ClassNotFoundException | InvocationTargetException | IOException | IllegalAccessException |
+                 NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

@@ -74,15 +74,24 @@ dependencies {
     commonImplementation 'org.jetbrains:annotations:24.0.0'
 
     commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
-    commonBundle "com.github.PuzzlesHQ:Mixin:$mixin_version"
+    commonBundle ("com.github.PuzzlesHQ:Mixin:$mixin_version") {
+//        exclude group: "com.google.code.gson", module: "gson"
+//        exclude group: "com.google.guava", module: "guava"
+    }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
 //    commonImplementation "org.apache.logging.log4j:log4j-api:$log4j_version"
 //    commonImplementation "org.apache.logging.log4j:log4j-core:$log4j_version"
 //    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-slf4j2-impl:$slf4j2_version"
-    commonBundle "org.apache.logging.log4j:log4j-api:$slf4j2_version"
-    commonBundle "org.apache.logging.log4j:log4j-core:$slf4j2_version"
+//    commonBundle 'org.slf4j:slf4j-reload4j:2.1.0-alpha1'
+
+    commonBundle "com.github.zafarkhaja:java-semver:0.10.2"
+
+    commonBundle 'org.slf4j:slf4j-ext:1.7.23'
+    commonBundle 'org.slf4j:slf4j-api:1.7.23'
+    commonBundle "org.apache.logging.log4j:log4j-api:$slf4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-core:$slf4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
     commonBundle "meteordevelopment:orbit:$eventbus_version"
@@ -101,50 +110,56 @@ tasks.register("buildMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks
     Collections.addAll(t, project.configurations.clientInternal, project.configurations.commonBundle, project.configurations.clientBundle)
     configurations = t
 
-    archiveClassifier = "merged"
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
 
+    archiveClassifier = "merged"
     from sourceSets.client.output
 }
 
 tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     configurations = Collections.singletonList(project.configurations.commonBundle)
 
-    archiveClassifier = "common"
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
 
+    archiveClassifier = "common"
     from sourceSets.common.output
 }
 
 tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     configurations = Collections.singletonList(project.configurations.clientBundle)
 
-    archiveClassifier = "client"
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
 
+    archiveClassifier = "client"
     from sourceSets.client.output
 }
 
 tasks.register("buildStrippedMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     configurations = project.configurations.clientInternal
 
-    archiveClassifier = "merged-stripped"
     mergeServiceFiles()
 
+    archiveClassifier = "merged-stripped"
     from sourceSets.client.output
 }
 
 tasks.register("buildStrippedCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveClassifier = "common-stripped"
     mergeServiceFiles()
 
+    archiveClassifier = "common-stripped"
     from sourceSets.common.output
 }
 
 tasks.register("buildStrippedClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveClassifier = "client-stripped"
     mergeServiceFiles()
 
+    archiveClassifier = "client-stripped"
     from sourceSets.client.output
 }
 
