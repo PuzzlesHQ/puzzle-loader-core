@@ -112,7 +112,7 @@ public class CosmicReachProvider implements IGameProvider {
         ModInfo.Builder cosmicModInfo = ModInfo.Builder.New();
         {
             cosmicModInfo.setName(getName());
-            cosmicModInfo.setId("cosmic-reach");
+            cosmicModInfo.setId(getId());
             cosmicModInfo.setDesc("The base game.");
             cosmicModInfo.addAuthor("FinalForEach");
             cosmicModInfo.setVersion(getGameVersion());

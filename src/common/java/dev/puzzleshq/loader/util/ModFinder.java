@@ -274,7 +274,7 @@ public class ModFinder {
             puzzleCoreModInfo.setAuthors(new String[]{
                     "Mr-Zombii", "CrabKing"
             });
-            puzzleCoreModInfo.addDependency(Piece.provider.getDefaultNamespace(), Piece.provider.getRawVersion());
+            puzzleCoreModInfo.addDependency(Piece.provider.getId(), Piece.provider.getRawVersion());
             puzzleCoreModInfo.setVersion(Constants.PUZZLE_CORE_VERSION);
 
             if (Constants.SIDE.equals(EnvType.CLIENT))

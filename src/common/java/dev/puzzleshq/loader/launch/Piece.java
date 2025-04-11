@@ -91,7 +91,11 @@ public class Piece {
 //            }
 
 //            if (options.has(modFolder_option))
-//                ModLocator.setModFolder(new File(modFolder_option.value(options)));
+//                ModFinder.setModFolder(new File(modFolder_option.value(options)).getAbsoluteFile());
+//            else
+//                ModFinder.setModFolder(new File("pmods").getAbsoluteFile());
+//
+//            ModFinder.crawlModsFolder();
 
             /* Support places where the old packages are used */
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.launch");

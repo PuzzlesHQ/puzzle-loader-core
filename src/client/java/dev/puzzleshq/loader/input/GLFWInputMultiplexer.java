@@ -9,7 +9,7 @@ public class GLFWInputMultiplexer extends AbstractGLFWInputProcessor {
     List<GLFWInputProcessor> processors;
 
     public GLFWInputMultiplexer() {
-        processors = new ArrayList();
+        processors = new ArrayList<>();
     }
 
     public GLFWInputMultiplexer(GLFWInputProcessor... processors) {
