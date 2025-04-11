@@ -19,15 +19,6 @@ public class PrePiece {
 
     private static Logger LOGGER;
 
-    public static class Test implements Runnable {
-
-        @Override
-        public void run() {
-            System.out.println("HIIIIII");
-            OffThreadExecutor.add(new Test());
-        }
-    }
-
     public static void launch(String[] args, EnvType type) {
         try {
             System.getProperties().setProperty("log4j.configurationFile", Objects.requireNonNull(PieceClassLoader.class.getResource("/log4j2.xml")).toURI().toString());
@@ -35,8 +26,6 @@ public class PrePiece {
             getLogger().error("Uh Oh stinky, an Illegal Error happened.", e);
             System.exit(-69);
         }
-
-        OffThreadExecutor.add(new Test());
 
         try {
             Piece.launch(args, type);

@@ -297,9 +297,17 @@ public class ModFinder {
         MODS_ARRAY.add(container);
     }
 
+    /** Checks if a mod was loaded from class-path/mod-folder.
+     * @param id the id of the mod.
+     * @return a {@link Boolean}
+     */
+    public static boolean isModLoaded(String id) {
+        return ModFinder.MODS.containsKey(id);
+    }
+
     /**
      * Gets the mod of the id.
-     * @param id the id of the mod
+     * @param id the id of the mod.
      * @return a {@link ModContainer}
      */
     public static ModContainer getMod(String id) {
