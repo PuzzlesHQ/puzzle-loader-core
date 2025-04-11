@@ -194,6 +194,12 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 compileJava {
     sourceCompatibility = '17'
     targetCompatibility = '17'

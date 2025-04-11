@@ -83,8 +83,8 @@ public class MinecraftProvider implements IGameProvider {
 
         if (launcher.contains("MinecraftApplet.class")) {
             if (args != null && !args.contains("--puzzleEdition")) {
-                args.addFirst(launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", ""));
-                args.addFirst("--puzzleEdition");
+                args.add(0, launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", ""));
+                args.add(0, "--puzzleEdition");
             }
         }
 
