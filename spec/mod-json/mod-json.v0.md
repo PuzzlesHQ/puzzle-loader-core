@@ -29,7 +29,7 @@
     "example-dep4": "1.0.0",
     "example-dep5": "*"
 },
-"mixins": [ // Mixin
+"mixins": [ // Mixins
     "example-mod.mixins.json",
     "example-mod.client-mixins.json"
 ],
@@ -38,7 +38,3 @@
 "accessWidener": "example-mod.widener" // Access Widener Path (optional)
 }
 ```
-
-Optional Fields
-    - optional
-    -

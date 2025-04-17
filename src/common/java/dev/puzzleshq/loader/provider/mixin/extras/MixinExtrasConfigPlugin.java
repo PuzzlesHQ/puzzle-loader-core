@@ -1,6 +1,6 @@
 package dev.puzzleshq.loader.provider.mixin.extras;
 
-import org.objectweb.asm.tree.ClassNode;
+import bundled.org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 

@@ -24,11 +24,11 @@
  */
 package dev.puzzleshq.loader.provider.mixin;
 
+import bundled.org.objectweb.asm.tree.ClassNode;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.provider.mixin.transformers.BetterProxy;
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
+import bundled.org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.platform.IMixinPlatformAgent;
@@ -46,10 +46,10 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import org.spongepowered.asm.util.ReEntranceLock;
 import org.spongepowered.asm.util.perf.Profiler;
 import org.spongepowered.asm.util.perf.Profiler.Section;
-import org.spongepowered.include.com.google.common.collect.ImmutableList;
-import org.spongepowered.include.com.google.common.collect.Sets;
-import org.spongepowered.include.com.google.common.io.ByteStreams;
-import org.spongepowered.include.com.google.common.io.Closeables;
+import bundled.com.google.common.collect.ImmutableList;
+import bundled.com.google.common.collect.Sets;
+import bundled.com.google.common.io.ByteStreams;
+import bundled.com.google.common.io.Closeables;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,18 +64,14 @@ import java.util.*;
  */
 public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider {
     protected static final String LAUNCH_PACKAGE = "org.spongepowered.asm.launch.";
-//    private static final String MIXIN_TWEAKER_CLASS = LAUNCH_PACKAGE + "MixinTweaker";
     private static final String TRANSFORMER_PROXY_CLASS = BetterProxy.class.getName();
-    private static final Map<String, ILogger> loggers = new HashMap();
     protected final ReEntranceLock lock = new ReEntranceLock(1);
     private final Map<Class<IMixinInternal>, IMixinInternal> internals = new HashMap();
     private List<IMixinPlatformServiceAgent> serviceAgents;
-    private String sideName;
-
 
     /**
      * Known re-entrant transformers, other re-entrant transformers will
-     * detected automatically
+     * detect automatically
      */
     private static final Set<String> excludeTransformers = Sets.newHashSet();
 
@@ -159,9 +155,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     }
 
     private List<IMixinPlatformServiceAgent> getServiceAgents() {
-        if (this.serviceAgents != null) {
-            return this.serviceAgents;
-        } else {
+        if (this.serviceAgents == null) {
             this.serviceAgents = new ArrayList<>();
 
             for (String agentClassName : this.getPlatformAgents()) {
@@ -176,8 +170,8 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
                 }
             }
 
-            return this.serviceAgents;
         }
+        return this.serviceAgents;
     }
 
     @Override
@@ -209,14 +203,12 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     }
 
     protected final void getContainersFromAgents(ImmutableList.Builder<IContainerHandle> list) {
-
         for (IMixinPlatformServiceAgent agent : this.getServiceAgents()) {
             Collection<IContainerHandle> containers = agent.getMixinContainers();
             if (containers != null) {
                 list.addAll(containers);
             }
         }
-
     }
 
     @Override
@@ -492,7 +484,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
 
     /**
      * Since we obtain the class bytes with getClassBytes(), we need to apply
-     * the transformers ourself
+     * the transformers ourselves
      *
      * @param name class name
      * @param transformedName transformed class name

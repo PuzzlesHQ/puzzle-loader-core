@@ -1,5 +1,14 @@
+# Idea Folder
+/.idea
+
+# mainSrc
 /gradlew
 /gradlew.bat
 /.gradle
-/.idea
 /build
+
+# buildSrc
+buildSrc/.gradle
+buildSrc/build
+/buildSrc/gradlew
+/buildSrc/gradlew.bat

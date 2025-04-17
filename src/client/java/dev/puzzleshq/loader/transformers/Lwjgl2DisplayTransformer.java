@@ -1,8 +1,8 @@
 package dev.puzzleshq.loader.transformers;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import bundled.org.objectweb.asm.ClassVisitor;
+import bundled.org.objectweb.asm.MethodVisitor;
+import bundled.org.objectweb.asm.Opcodes;
 
 public class Lwjgl2DisplayTransformer extends ClassVisitor {
 

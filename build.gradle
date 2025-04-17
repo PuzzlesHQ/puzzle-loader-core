@@ -1,3 +1,9 @@
+import dev.puzzleshq.accesswriter.AccessWriters
+import me.lucko.jarrelocator.JarRelocator
+import me.lucko.jarrelocator.Relocation
+import org.gradle.api.artifacts.transform.TransformParameters;
+import dev.puzzleshq.buildsrc.GenericTransformer
+
 plugins {
     id 'java'
     id 'maven-publish'
@@ -16,6 +22,7 @@ repositories {
         name = "meteor-maven"
         url = "https://maven.meteordev.org/releases"
     }
+    mavenLocal()
 }
 
 sourceSets {
@@ -48,7 +55,51 @@ def natives(String lwjgl_natives) {
     }
 }
 
-// Client Dependencies
+abstract class MyTransform implements TransformAction<TransformParameters.None> {
+
+    @InputArtifact
+    abstract Provider<FileSystemLocation> getInputArtifact();
+
+    @Override
+    void transform(TransformOutputs outputs) {
+        var inp = inputArtifact.get().asFile;
+        var out = outputs.file(inp.name.replace(".jar", "-transformed.jar"));
+
+        List<Relocation> rules = new ArrayList<>();
+        rules.add(new Relocation("org.objectweb", "bundled.org.objectweb"));
+        rules.add(new Relocation("org.spongepowered.include", "bundled"));
+        rules.add(new Relocation("com.google.common.eventbus", "unused"));
+
+        JarRelocator relocator = new JarRelocator(inp, out, rules);
+        relocator.run();
+
+        AccessWriters.init(null)
+        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer")
+        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer", "<init>", "()V")
+
+        GenericTransformer.transform(out)
+    }
+}
+Attribute<Boolean> manipulated = Attribute.of("manipulated", Boolean.class);
+
+afterEvaluate {
+    project.getDependencies().getAttributesSchema().attribute(manipulated);
+    project.getDependencies().getArtifactTypes().getByName("jar", artifact -> {
+        artifact.getAttributes().attribute(manipulated, false);
+    });
+
+    project.getDependencies().registerTransform(MyTransform) {
+        getFrom().attribute(manipulated, false);
+        getTo().attribute(manipulated, true);
+    }
+
+    project.getConfigurations().all(config -> {
+        if (config.isCanBeResolved())
+            config.getAttributes().attribute(manipulated, true);
+    });
+}
+
+// Common Dependencies
 dependencies {
     clientImplementation 'org.jetbrains:annotations:24.0.0'
     clientImplementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
@@ -67,17 +118,20 @@ dependencies {
     clientBundle "org.joml:joml:${joml_version}"
 
     clientInternal sourceSets.common.output
-}
 
-// Common Dependencies
-dependencies {
+    // Common
+
     commonImplementation 'org.jetbrains:annotations:24.0.0'
 
     commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
-    commonBundle ("com.github.PuzzlesHQ:Mixin:$mixin_version") {
+    commonBundle("net.fabricmc:sponge-mixin:$mixin_version") {
+        exclude group: "com.google.code.gson", module: "gson"
+        exclude group: "com.google.guava", module: "guava"
+    }
+//    commonBundle ("com.github.PuzzlesHQ:Mixin:$mixin_version") {
 //        exclude group: "com.google.code.gson", module: "gson"
 //        exclude group: "com.google.guava", module: "guava"
-    }
+//    }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
 //    commonImplementation "org.apache.logging.log4j:log4j-api:$log4j_version"
@@ -94,13 +148,15 @@ dependencies {
     commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
-    commonBundle "meteordevelopment:orbit:$eventbus_version"
+//    commonBundle "meteordevelopment:orbit:$eventbus_version"
+    commonBundle "net.neoforged:bus:$eventbus_version"
 
     commonBundle "org.ow2.asm:asm:$asm_version"
     commonBundle "org.ow2.asm:asm-tree:$asm_version"
     commonBundle "org.ow2.asm:asm-util:$asm_version"
     commonBundle "org.ow2.asm:asm-analysis:$asm_version"
     commonBundle "org.ow2.asm:asm-commons:$asm_version"
+    commonBundle "dev.puzzleshq:access-writer:1.0.0"
 
     commonBundle "org.hjson:hjson:$hjson_version"
 }
@@ -113,6 +169,7 @@ tasks.register("buildMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks
     mergeServiceFiles()
     relocate("org.objectweb", "internal.org.objectweb")
     relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "merged"
     from sourceSets.client.output
@@ -124,6 +181,7 @@ tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.task
     mergeServiceFiles()
     relocate("org.objectweb", "internal.org.objectweb")
     relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "common"
     from sourceSets.common.output
@@ -135,6 +193,7 @@ tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.task
     mergeServiceFiles()
     relocate("org.objectweb", "internal.org.objectweb")
     relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "client"
     from sourceSets.client.output
@@ -194,23 +253,4 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-compileJava {
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
-}
-
-compileClientJava {
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
-}
-
-compileCommonJava {
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
-}
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))

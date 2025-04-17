@@ -6,16 +6,17 @@ import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.mod.ModContainer;
 import dev.puzzleshq.loader.mod.info.spec.ModJsonV2;
 import dev.puzzleshq.loader.util.EnvType;
+import bundled.com.google.common.collect.ImmutableCollection;
+import bundled.com.google.common.collect.ImmutableList;
+import bundled.com.google.common.collect.ImmutableMap;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.include.com.google.common.collect.ImmutableCollection;
-import org.spongepowered.include.com.google.common.collect.ImmutableList;
-import org.spongepowered.include.com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 import java.util.jar.JarFile;
 
+// TODO: add V3 format.
 public class ModInfo {
     // Info
     public final String DisplayName;

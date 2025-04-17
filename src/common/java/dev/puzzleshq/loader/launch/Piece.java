@@ -1,5 +1,6 @@
 package dev.puzzleshq.loader.launch;
 
+import dev.puzzleshq.accesswriter.AccessWriters;
 import dev.puzzleshq.loader.mod.entrypoint.PreLaunchInitializer;
 import dev.puzzleshq.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
@@ -31,7 +32,7 @@ public class Piece {
     public static Map<String, Object> blackboard;
     public static PieceClassLoader classLoader;
 
-    static AtomicReference<EnvType> env = new AtomicReference();
+    static AtomicReference<EnvType> env = new AtomicReference<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | Piece");
 
@@ -123,6 +124,7 @@ public class Piece {
 
             ModFinder.findMods();
 
+            AccessWriters.init(classLoader);
             provider.initArgs(args);
             TransformerInitializer.invokeTransformers(classLoader);
             provider.registerTransformers(classLoader);

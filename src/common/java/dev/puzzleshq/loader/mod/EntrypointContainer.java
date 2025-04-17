@@ -1,15 +1,13 @@
 package dev.puzzleshq.loader.mod;
 
-import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.mod.info.AdapterPathPair;
 import dev.puzzleshq.loader.provider.ProviderException;
 import dev.puzzleshq.loader.provider.lang.ILangProvider;
+import bundled.com.google.common.collect.ImmutableCollection;
+import bundled.com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.include.com.google.common.collect.ImmutableCollection;
-import org.spongepowered.include.com.google.common.collect.ImmutableMap;
 
-import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -41,7 +39,6 @@ public class EntrypointContainer {
                         throw new RuntimeException(e);
                     }
 
-                    Constants.EVENT_BUS.registerLambdaFactory(instClass.getPackage().getName(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
                     inst = ILangProvider.PROVDERS.get(pair.getAdapter()).create(container.INFO, pair.getValue(), type);
                     EntrypointContainer.INSTANCE_MAP.put(pair.getValue(), inst);
                 }

@@ -2,6 +2,7 @@ package dev.puzzleshq.loader.loading.events;
 
 import dev.puzzleshq.loader.loading.GameLoader;
 import dev.puzzleshq.loader.loading.stage.AbstractStage;
+import net.neoforged.bus.api.Event;
 
 /**
  * An event that is called before the game-loader starts to collect game-loading stages.
@@ -11,7 +12,7 @@ import dev.puzzleshq.loader.loading.stage.AbstractStage;
  *
  * @see GameLoader
  */
-public class RegisterStagesEvent {
+public class RegisterStagesEvent extends Event {
 
     public final GameLoader loader;
 

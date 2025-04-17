@@ -1,8 +1,8 @@
 package dev.puzzleshq.loader.transformers;
 
 import dev.puzzleshq.loader.launch.fix.IClassTransformer;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import bundled.org.objectweb.asm.ClassReader;
+import bundled.org.objectweb.asm.ClassWriter;
 
 public class ClientASMTransformer implements IClassTransformer {
 

@@ -277,8 +277,9 @@ public class ModFinder {
             puzzleCoreModInfo.addDependency(Piece.provider.getId(), Piece.provider.getRawVersion());
             puzzleCoreModInfo.setVersion(Constants.PUZZLE_CORE_VERSION);
 
+            puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.loader.transformers.CommonTransformers");
             if (Constants.SIDE.equals(EnvType.CLIENT))
-                puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.loader.transformers.CoreClientTransformers");
+                puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.loader.transformers.ClientTransformers");
         }
         ModFinder.addModWithContainer(puzzleCoreModInfo.build().getOrCreateModContainer());
         Piece.provider.addBuiltinMods();
