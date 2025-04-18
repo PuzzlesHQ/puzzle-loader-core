@@ -1,55 +1,75 @@
 package dev.puzzleshq.loader.mod;
 
 import dev.puzzleshq.loader.launch.Piece;
-import dev.puzzleshq.loader.mod.info.AdapterPathPair;
 import dev.puzzleshq.loader.provider.ProviderException;
 import dev.puzzleshq.loader.provider.lang.ILangProvider;
-import bundled.com.google.common.collect.ImmutableCollection;
-import bundled.com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
+import dev.puzzleshq.mod.api.IEntrypointContainer;
+import dev.puzzleshq.mod.api.IModContainer;
+import dev.puzzleshq.mod.util.EntrypointPair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@SuppressWarnings("unchecked")
-public class EntrypointContainer {
-    public final ImmutableMap<String, ImmutableCollection<AdapterPathPair>> entrypointClasses;
-    public final ModContainer container;
+public class EntrypointContainer implements IEntrypointContainer {
 
     public static final Map<String, Object> INSTANCE_MAP = new HashMap<>();
 
-    public <T> void invokeClasses(String key, Class<T> type, Consumer<? super T> invoker) throws Exception {
-        if (!ILangProvider.PROVDERS.containsKey("java"))
-            ILangProvider.PROVDERS.put("java", ILangProvider.JAVA_INSTANCE);
+    private final IModContainer container;
+    private final Map<String, EntrypointPair[]> entrypointMap;
 
-        ImmutableCollection<AdapterPathPair> pairImmutableCollection = entrypointClasses.get(key);
-        if (pairImmutableCollection != null) {
-            for (AdapterPathPair pair : pairImmutableCollection){
-                if (ILangProvider.PROVDERS.get(pair.getAdapter()) == null)
-                    throw new ProviderException("LangProvider \"" + pair.getAdapter() + "\" does not exist.");
+    public EntrypointContainer(IModContainer container) {
+        this.container = container;
+        this.entrypointMap = container.getInfo().getEntrypointMap();
+    }
 
-                T inst = (T) EntrypointContainer.INSTANCE_MAP.get(pair.getValue());
+    @Override
+    public <T> void invoke(String key, Class<T> type, Consumer<? super T> invoker) {
+        ILangProvider.init();
 
-                if (inst == null) {
-                    Class<?> instClass = null;
-                    try {
-                        instClass = Piece.classLoader.findClass(pair.getValue());
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
+        EntrypointPair[] pairs = getEntrypoints(key);
+        if (pairs == null) return;
 
-                    inst = ILangProvider.PROVDERS.get(pair.getAdapter()).create(container.INFO, pair.getValue(), type);
-                    EntrypointContainer.INSTANCE_MAP.put(pair.getValue(), inst);
-                }
-                invoker.accept(inst);
+        for (EntrypointPair pair : pairs) {
+            T instance = (T) EntrypointContainer.INSTANCE_MAP.get(pair.entrypoint());
+
+            if (instance != null) {
+                invoker.accept(instance);
+                continue;
             }
+
+            try {
+                ILangProvider provider = ILangProvider.PROVDERS.get(pair.adapter());
+                if (provider == null) throw new ProviderException("LangProvider \"" + pair.adapter() + "\" does not exist.");
+
+                instance = provider.create(
+                        container.getInfo(),
+                        pair.entrypoint(),
+                        type
+                );
+
+                EntrypointContainer.INSTANCE_MAP.put(pair.entrypoint(), instance);
+                invoker.accept(instance);
+            } catch (ProviderException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
-    public EntrypointContainer(ModContainer container, @NotNull ImmutableMap<String, ImmutableCollection<AdapterPathPair>> entrypoints) {
-        this.container = container;
-        entrypointClasses = entrypoints;
+    @Override
+    public @Nullable EntrypointPair[] getEntrypoints(String s) {
+        return entrypointMap.get(s);
     }
 
+    @Override
+    public Map<String, EntrypointPair[]> getEntrypointMap() {
+        return entrypointMap;
+    }
+
+    @Override
+    public IModContainer getContainer() {
+        return container;
+    }
 }

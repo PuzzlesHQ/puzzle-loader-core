@@ -1,4 +1,4 @@
 # All Specifications
 
-- [Mod-Json](mod-json/mod-json.md)
+- [Mod-Json](https://github.com/PuzzlesHQ/mod-json-formats/blob/main/spec/specs.md)
 - [Mixin-Json](mixin-json/mixin-json.md)

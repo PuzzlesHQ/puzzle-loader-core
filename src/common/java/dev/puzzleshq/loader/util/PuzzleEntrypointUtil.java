@@ -7,7 +7,7 @@ public class PuzzleEntrypointUtil {
     public static <T> void invoke(String key, Class<T> entrypointType, Consumer<? super T> entrypointInvoker) {
         ModFinder.getModsArray().forEach(c -> {
             try {
-                c.invokeEntrypoint(key, entrypointType, entrypointInvoker);
+                c.getEntrypointContainer().invoke(key, entrypointType, entrypointInvoker);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

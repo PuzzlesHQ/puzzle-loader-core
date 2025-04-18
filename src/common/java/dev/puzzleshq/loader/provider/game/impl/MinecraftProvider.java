@@ -1,22 +1,19 @@
 package dev.puzzleshq.loader.provider.game.impl;
 
 import com.github.zafarkhaja.semver.Version;
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.launch.PieceClassLoader;
 import dev.puzzleshq.loader.mod.ModContainer;
-import dev.puzzleshq.loader.mod.info.ModInfo;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
 import dev.puzzleshq.loader.util.EnvType;
 import dev.puzzleshq.loader.util.ModFinder;
 import dev.puzzleshq.loader.util.RawAssetLoader;
+import dev.puzzleshq.mod.info.ModInfoBuilder;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
-import org.hjson.JsonValue;
-import org.spongepowered.asm.mixin.Mixins;
 
 import java.util.*;
 
@@ -117,32 +114,20 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public void inject(PieceClassLoader classLoader) {
-        List<Pair<EnvType, String>> mixinConfigs = new ArrayList<>();
-        for (ModContainer mod : ModFinder.getModsArray()) {
-            if (!mod.INFO.MixinConfigs.isEmpty()) mixinConfigs.addAll(mod.INFO.MixinConfigs);
-        }
 
-        EnvType envType = Constants.SIDE;
-        mixinConfigs.forEach((e) -> {
-            if (envType == e.getKey() || e.getKey() == EnvType.UNKNOWN) {
-                Mixins.addConfiguration(e.getRight());
-            }
-        });
     }
 
     @Override
     public void addBuiltinMods() {
-        ModInfo.Builder minecraftModInfo = ModInfo.Builder.New();
+        ModInfoBuilder minecraftModInfo = new ModInfoBuilder();
         {
-            minecraftModInfo.setName(getName());
+            minecraftModInfo.setDisplayName(getName());
             minecraftModInfo.setId(getId());
-            minecraftModInfo.setDesc("The base game.");
+            minecraftModInfo.setDescription("The base game.");
             minecraftModInfo.addAuthor("Mojang");
-            minecraftModInfo.setVersion(getGameVersion());
-            HashMap<String, JsonValue> meta = new HashMap<>();
-            meta.put("icon", JsonObject.valueOf("pack.png"));
-            minecraftModInfo.setMeta(meta);
-            ModFinder.addModWithContainer(minecraftModInfo.build().getOrCreateModContainer());
+            minecraftModInfo.setVersion(getRawVersion());
+            minecraftModInfo.addMeta("icon", JsonObject.valueOf("pack.png"));
+            ModFinder.addModWithContainer(new ModContainer(minecraftModInfo.build()));
         }
 
     }

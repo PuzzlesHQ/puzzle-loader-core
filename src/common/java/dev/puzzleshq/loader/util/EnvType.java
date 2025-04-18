@@ -7,9 +7,9 @@ package dev.puzzleshq.loader.util;
  * @since 1.0.0
  */
 public enum EnvType {
-    UNKNOWN("UNKNOWN"),
-    CLIENT("CLIENT"),
-    SERVER("SERVER");
+    UNKNOWN("unknown"),
+    CLIENT("client"),
+    SERVER("server");
 
     public final String name;
 

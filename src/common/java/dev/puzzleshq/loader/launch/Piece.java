@@ -1,14 +1,16 @@
 package dev.puzzleshq.loader.launch;
 
 import dev.puzzleshq.accesswriter.AccessWriters;
+import dev.puzzleshq.accesswriter.api.IFileReader;
+import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.mod.entrypoint.PreLaunchInitializer;
 import dev.puzzleshq.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.loader.provider.game.IGameProvider;
 import dev.puzzleshq.loader.threading.OffThreadExecutor;
-import dev.puzzleshq.loader.util.ClassPathUtil;
-import dev.puzzleshq.loader.util.EnvType;
-import dev.puzzleshq.loader.util.ModFinder;
-import dev.puzzleshq.loader.util.ReflectionUtil;
+import dev.puzzleshq.loader.util.*;
+import dev.puzzleshq.mod.ModFormats;
+import dev.puzzleshq.mod.api.IModContainer;
+import dev.puzzleshq.mod.util.MixinConfig;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -16,11 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Piece {
@@ -122,8 +124,10 @@ public class Piece {
                 provider = (IGameProvider) Class.forName(COSMIC_PROVIDER, true, classLoader).newInstance();
             }
 
+            ModFormats.register(ModFinder::getMod);
             ModFinder.findMods();
 
+            AccessWriters.register(s -> RawAssetLoader.getLowLevelClassPathAsset(s).getString());
             AccessWriters.init(classLoader);
             provider.initArgs(args);
             TransformerInitializer.invokeTransformers(classLoader);
@@ -131,6 +135,8 @@ public class Piece {
             MixinBootstrap.init();
 
             provider.inject(classLoader);
+            setupModMixins();
+
             MixinBootstrap.getPlatform().init();
 
             String entryPoint = provider.getEntrypoint();
@@ -153,6 +159,21 @@ public class Piece {
             LOGGER.error("Unable To Launch", e);
             System.exit(1);
         }
+    }
+
+    private void setupModMixins() {
+        List<MixinConfig> mixinConfigs = new ArrayList<>();
+        for (IModContainer mod : ModFinder.getModsArray()) {
+            if (mod.getInfo().getMixinConfigs().length != 0)
+                mixinConfigs.addAll(List.of(mod.getInfo().getMixinConfigs()));
+        }
+
+        EnvType envType = Constants.SIDE;
+        mixinConfigs.forEach((e) -> {
+            if (Objects.equals(envType.name, e.environment()) || Objects.equals(e.environment(), EnvType.UNKNOWN.name)) {
+                Mixins.addConfiguration(e.path());
+            }
+        });
     }
 
 }

@@ -4,8 +4,10 @@ import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.mod.ModContainer;
-import dev.puzzleshq.loader.mod.info.ModInfo;
-import dev.puzzleshq.loader.mod.info.ModJson;
+import dev.puzzleshq.mod.api.IModContainer;
+import dev.puzzleshq.mod.info.ModInfo;
+import dev.puzzleshq.mod.info.ModInfoBuilder;
+import dev.puzzleshq.mod.util.ModDependency;
 import javassist.bytecode.DuplicateMemberException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +37,7 @@ public class ModFinder {
     private static File MOD_FOLDER = null;
 
     private static final Map<String, Integer> MODS = new HashMap<>();
-    private static final List<ModContainer> MODS_ARRAY = new ArrayList<>();
+    private static final List<IModContainer> MODS_ARRAY = new ArrayList<>();
 
     public static final Logger LOGGER = LogManager.getLogger("Puzzle | ModFinder");
 
@@ -110,10 +112,7 @@ public class ModFinder {
                             byte[] bytes = jsonInputStream.readAllBytes();
                             jsonInputStream.close();
 
-                            String rawJson = new String(bytes);
-                            ModJson modJson = ModJson.fromString(rawJson);
-
-                            addModToArray(modJson, jar);
+                            addModToArray(ModInfo.readFromString(new String(bytes)), jar);
                         }
                         continue;
                     }
@@ -124,10 +123,8 @@ public class ModFinder {
                         if (!entry.getName().equals("puzzle.mod.json")) continue;
 
                         byte[] bytes = stream.readAllBytes();
-                        String rawJson = new String(bytes);
-                        ModJson modJson = ModJson.fromString(rawJson);
 
-                        addModToArray(modJson, null);
+                        addModToArray(ModInfo.readFromString(new String(bytes)), null);
                         break;
                     }
                 } catch (IOException e) {
@@ -170,10 +167,7 @@ public class ModFinder {
                 byte[] bytes = jsonInputStream.readAllBytes();
                 jsonInputStream.close();
 
-                String rawJson = new String(bytes);
-                ModJson modJson = ModJson.fromString(rawJson);
-
-                addModToArray(modJson, null);
+                addModToArray(ModInfo.readFromString(new String(bytes)), null);
                 } catch (FileNotFoundException e) {
                     LOGGER.error("Could not find file \"{}\"", f, e);
                 } catch (IOException e) {
@@ -185,50 +179,46 @@ public class ModFinder {
 
     /**
      * Adds the mod.
-     * @param modJson the mod-json for the mod.
+     * @param info the mod-json for the mod.
      * @param jar the jar of the mod.
      */
-    private static void addModToArray(@Nonnull ModJson modJson, @Nullable JarFile jar) {
-        if (modJson.allowedSides().isAllowed(Constants.SIDE)) {
-            LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", modJson.id(), jar, Constants.SIDE.name);
+    private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar) {
+        if (!info.getLoadableSides().get(Constants.SIDE.name)) {
+            LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), jar, Constants.SIDE.name);
             return;
         }
 
         String text = jar == null ? "Development" : "";
-        if (MODS.containsKey(modJson.id()))
-            throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + modJson.id() + "}\" at jar \"" + jar + "\""));
+        if (MODS.containsKey(info.getId()))
+            throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + info.getId() + "}\" at jar \"" + jar + "\""));
 
         LOGGER.info(
                 "Discovered{} Mod DisplayName: \"{}\", ID: \"{}\", JarFile: \"{}\"",
-                text, modJson.name(), modJson.id(), jar
+                text, info.getDisplayName(), info.getId(), jar
         );
 
-        ModContainer container = ModInfo.fromModJsonInfo(modJson).getOrCreateModContainer(jar);
-        MODS.put(container.ID, MODS_ARRAY.size());
+        IModContainer container = new ModContainer(info);
+        MODS.put(container.getID(), MODS_ARRAY.size());
         MODS_ARRAY.add(container);
     }
 
     /**
      * Verifies the mods and their dependency.
-     * @see ModContainer
+     * @see IModContainer
      */
     private static void verify() {
-        for (ModContainer container : ModFinder.getModsArray()) {
-            Set<Map.Entry<String, Pair<String, Boolean>>> entries = container.INFO.JSON.dependencies().entrySet();
-            for (Map.Entry<String, Pair<String, Boolean>> entry : entries) {
-                Pair<String, Boolean> pair = entry.getValue();
-                String modId = entry.getKey();
-
-                if (!MODS.containsKey(modId)) {
-                    if (pair.getRight()) throw new RuntimeException(new NullPointerException("Missing dependency \"" + modId + "\" that was required by \"" + container.ID + "\""));
+        for (IModContainer container : ModFinder.getModsArray()) {
+            ModDependency[] dependencies = container.getInfo().getDependencies();
+            for (ModDependency dependency : dependencies) {
+                IModContainer dependencyContainer = dependency.getContainer();
+                if (dependencyContainer == null) {
+                    if (!dependency.isOptional()) throw new RuntimeException(new NullPointerException("Missing dependency \"" + dependency.getModID() + "\" that was required by \"" + container.getID() + "\""));
                     continue;
                 }
 
-                ModContainer dependency = ModFinder.getMod(modId);
-
-                boolean doesSatisfy = dependency.VERSION.satisfies(pair.getLeft());
+                boolean doesSatisfy = dependencyContainer.getVersion().satisfies(dependency.getConstraint());
                 if (doesSatisfy) continue;
-                throw new RuntimeException(new InputMismatchException("Dependency mis-match for mod \"" + container.ID + "\", it wanted \"" + pair.getLeft() + "\" but got \"" + dependency.VERSION + "\""));
+                throw new RuntimeException(new InputMismatchException("Dependency mis-match for mod \"" + dependencyContainer.getID() + "\", it wanted \"" + dependency.getConstraint() + "\" but got \"" + dependencyContainer.getVersion() + "\""));
             }
         }
         hasModFinderVerified = true;
@@ -237,24 +227,22 @@ public class ModFinder {
 
     /**
      * Sorts the mods.
-     * @see ModContainer
+     * @see IModContainer
      */
     private static void sort() {
-        for (ModContainer container : ModFinder.MODS_ARRAY) {
-            Set<Map.Entry<String, Pair<String, Boolean>>> entries = container.INFO.JSON.dependencies().entrySet();
-            for (Map.Entry<String, Pair<String, Boolean>> entry : entries) {
-                String modId = entry.getKey();
-
-                if (!MODS.containsKey(modId))
+        for (IModContainer container : ModFinder.MODS_ARRAY) {
+            ModDependency[] dependencies = container.getInfo().getDependencies();
+            for (ModDependency dependency : dependencies) {
+                IModContainer dependencyContainer = dependency.getContainer();
+                if (dependencyContainer == null)
                     continue;
 
-                ModContainer dependency = ModFinder.getMod(modId);
-                dependency.bumpPriority();
+                dependencyContainer.bumpPriority();
             }
         }
-        ModFinder.MODS_ARRAY.sort(Comparator.comparingInt(a -> a.priority));
+        ModFinder.MODS_ARRAY.sort(Comparator.comparingInt(IModContainer::getPriority));
         // Re-Order ModContainer to get the right indices.
-        for (ModContainer container : ModFinder.MODS_ARRAY) ModFinder.MODS.put(container.ID, ModFinder.MODS_ARRAY.indexOf(container));
+        for (IModContainer container : ModFinder.MODS_ARRAY) ModFinder.MODS.put(container.getID(), ModFinder.MODS_ARRAY.indexOf(container));
         ModFinder.hadModSortingFinished = true;
     }
 
@@ -262,39 +250,36 @@ public class ModFinder {
      * Adds puzzle-Core as a mod.
      */
     private static void addPuzzleCoreBuiltin() {
-        ModInfo.Builder puzzleCoreModInfo = ModInfo.Builder.New();
+        ModInfoBuilder puzzleCoreModInfo = new ModInfoBuilder();
         {
-            puzzleCoreModInfo.setName("Puzzle Core");
+            puzzleCoreModInfo.setDisplayName("Puzzle Core");
             puzzleCoreModInfo.setId("puzzle-loader-core");
-            puzzleCoreModInfo.setDesc("The core mod-loading mechanics of puzzle-loader");
+            puzzleCoreModInfo.setDescription("The core mod-loading mechanics of puzzle-loader");
 
-            HashMap<String, JsonValue> meta = new HashMap<>();
-            meta.put("icon", JsonObject.valueOf("puzzle-loader:icons/PuzzleLoaderIconx160.png"));
-            puzzleCoreModInfo.setMeta(meta);
-            puzzleCoreModInfo.setAuthors(new String[]{
-                    "Mr-Zombii", "CrabKing"
-            });
-            puzzleCoreModInfo.addDependency(Piece.provider.getId(), Piece.provider.getRawVersion());
+            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader:icons/PuzzleLoaderIconx160.png"));
+            puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
+            puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
             puzzleCoreModInfo.setVersion(Constants.PUZZLE_CORE_VERSION);
 
             puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.loader.transformers.CommonTransformers");
             if (Constants.SIDE.equals(EnvType.CLIENT))
                 puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.loader.transformers.ClientTransformers");
         }
-        ModFinder.addModWithContainer(puzzleCoreModInfo.build().getOrCreateModContainer());
+        ModFinder.addModWithContainer(new ModContainer(puzzleCoreModInfo.build()));
+
         Piece.provider.addBuiltinMods();
     }
 
 
     /**
-     * Adds a mod with a {@link ModContainer}.
-     * @param container the {@link ModContainer} to add.
+     * Adds a mod with a {@link IModContainer}.
+     * @param container the {@link IModContainer} to add.
      */
-    public static void addModWithContainer(ModContainer container) {
+    public static void addModWithContainer(IModContainer container) {
         if (hasModFinderVerified)
-            LOGGER.warn("Cannot add mod container \"{}\" after mod dependency verification has taken place.", container.ID);
+            LOGGER.warn("Cannot add mod container \"{}\" after mod dependency verification has taken place.", container.getID());
 
-        MODS.put(container.ID, MODS_ARRAY.size());
+        MODS.put(container.getID(), MODS_ARRAY.size());
         MODS_ARRAY.add(container);
     }
 
@@ -309,9 +294,9 @@ public class ModFinder {
     /**
      * Gets the mod of the id.
      * @param id the id of the mod.
-     * @return a {@link ModContainer}
+     * @return a {@link IModContainer}
      */
-    public static ModContainer getMod(String id) {
+    public static IModContainer getMod(String id) {
         Integer dependencyIndex = ModFinder.MODS.get(id);
         if (dependencyIndex == null) {
             LOGGER.error("Could not find mod \"{}\"", id);
@@ -331,10 +316,10 @@ public class ModFinder {
 
     /**
      * Gets the mod array.
-     * @return a {@link List} of {@link ModContainer}.
+     * @return a {@link List} of {@link IModContainer}.
      * @see ModFinder#getMods()
      */
-    public static List<ModContainer> getModsArray() {
+    public static List<IModContainer> getModsArray() {
         return MODS_ARRAY;
     }
 
