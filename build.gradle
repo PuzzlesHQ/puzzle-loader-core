@@ -10,7 +10,8 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
-group = 'com.github.PuzzlesHQ'
+group = 'dev.puzzleshq'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -130,11 +131,6 @@ dependencies {
     }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
-//    commonImplementation "org.apache.logging.log4j:log4j-api:$log4j_version"
-//    commonImplementation "org.apache.logging.log4j:log4j-core:$log4j_version"
-//    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
-//    commonBundle 'org.slf4j:slf4j-reload4j:2.1.0-alpha1'
-
     commonBundle "com.github.zafarkhaja:java-semver:0.10.2"
 
     commonBundle 'org.slf4j:slf4j-ext:1.7.23'
@@ -198,9 +194,12 @@ tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.task
 }
 
 tasks.register("buildStrippedMergeJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    configurations = project.configurations.clientInternal
+    configurations = Collections.singletonList(project.configurations.clientInternal)
 
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "merged-stripped"
     from sourceSets.client.output
@@ -208,6 +207,9 @@ tasks.register("buildStrippedMergeJar", com.github.jengelman.gradle.plugins.shad
 
 tasks.register("buildStrippedCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "common-stripped"
     from sourceSets.common.output
@@ -215,6 +217,9 @@ tasks.register("buildStrippedCommonJar", com.github.jengelman.gradle.plugins.sha
 
 tasks.register("buildStrippedClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     mergeServiceFiles()
+    relocate("org.objectweb", "internal.org.objectweb")
+    relocate("org.spongepowered.include", "internal")
+    relocate("com.google.common.eventbus", "unused")
 
     archiveClassifier = "client-stripped"
     from sourceSets.client.output
@@ -242,6 +247,9 @@ publishing {
             artifact source: buildMergeJar, classifier: 'merged', extension: 'jar'
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
+            artifact source: buildStrippedMergeJar, classifier: 'merged-stripped', extension: 'jar'
+            artifact source: buildStrippedClientJar, classifier: 'client-stripped', extension: 'jar'
+            artifact source: buildStrippedCommonJar, classifier: 'common-stripped', extension: 'jar'
         }
     }
 }
