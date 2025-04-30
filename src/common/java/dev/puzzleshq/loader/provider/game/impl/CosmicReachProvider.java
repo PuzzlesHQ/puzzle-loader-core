@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 public class CosmicReachProvider implements IGameProvider {
 
     public static final String PARADOX_SERVER_ENTRYPOINT = "com.github.puzzle.paradox.loader.launch.PuzzlePiece";
+    public static final String PARADOX_SERVER_ENTRYPOINT_CLASS = "/com/github/puzzle/paradox/loader/launch/PuzzlePiece.class";
 
     public CosmicReachProvider() {
         Piece.provider = this;
@@ -53,16 +54,18 @@ public class CosmicReachProvider implements IGameProvider {
     public String getEntrypoint() {
         boolean isRunningOnParadox = ((Supplier<Boolean>) () -> {
             if (paradoxExist.get() != null) return paradoxExist.get();
-            if (System.getProperty("puzzle.useParadox") != null) {
-                paradoxExist.set(true);
-                return true;
+            String property = System.getProperty("puzzle.useParadox");
+            if (property != null) {
+                boolean paradoxExist = Boolean.valueOf(property);
+                this.paradoxExist.set(paradoxExist);
+                return paradoxExist;
             }
 
             try {
-                Class.forName(CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT, false, Piece.classLoader);
+                RawAssetLoader.getLowLevelClassPathAsset(PARADOX_SERVER_ENTRYPOINT_CLASS).dispose();
                 paradoxExist.set(true);
                 return true;
-            } catch (ClassNotFoundException ignore) {
+            } catch (NullPointerException ignore) {
                 paradoxExist.set(false);
                 return false;
             }

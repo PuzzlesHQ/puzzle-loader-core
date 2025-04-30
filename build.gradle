@@ -77,6 +77,7 @@ abstract class MyTransform implements TransformAction<TransformParameters.None> 
         AccessWriters.init(null)
         AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer")
         AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer", "<init>", "()V")
+        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/MixinEnvironment", "gotoPhase", '(Lorg/spongepowered/asm/mixin/MixinEnvironment$Phase;)V')
 
         GenericTransformer.transform(out)
     }
@@ -140,7 +141,9 @@ dependencies {
     commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
-    commonBundle "net.neoforged:bus:$eventbus_version"
+    commonBundle("net.neoforged:bus:$eventbus_version") {
+        exclude group: "org.apache.logging.log4j", module: "log4j-api"
+    }
 
     commonBundle "org.ow2.asm:asm:$asm_version"
     commonBundle "org.ow2.asm:asm-tree:$asm_version"

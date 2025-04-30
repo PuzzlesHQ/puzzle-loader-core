@@ -17,8 +17,12 @@ import joptsimple.OptionSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.launch.platform.IMixinPlatformServiceAgent;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.asm.service.IMixinService;
+import org.spongepowered.asm.service.MixinService;
+import org.spongepowered.asm.service.MixinServiceAbstract;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -129,15 +133,18 @@ public class Piece {
 
             AccessWriters.register(s -> RawAssetLoader.getLowLevelClassPathAsset(s).getString());
             AccessWriters.init(classLoader);
+
+            MixinBootstrap.init();
+            MixinBootstrap.getPlatform().init();
             provider.initArgs(args);
+
             TransformerInitializer.invokeTransformers(classLoader);
             provider.registerTransformers(classLoader);
-            MixinBootstrap.init();
 
             provider.inject(classLoader);
-            setupModMixins();
 
-            MixinBootstrap.getPlatform().init();
+            Piece.setupModMixins();
+            MixinBootstrap.getPlatform().inject();
 
             String entryPoint = provider.getEntrypoint();
             String ranEntrypoint = entryPoint;
@@ -145,8 +152,8 @@ public class Piece {
                 ranEntrypoint = "dev.puzzleshq.minecraft.launch.MinecraftAppletLauncher";
             }
 
+            MixinEnvironment.gotoPhase(MixinEnvironment.Phase.DEFAULT);
             Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
-            MixinEnvironment.init(MixinEnvironment.Phase.DEFAULT);
             String[] providerArgs = provider.getArgs().toArray(new String[0]);
 
             Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
@@ -161,7 +168,7 @@ public class Piece {
         }
     }
 
-    private void setupModMixins() {
+    public static void setupModMixins() {
         List<MixinConfig> mixinConfigs = new ArrayList<>();
         for (IModContainer mod : ModFinder.getModsArray()) {
             if (mod.getInfo().getMixinConfigs().length != 0)

@@ -9,6 +9,7 @@ import dev.puzzleshq.loader.launch.fix.IClassTransformer;
 public class CommonASMTransformer implements IClassTransformer {
 
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
+        if (basicClass == null) System.out.println(name);
         ClassReader reader = new ClassReader(basicClass);
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 

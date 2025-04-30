@@ -1,9 +1,9 @@
 package dev.puzzleshq.loader.util;
 
-import com.llamalad7.mixinextras.lib.apache.commons.tuple.Pair;
 import dev.puzzleshq.loader.Constants;
 import dev.puzzleshq.loader.launch.Piece;
 import dev.puzzleshq.loader.mod.ModContainer;
+import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
@@ -90,6 +90,8 @@ public class ModFinder {
      * Finds the puzzle.mod.json in all the mod jars and adds it.
      */
     public static void findMods() {
+        ModFormats.initDefaultFormats();
+
         if (hadModSortingFinished && hasModFinderVerified) {
             ModFinder.LOGGER.warn("Cannot call ModFinder.findMods() more than once.");
             return;

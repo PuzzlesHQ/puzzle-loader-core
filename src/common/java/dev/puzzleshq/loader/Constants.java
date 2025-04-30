@@ -17,7 +17,6 @@ public class Constants {
     public static final IEventBus EVENT_BUS = new BusBuilderImpl().build();
 
     public static final EnvType SIDE = Piece.getSide();
-    public static final MixinEnvironment.CompatibilityLevel MIXIN_COMPATIBILITY_LEVEL = MixinEnvironment.CompatibilityLevel.JAVA_8;
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
@@ -36,7 +35,10 @@ public class Constants {
         try {
             Class<?> gdxClass = Class.forName("com.badlogic.gdx");
             Object app = ReflectionUtil.getField(gdxClass, "app").get(null);
-            if (app == null) return false;
+            if (app == null) {
+                System.out.println("Constants.shouldClose() not implemented for this game.");
+                return false;
+            }
 
             return (boolean) ReflectionUtil.getField(app, "running").get(app);
         } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {

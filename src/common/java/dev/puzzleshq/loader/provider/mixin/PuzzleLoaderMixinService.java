@@ -146,7 +146,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      */
     @Override
     public CompatibilityLevel getMaxCompatibilityLevel() {
-        return CompatibilityLevel.JAVA_8;
+        return CompatibilityLevel.JAVA_6;
     }
 
     @Override
@@ -326,7 +326,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
 
     @Override
     public CompatibilityLevel getMinCompatibilityLevel() {
-        return dev.puzzleshq.loader.Constants.MIXIN_COMPATIBILITY_LEVEL;
+        return CompatibilityLevel.JAVA_21;
     }
 
     /* (non-Javadoc)
