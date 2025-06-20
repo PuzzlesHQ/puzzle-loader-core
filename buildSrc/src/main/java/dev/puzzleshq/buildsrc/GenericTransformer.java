@@ -1,6 +1,7 @@
 package dev.puzzleshq.buildsrc;
 
-import dev.puzzleshq.accesswriter.transformers.AccessTransformer;
+import dev.puzzleshq.accesswriter.transformers.AccessTransformer24;
+import dev.puzzleshq.accesswriter.transformers.AccessTransformerASM;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
@@ -51,10 +52,14 @@ public class GenericTransformer {
         ClassReader reader = new ClassReader(bytes);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 
-        reader.accept(new AccessTransformer(writer), ClassReader.SKIP_DEBUG);
+        reader.accept(new AccessTransformerASM(writer), ClassReader.SKIP_DEBUG);
 
         return writer.toByteArray();
     }
+
+//    private static byte[] transformClass(byte[] bytes) {
+//        return AccessTransformer24.transform(bytes);
+//    }
 
 //    private static byte[] transformClass(byte[] bytes, AbstractClassTransformer... transformers) {
 //        ClassReader reader = new ClassReader(bytes);
