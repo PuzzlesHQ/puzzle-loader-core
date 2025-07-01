@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader;
 
-import dev.puzzlehq.annotation.documentation.Note;
+import dev.puzzleshq.annotation.documentation.Note;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;

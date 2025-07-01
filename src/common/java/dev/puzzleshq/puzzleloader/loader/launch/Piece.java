@@ -26,8 +26,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Piece {
-    public static String COSMIC_PROVIDER = "dev.puzzleshq.puzzleloader.loader.provider.game.impl.CosmicReachProvider";
-    public static String MINECRAFT_PROVIDER = "dev.puzzleshq.puzzleloader.loader.provider.game.impl.MinecraftProvider";
+    private static String[] BUILT_IN_PROVIDERS = {
+        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.CosmicReachProvider",
+        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.MinecraftProvider",
+        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.ProjectZomboidProvider"
+    };
 
     public static IGameProvider provider;
 
@@ -115,14 +118,12 @@ public class Piece {
             if (options.has(provider_option))
                 provider = (IGameProvider) Class.forName(provider_option.value(options), true, classLoader).newInstance();
             else {
-                try {
-                    provider = (IGameProvider) Class.forName(MINECRAFT_PROVIDER, true, classLoader).newInstance();
-                } catch (Exception ignore) {}
+                for (String builtInProvider : BUILT_IN_PROVIDERS) {
+                    provider = (IGameProvider) Class.forName(builtInProvider, true, classLoader).newInstance();
+                    if (provider.isValid()) break;
+                }
             }
-
-            if (!provider.isValid()) {
-                provider = (IGameProvider) Class.forName(COSMIC_PROVIDER, true, classLoader).newInstance();
-            }
+            if (!provider.isValid()) throw new RuntimeException("Couldn't load any game provider for this particular application.");
 
             ModFormats.register(ModFinder::getMod);
             ModFinder.findMods();

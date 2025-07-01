@@ -1,6 +1,5 @@
 package dev.puzzleshq.buildsrc;
 
-import dev.puzzleshq.accesswriter.transformers.AccessTransformer24;
 import dev.puzzleshq.accesswriter.transformers.AccessTransformerASM;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;

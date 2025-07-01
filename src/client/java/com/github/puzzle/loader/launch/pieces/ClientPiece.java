@@ -1,6 +1,6 @@
 package com.github.puzzle.loader.launch.pieces;
 
-import dev.puzzlehq.annotation.documentation.Note;
+import dev.puzzleshq.annotation.documentation.Note;
 
 @Deprecated(since = "core-1.0.0", forRemoval = true)
 @Note("Being kept for Launcher Compat *for now*")

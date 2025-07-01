@@ -50,29 +50,29 @@ public class CosmicReachProvider implements IGameProvider {
 
     AtomicReference<Boolean> paradoxExist = new AtomicReference<>();
 
+    boolean isRunningOnParadox() {
+        if (paradoxExist.get() != null) return paradoxExist.get();
+        String property = System.getProperty("puzzle.useParadox");
+        if (property != null) {
+            boolean paradoxExist = Boolean.valueOf(property);
+            this.paradoxExist.set(paradoxExist);
+            return paradoxExist;
+        }
+
+        try {
+            RawAssetLoader.getLowLevelClassPathAsset(PARADOX_SERVER_ENTRYPOINT_CLASS).dispose();
+            paradoxExist.set(true);
+            return true;
+        } catch (NullPointerException ignore) {
+            paradoxExist.set(false);
+            return false;
+        }
+    }
+
     @Override
     public String getEntrypoint() {
-        boolean isRunningOnParadox = ((Supplier<Boolean>) () -> {
-            if (paradoxExist.get() != null) return paradoxExist.get();
-            String property = System.getProperty("puzzle.useParadox");
-            if (property != null) {
-                boolean paradoxExist = Boolean.valueOf(property);
-                this.paradoxExist.set(paradoxExist);
-                return paradoxExist;
-            }
-
-            try {
-                RawAssetLoader.getLowLevelClassPathAsset(PARADOX_SERVER_ENTRYPOINT_CLASS).dispose();
-                paradoxExist.set(true);
-                return true;
-            } catch (NullPointerException ignore) {
-                paradoxExist.set(false);
-                return false;
-            }
-        }).get();
-
         if (LoaderConstants.SIDE == EnvType.SERVER) {
-            return isRunningOnParadox ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
+            return isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
         }
 
         return "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
@@ -117,7 +117,26 @@ public class CosmicReachProvider implements IGameProvider {
 
     @Override
     public boolean isValid() {
-        return true;
+        try {
+            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
+            if (LoaderConstants.SIDE == EnvType.SERVER) {
+                try {
+                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    return true;
+                } catch (Exception ignore) {
+                    throw new RuntimeException("Cosmic Reach Server Main does not exist.");
+                }
+            }
+            try {
+                launcher = "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
+                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            } catch (Exception e) {
+                throw new RuntimeException("Cosmic Reach Main does not exist.");
+            }
+            return true;
+        } catch (Exception ignore) {
+            return false;
+        }
     }
 
 }

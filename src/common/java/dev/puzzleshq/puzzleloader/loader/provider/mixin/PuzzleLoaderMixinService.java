@@ -24,12 +24,12 @@
  */
 package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 
-import bundled.org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.ClassNode;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.transformers.BetterProxy;
 import org.jetbrains.annotations.NotNull;
-import bundled.org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.platform.IMixinPlatformAgent;
@@ -47,11 +47,6 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import org.spongepowered.asm.util.ReEntranceLock;
 import org.spongepowered.asm.util.perf.Profiler;
 import org.spongepowered.asm.util.perf.Profiler.Section;
-import bundled.com.google.common.collect.ImmutableList;
-import bundled.com.google.common.collect.Sets;
-import bundled.com.google.common.io.ByteStreams;
-import bundled.com.google.common.io.Closeables;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -74,7 +69,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      * Known re-entrant transformers, other re-entrant transformers will
      * detect automatically
      */
-    private static final Set<String> excludeTransformers = Sets.newHashSet();
+    private static final Set<String> excludeTransformers = new HashSet<>();
 
     /**
      * Log4j2 logger
@@ -187,7 +182,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      */
     @Override
     public Collection<String> getPlatformAgents() {
-        return ImmutableList.<String>of();
+        return new ArrayList<>();
     }
 
     @Override
@@ -203,20 +198,16 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         return new ContainerHandleVirtual(this.getName());
     }
 
-    protected final void getContainersFromAgents(ImmutableList.Builder<IContainerHandle> list) {
+    @Override
+    public Collection<IContainerHandle> getMixinContainers() {
+        List<IContainerHandle> list = new ArrayList<>();
         for (IMixinPlatformServiceAgent agent : this.getServiceAgents()) {
             Collection<IContainerHandle> containers = agent.getMixinContainers();
             if (containers != null) {
                 list.addAll(containers);
             }
         }
-    }
-
-    @Override
-    public Collection<IContainerHandle> getMixinContainers() {
-        ImmutableList.Builder<IContainerHandle> list = ImmutableList.builder();
-        this.getContainersFromAgents(list);
-        return list.build();
+        return list;
     }
 
     /* (non-Javadoc)
@@ -442,11 +433,11 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             final String resourcePath = transformedName.replace('.', '/').concat(".class");
             classStream = appClassLoader.getResourceAsStream(resourcePath);
             assert classStream != null;
-            return ByteStreams.toByteArray(classStream);
+            return classStream.readAllBytes();
         } catch (Exception ex) {
             return null;
         } finally {
-            Closeables.closeQuietly(classStream);
+            classStream.close();
         }
     }
 
