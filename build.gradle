@@ -10,8 +10,13 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.6'
 }
 
-group = 'dev.puzzleshq'
-version = '1.0.0'
+def ref = System.getenv("GITHUB_REF")
+version = (ref != null && ref.startsWith("refs/tags/")) ? ref.tokenize('/').last().replaceFirst(/^v/, '') : p_version
+
+String mavenUrl = System.getenv("MAVEN_URL")
+
+String envRepo = System.getenv("MAVEN_REPO");
+String mavenRepo = envRepo != null ? envRepo : "releases";
 
 repositories {
     mavenCentral()
@@ -180,8 +185,6 @@ tasks.register("buildMergedTestJar", com.github.jengelman.gradle.plugins.shadow.
 
 tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     mergeServiceFiles()
-//    relocate("org.objectweb", "bundled.org.objectweb")
-//    relocate("org.spongepowered.include", "bundled")
 
     archiveClassifier = "common"
     from sourceSets.common.output
@@ -189,11 +192,15 @@ tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.task
 
 tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     mergeServiceFiles()
-//    relocate("org.objectweb", "bundled.org.objectweb")
-//    relocate("org.spongepowered.include", "bundled")
 
     archiveClassifier = "client"
     from sourceSets.client.output
+}
+
+tasks.register("buildSourcesJar", Jar) {
+    from sourceSets.client.allSource
+    from sourceSets.common.allSource
+    archiveClassifier = "client-sources"
 }
 
 processCommonResources {
@@ -210,19 +217,70 @@ processCommonResources {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "PuzzleHQsMaven"
+            url = mavenUrl+ "/" +mavenRepo
+            credentials {
+                username = System.getenv("MAVEN_NAME")
+                password = System.getenv("MAVEN_SECRET")
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+
     publications {
         maven(MavenPublication) {
-            groupId = group
-            artifactId = "puzzle-loader-core"
+            groupId = p_group
+            artifactId = p_id
+            version = this.version
 
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
+            artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
+
+            pom {
+                name = p_name
+                description = p_desc
+                url = p_git
+
+                licenses {
+                    license {
+                        name = "GNU Lesser General Public License"
+                        url = "https://www.gnu.org/licenses/lgpl-2.1.html"
+                        distribution = "LGPL"
+                        comments = "This project includes LGPL-licensed components."
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'mrzombii'
+                        name = 'Mr Zombii'
+                        email = 'thezombiigames@gmail.com'
+                    }
+                }
+                scm {
+                    connection = "${p_git}.git"
+                    developerConnection = "${p_git}.git"
+                    url = "${p_git}.git"
+                }
+            }
         }
     }
 }
 
+if (ref != null) {
+    signing {
+        useGpgCmd()
+        sign(publishing.publications[0])
+    }
+}
+
 wrapper {
-    gradleVersion = "8.5"
+    gradleVersion = "8.14"
     distributionType = Wrapper.DistributionType.ALL
 }
 
