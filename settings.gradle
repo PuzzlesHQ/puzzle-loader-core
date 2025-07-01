@@ -10,4 +10,4 @@ buildscript {
     }
 }
 
-rootProject.name = 'PuzzleLoaderCore'
+rootProject.name = p_id
