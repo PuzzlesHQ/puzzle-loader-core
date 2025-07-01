@@ -251,7 +251,7 @@ afterEvaluate {
                     licenses {
                         license {
                             name = "GNU Lesser General Public License"
-                            url = "https://www.gnu.org/licenses/lgpl-2.1.html"
+                            url = "https://www.gnu.org/licenses/lgpl-3.0.html"
                             distribution = "LGPL"
                             comments = "This project includes LGPL-licensed components."
                         }
