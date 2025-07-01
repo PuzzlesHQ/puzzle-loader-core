@@ -216,59 +216,56 @@ processCommonResources {
     }
 }
 
-afterEvaluate {
-    publishing {
-        repositories {
-            maven {
-                name = "PuzzleHQsMaven"
-                url = mavenUrl+ "/" +mavenRepo
-                credentials {
-                    username = System.getenv("MAVEN_NAME")
-                    password = System.getenv("MAVEN_SECRET")
-                }
-                authentication {
-                    basic(BasicAuthentication)
-                }
+publishing {
+    repositories {
+        maven {
+            name = "PuzzleHQsMaven"
+            url = mavenUrl+ "/" +mavenRepo
+            credentials {
+                username = System.getenv("MAVEN_NAME")
+                password = System.getenv("MAVEN_SECRET")
             }
-            mavenLocal()
+            authentication {
+                basic(BasicAuthentication)
+            }
         }
+        mavenLocal()
+    }
 
-        publications {
-            maven(MavenPublication) {
-                groupId = p_group
-                artifactId = p_id
-                version = this.version
+    publications {
+        maven(MavenPublication) {
+            groupId = p_group
+            artifactId = p_id
 
-                artifact source: buildClientJar, classifier: 'client', extension: 'jar'
-                artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
-                artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
+            artifact source: buildClientJar, classifier: 'client', extension: 'jar'
+            artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
+            artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
 
-                pom {
-                    name = p_name
-                    description = p_desc
-                    url = p_git
+            pom {
+                name = p_name
+                description = p_desc
+                url = p_git
 
-                    licenses {
-                        license {
-                            name = "GNU Lesser General Public License"
-                            url = "https://www.gnu.org/licenses/lgpl-3.0.html"
-                            distribution = "LGPL"
-                            comments = "This project includes LGPL-licensed components."
-                        }
+                licenses {
+                    license {
+                        name = "GNU Lesser General Public License"
+                        url = "https://www.gnu.org/licenses/lgpl-3.0.html"
+                        distribution = "LGPL"
+                        comments = "This project includes LGPL-licensed components."
                     }
+                }
 
-                    developers {
-                        developer {
-                            id = 'mrzombii'
-                            name = 'Mr Zombii'
-                            email = 'thezombiigames@gmail.com'
-                        }
+                developers {
+                    developer {
+                        id = 'mrzombii'
+                        name = 'Mr Zombii'
+                        email = 'thezombiigames@gmail.com'
                     }
-                    scm {
-                        connection = "${p_git}.git"
-                        developerConnection = "${p_git}.git"
-                        url = "${p_git}.git"
-                    }
+                }
+                scm {
+                    connection = "${p_git}.git"
+                    developerConnection = "${p_git}.git"
+                    url = "${p_git}.git"
                 }
             }
         }
