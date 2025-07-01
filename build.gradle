@@ -10,6 +10,8 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.6'
 }
 
+var manipulator = file("$projectDir/src/common/resources/puzzle-loader-core.manipulator")
+
 def ref = System.getenv("GITHUB_REF")
 version = (ref != null && ref.startsWith("refs/tags/")) ? ref.tokenize('/').last().replaceFirst(/^v/, '') : p_version
 
@@ -68,6 +70,14 @@ def natives(String lwjgl_natives) {
     }
 }
 
+FileInputStream stream = new FileInputStream(manipulator)
+byte[] bytes = stream.readAllBytes()
+stream.close()
+String str = new String(bytes)
+
+AccessWriters.init(null)
+AccessWriters.getFormat("manipulator").parse(str)
+
 abstract class MyTransform implements TransformAction<TransformParameters.None> {
 
     @InputArtifact
@@ -84,11 +94,6 @@ abstract class MyTransform implements TransformAction<TransformParameters.None> 
 
         JarRelocator relocator = new JarRelocator(inp, out, rules);
         relocator.run();
-
-        AccessWriters.init(null)
-        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer")
-        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/transformer/MixinTransformer", "<init>", "()V")
-        AccessWriters.MERGED.add("public", "org/spongepowered/asm/mixin/MixinEnvironment", "gotoPhase", '(Lorg/spongepowered/asm/mixin/MixinEnvironment$Phase;)V')
 
         GenericTransformer.transform(out)
     }
@@ -163,7 +168,7 @@ dependencies {
     commonBundle "org.ow2.asm:asm-commons:$asm_version"
 
     commonBundle "dev.puzzleshq:puzzle-annotations:1.0.0"
-    commonBundle "dev.puzzleshq:access-writer:1.0.3"
+    commonBundle "dev.puzzleshq:access-writer:1.0.4+c"
     commonBundle "dev.puzzleshq:mod-format-framework:1.0.0"
 
     commonBundle "org.hjson:hjson:$hjson_version"

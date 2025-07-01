@@ -261,6 +261,7 @@ public class ModFinder {
             puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
             puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
             puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
+            puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
 
             puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers");
             if (LoaderConstants.SIDE.equals(EnvType.CLIENT))
