@@ -8,15 +8,15 @@ import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
 
 // TODO: read access-writers from mod.
 public class CommonASMTransformer implements IClassTransformer {
-
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (transformedName.endsWith("package-info.class")) return RawAssetLoader.getLowLevelClassPathAsset(transformedName).getBytes();
-        if (basicClass == null) return null;
-        ClassReader reader = new ClassReader(basicClass);
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        if (basicClass == null) System.out.println(name);
+        // errors with package-info.class
+        if (!name.endsWith("package-info")) {
+            ClassReader reader = new ClassReader(basicClass);
+            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-        reader.accept(new AccessTransformerASM(writer), ClassReader.EXPAND_FRAMES);
-        return writer.toByteArray();
+            reader.accept(new AccessTransformerASM(writer), ClassReader.EXPAND_FRAMES);
+            return writer.toByteArray();
+        } else return null;
     }
-
 }
