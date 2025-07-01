@@ -76,7 +76,7 @@ stream.close()
 String str = new String(bytes)
 
 AccessWriters.init(null)
-AccessWriters.getFormat("manipulator").parse(str)
+AccessWriters.MERGED.add(AccessWriters.getFormat("manipulator").parse(str))
 
 abstract class MyTransform implements TransformAction<TransformParameters.None> {
 
