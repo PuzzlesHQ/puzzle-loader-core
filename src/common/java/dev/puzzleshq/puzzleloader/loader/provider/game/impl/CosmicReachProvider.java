@@ -118,7 +118,7 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public boolean isValid() {
         try {
-            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
+            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "/finalforeach/cosmicreach/server/ServerLauncher.class";
             if (LoaderConstants.SIDE == EnvType.SERVER) {
                 try {
                     RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
@@ -128,7 +128,7 @@ public class CosmicReachProvider implements IGameProvider {
                 }
             }
             try {
-                launcher = "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
+                launcher = "/finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
                 RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
             } catch (Exception e) {
                 throw new RuntimeException("Cosmic Reach Main does not exist.");

@@ -181,7 +181,11 @@ public class Piece {
                 if (format == null)
                     throw new RuntimeException("Unsupported AccessWriter format found in file \"" + transformerPath + "\", please remove this file or fix the format or the crash will persist.");
 
-                format.parse(handle.getString());
+                try {
+                    AccessWriters.MERGED.add(format.parse(handle.getString()));
+                } catch (Exception e) {
+                    LOGGER.error("Error on File: {}", handle.getFile(), e);
+                }
             }
         }
     }
