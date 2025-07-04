@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.github.PuzzlesHQ'
+group = 'dev.puzzleshq'
 
 repositories {
     mavenCentral()
