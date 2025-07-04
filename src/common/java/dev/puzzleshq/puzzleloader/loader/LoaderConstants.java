@@ -7,11 +7,12 @@ import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
 import dev.puzzleshq.puzzleloader.loader.util.ResourceLocation;
 import net.neoforged.bus.BusBuilderImpl;
+import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.IEventBus;
 
 public class LoaderConstants {
 
-    public static final IEventBus CORE_EVENT_BUS = new BusBuilderImpl().build();
+    public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
 
     public static final EnvType SIDE = Piece.getSide();
 
