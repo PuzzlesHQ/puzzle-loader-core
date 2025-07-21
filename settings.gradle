@@ -11,3 +11,5 @@ buildscript {
 }
 
 rootProject.name = p_id
+
+include 'client-dependencies'

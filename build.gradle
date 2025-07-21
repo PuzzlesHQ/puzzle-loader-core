@@ -33,9 +33,6 @@ repositories {
 }
 
 java {
-    withJavadocJar()
-    withSourcesJar()
-
     sourceCompatibility = '17'
     targetCompatibility = '17'
 }
@@ -60,13 +57,19 @@ configurations {
     commonBundle
     commonImplementation.extendsFrom(commonBundle)
     clientImplementation.extendsFrom(commonBundle)
+
+    clientNative
+    clientImplementation.extendsFrom(clientNative)
+
+    clientImpl
+    clientImplementation.extendsFrom(clientImpl)
 }
 
 def natives(String lwjgl_natives) {
     dependencies {
-        clientImplementation "org.lwjgl:lwjgl::$lwjgl_natives"
-        clientImplementation "org.lwjgl:lwjgl-opengl::$lwjgl_natives"
-        clientImplementation "org.lwjgl:lwjgl-glfw::$lwjgl_natives"
+        clientNative "org.lwjgl:lwjgl:$lwjgl_version:$lwjgl_natives"
+        clientNative "org.lwjgl:lwjgl-opengl:$lwjgl_version:$lwjgl_natives"
+        clientNative "org.lwjgl:lwjgl-glfw:$lwjgl_version:$lwjgl_natives"
     }
 }
 
@@ -120,11 +123,10 @@ afterEvaluate {
 // Common Dependencies
 dependencies {
     clientImplementation 'org.jetbrains:annotations:24.0.0'
-    clientImplementation platform("org.lwjgl:lwjgl-bom:$lwjgl_version")
 
-    clientImplementation "org.lwjgl:lwjgl"
-    clientImplementation "org.lwjgl:lwjgl-opengl"
-    clientImplementation "org.lwjgl:lwjgl-glfw"
+    clientImpl "org.lwjgl:lwjgl:$lwjgl_version"
+    clientImpl "org.lwjgl:lwjgl-opengl:$lwjgl_version"
+    clientImpl "org.lwjgl:lwjgl-glfw:$lwjgl_version"
 
     natives("natives-linux")
     natives("natives-linux-arm32")
@@ -221,6 +223,16 @@ processCommonResources {
     }
 }
 
+def addDeps(dependenciesNode, dependencySet) {
+    for (final def dependency in dependencySet) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', dependency.group)
+        dependencyNode.appendNode('artifactId', dependency.name)
+        dependencyNode.appendNode('version', dependency.version)
+        dependencyNode.appendNode('scope', "compile")
+    }
+}
+
 publishing {
     repositories {
         maven {
@@ -238,9 +250,30 @@ publishing {
     }
 
     publications {
+        clientDepdendencies(MavenPublication) {
+            groupId = p_group
+            artifactId = p_id + "-client-dependencies"
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                addDeps(dependenciesNode, configurations.clientImpl.allDependencies)
+                addDeps(dependenciesNode, configurations.clientImpl.allDependencies)
+            }
+        }
+        commonDependencies(MavenPublication) {
+            groupId = p_group
+            artifactId = p_id + "-common-dependencies"
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                addDeps(dependenciesNode, configurations.commonBundle.allDependencies)
+            }
+        }
         maven(MavenPublication) {
             groupId = p_group
             artifactId = p_id
+
+            from components.java
 
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
@@ -250,6 +283,9 @@ publishing {
                 name = p_name
                 description = p_desc
                 url = p_git
+
+                dependencies {
+                }
 
                 licenses {
                     license {
