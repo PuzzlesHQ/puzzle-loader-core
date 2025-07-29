@@ -45,7 +45,7 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public String getRawVersion() {
         if (rawVersion != null) return rawVersion;
-        return rawVersion = RawAssetLoader.getLowLevelClassPathAsset("/build_assets/version.txt").getString();
+        return rawVersion = RawAssetLoader.getLowLevelClassPathAsset("/build_assets/version.txt").getString().replaceAll("[A-Za-z]", "");
     }
 
     AtomicReference<Boolean> paradoxExist = new AtomicReference<>();
