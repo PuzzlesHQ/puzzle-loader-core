@@ -1,8 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.puzzleshq.accesswriter.AccessWriters
 import me.lucko.jarrelocator.JarRelocator
 import me.lucko.jarrelocator.Relocation
 import dev.puzzleshq.buildsrc.GenericTransformer
-import org.gradle.api.artifacts.transform.TransformParameters;
+import static org.gradle.api.artifacts.transform.TransformParameters.None
 
 plugins {
     id 'java'
@@ -17,8 +18,8 @@ version = (ref != null && ref.startsWith("refs/tags/")) ? ref.tokenize('/').last
 
 String mavenUrl = System.getenv("MAVEN_URL")
 
-String envRepo = System.getenv("MAVEN_REPO");
-String mavenRepo = envRepo != null ? envRepo : "releases";
+String envRepo = System.getenv("MAVEN_REPO")
+String mavenRepo = envRepo != null ? envRepo : "releases"
 
 repositories {
     mavenCentral()
@@ -81,19 +82,19 @@ String str = new String(bytes)
 AccessWriters.init(null)
 AccessWriters.MERGED.add(AccessWriters.getFormat("manipulator").parse(str))
 
-abstract class MyTransform implements TransformAction<TransformParameters.None> {
+abstract class MyTransform implements TransformAction<None> {
 
     @InputArtifact
     abstract Provider<FileSystemLocation> getInputArtifact();
 
-    @Override
+    @SuppressWarnings("unused")
     void transform(TransformOutputs outputs) {
-        var inp = inputArtifact.get().asFile;
-        var out = outputs.file(inp.name.replace(".jar", "-transformed.jar"));
+        var inp = inputArtifact.get().asFile
+        var out = outputs.file(inp.name.replace(".jar", "-transformed.jar"))
 
-        List<Relocation> rules = new ArrayList<>();
-//        rules.add(new Relocation("org.objectweb", "bundled.org.objectweb"));
-//        rules.add(new Relocation("org.spongepowered.include", "bundled"));
+        List<Relocation> rules = new ArrayList<>()
+//        rules.add(new Relocation("org.objectweb", "bundled.org.objectweb"))
+//        rules.add(new Relocation("org.spongepowered.include", "bundled"))
 
         JarRelocator relocator = new JarRelocator(inp, out, rules);
         relocator.run();
@@ -101,23 +102,24 @@ abstract class MyTransform implements TransformAction<TransformParameters.None> 
         GenericTransformer.transform(out)
     }
 }
-Attribute<Boolean> manipulated = Attribute.of("manipulated", Boolean.class);
+
+Attribute<Boolean> manipulated = Attribute.of("manipulated", Boolean.class)
 
 afterEvaluate {
     project.getDependencies().getAttributesSchema().attribute(manipulated);
-    project.getDependencies().getArtifactTypes().getByName("jar", artifact -> {
-        artifact.getAttributes().attribute(manipulated, false);
-    });
+    project.getDependencies().getArtifactTypes().named("jar", artifact -> {
+        artifact.getAttributes().attribute(manipulated, false)
+    })
 
     project.getDependencies().registerTransform(MyTransform) {
-        getFrom().attribute(manipulated, false);
-        getTo().attribute(manipulated, true);
+        getFrom().attribute(manipulated, false)
+        getTo().attribute(manipulated, true)
     }
 
-    project.getConfigurations().all(config -> {
+    project.getConfigurations().configureEach(config -> {
         if (config.isCanBeResolved())
-            config.getAttributes().attribute(manipulated, true);
-    });
+            config.getAttributes().attribute(manipulated, true)
+    })
 }
 
 // Common Dependencies
@@ -136,7 +138,6 @@ dependencies {
     natives("natives-windows")
     natives("natives-windows-arm64")
     natives("natives-windows-x86")
-    clientBundle "org.joml:joml:${joml_version}"
 
     clientInternal sourceSets.common.output
 
@@ -176,7 +177,7 @@ dependencies {
     commonBundle "org.hjson:hjson:$hjson_version"
 }
 
-tasks.register("buildMergedTestJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+tasks.register("buildMergedTestJar", ShadowJar) {
     ArrayList t = new ArrayList();
     Collections.addAll(t, project.configurations.clientInternal, project.configurations.commonBundle, project.configurations.clientBundle)
     configurations = t
@@ -190,14 +191,14 @@ tasks.register("buildMergedTestJar", com.github.jengelman.gradle.plugins.shadow.
     from sourceSets.client.output
 }
 
-tasks.register("buildCommonJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+tasks.register("buildCommonJar", ShadowJar) {
     mergeServiceFiles()
 
     archiveClassifier = "common"
     from sourceSets.common.output
 }
 
-tasks.register("buildClientJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+tasks.register("buildClientJar", ShadowJar) {
     mergeServiceFiles()
 
     archiveClassifier = "client"
@@ -211,7 +212,7 @@ tasks.register("buildSourcesJar", Jar) {
 }
 
 processCommonResources {
-    def replacement_properties = [
+    Map<String, Object> replacement_properties = [
             "version": ((String)version).contains(".") ? version : "69.69.69"
     ]
 
@@ -223,7 +224,7 @@ processCommonResources {
     }
 }
 
-def addDeps(dependenciesNode, dependencySet) {
+static def addDeps(dependenciesNode, dependencySet) {
     for (final def dependency in dependencySet) {
         def dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', dependency.group)
@@ -250,25 +251,6 @@ publishing {
     }
 
     publications {
-        clientDepdendencies(MavenPublication) {
-            groupId = p_group
-            artifactId = p_id + "-client-dependencies"
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                addDeps(dependenciesNode, configurations.clientImpl.allDependencies)
-                addDeps(dependenciesNode, configurations.clientImpl.allDependencies)
-            }
-        }
-        commonDependencies(MavenPublication) {
-            groupId = p_group
-            artifactId = p_id + "-common-dependencies"
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                addDeps(dependenciesNode, configurations.commonBundle.allDependencies)
-            }
-        }
         maven(MavenPublication) {
             groupId = p_group
             artifactId = p_id
@@ -278,6 +260,11 @@ publishing {
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
             artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                addDeps(dependenciesNode, configurations.commonBundle.allDependencies)
+            }
 
             pom {
                 name = p_name
