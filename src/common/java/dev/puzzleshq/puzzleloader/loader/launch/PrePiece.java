@@ -2,6 +2,7 @@ package dev.puzzleshq.puzzleloader.loader.launch;
 
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap;
+import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class PrePiece {
     public static void launch(String[] args, EnvType type) {
         System.setProperty("mixin.bootstrapService", PuzzleLoaderMixinServiceBootstrap.class.getName());
         System.setProperty("mixin.service", PuzzleLoaderMixinService.class.getName());
+        ThreadExceptionCatcher.attach(Thread.currentThread());
 
         try {
             System.getProperties().setProperty("log4j.configurationFile", Objects.requireNonNull(PieceClassLoader.class.getResource("/log4j2.xml")).toURI().toString());

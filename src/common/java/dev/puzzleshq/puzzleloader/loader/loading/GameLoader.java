@@ -3,6 +3,7 @@ package dev.puzzleshq.puzzleloader.loader.loading;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.loading.events.GameLoaderFinishEvent;
 import dev.puzzleshq.puzzleloader.loader.loading.events.RegisterStagesEvent;
+import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +44,7 @@ public class GameLoader {
         LoaderConstants.CORE_EVENT_BUS.post(new RegisterStagesEvent(this));
 
         thread = new Thread(this::gameLoadingThread, "Game-Loader");
-//        loading.setUncaughtExceptionHandler();
+        ThreadExceptionCatcher.attach(thread);
         thread.setDaemon(true);
         thread.start();
     }

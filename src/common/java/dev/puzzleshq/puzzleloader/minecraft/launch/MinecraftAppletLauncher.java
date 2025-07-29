@@ -1,5 +1,6 @@
 package dev.puzzleshq.puzzleloader.minecraft.launch;
 
+import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -222,7 +223,9 @@ public class MinecraftAppletLauncher {
         minecraft.init();
         minecraft.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(minecraft::stop));
+        Thread thread = new Thread(minecraft::stop);
+        ThreadExceptionCatcher.attach(thread);
+        Runtime.getRuntime().addShutdownHook(thread);
     }
 
 }

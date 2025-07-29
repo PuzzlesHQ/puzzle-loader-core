@@ -25,6 +25,7 @@ public class OffThreadExecutor implements Runnable {
     public void run() {
         t = Thread.currentThread();
         t.setName("OffThread Executor");
+        ThreadExceptionCatcher.attach(t);
         while (!runnableQueue.isEmpty()) {
             Runnable runnable = runnableQueue.poll();
             runnable.run();
