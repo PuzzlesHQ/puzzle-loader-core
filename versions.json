@@ -44,8 +44,8 @@
 			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/1.0.3-alpha/dependencies.json"
 		},
 		"1.0.4-alpha": {
-			"epoch": 1754028928,
-			"date": "2025/08/01T06:15:28",
+			"epoch": 1754029388,
+			"date": "2025/08/01T06:23:08",
 			"id": "1.0.4-alpha",
 			"phase": "alpha",
 			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:1.0.4-alpha",
