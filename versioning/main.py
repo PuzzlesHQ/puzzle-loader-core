@@ -11,6 +11,8 @@ def findPhase(ver):
     return "release"
 
 ref = os.getenv("GITHUB_REF") or "refs/tags/0.0.0-alpha"
+username = os.getenv("GITHUB_USERNAME")
+email = os.getenv("GITHUB_EMAIL")
 version = ref.replace("refs/tags/", "")
 phase = findPhase(version)
 
@@ -39,8 +41,8 @@ f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
 
-subprocess.call(args=["gh", "auth", "setup-git"])
-
 subprocess.call(args=["gradle", "mkDeps"])
+subprocess.call(args=["git", "config", "user.name", username])
+subprocess.call(args=["git", "config", "user.email", email])
 subprocess.call(args=["gh", "release", "upload", version, "./dependencies.json"])
 subprocess.call(args=["git", "commit", "-m", f"add {version} to version manifest", "--", "versions.json"])
