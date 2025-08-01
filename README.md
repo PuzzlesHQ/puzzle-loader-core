@@ -2,6 +2,28 @@
 
 This is a branch dedicated to holding timestamps, dependencies & binaries to puzzle-loader-core
 
-Documentation on what the structure of the versions.json file is.
-
-https://github.com/PuzzlesHQ/puzzle-loader-core/blob/versioning/api/puzzle_core_versions_json.d.ts
+```json
+{
+  // Map of each latest version according to phase (ex: *, alpha, beta, release-canadate, release).
+	"latest": {
+		"*": "0.0.0-alpha",
+		"alpha": "0.0.0-alpha"
+	},
+  // A list of phases that have been entered or passed (ex: alpha, beta, release-canadate, release).
+	"existing-phases": [
+		"alpha"
+	],
+  // Map of each sem-ver compilent version
+	"versions": {
+		"0.0.0-alpha": {
+			"epoch": 1754019066, // Unix epoch of when this was released
+			"date": "2025/08/01T03:31:06", // The date of release formatted as {YYYY}{MM}{DD}T{HH}:{MM}:{SS} using the timezone UTC+00:00 and 24 hour time.
+			"id": "0.0.0-alpha", // Semver complient version id
+			"phase": "alpha", // phase of this release (ex: alpha, beta, release-canadate, release)
+			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:0.0.0-alpha", // Maven location on the jitpack.io maven
+			"maven-central": "dev.puzzleshq:puzzle-loader-core:0.0.0-alpha", // Maven  location on maven-central
+			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/0.0.0-alpha/dependencies.json" // Url pointing to the dependencies.json
+		}
+	}
+}
+```
