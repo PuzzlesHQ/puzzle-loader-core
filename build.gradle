@@ -201,7 +201,7 @@ tasks.register("buildClientJar", ShadowJar) {
 tasks.register("buildSourcesJar", Jar) {
     from sourceSets.client.allSource
     from sourceSets.common.allSource
-    archiveClassifier = "client-sources"
+    archiveClassifier = "sources"
 }
 
 tasks.register("mkDeps") {
@@ -247,52 +247,6 @@ tasks.register("mkDeps") {
     file.write(contents + "\n}")
 }
 
-//tasks.register("createDepJson", Jar) {
-//    archiveFileName = "dependencies.zip"
-//
-//    File file = new File("$buildDir/libs/dependencies.json")
-//
-//    def repos = "["
-//
-//    for (i in 0..<project.repositories.size()) {
-//        def dependency = project.repositories[i];
-//        if (dependency instanceof MavenArtifactRepository) {
-//            repos += """\n\t\t{
-//\t\t\t\"name\": \"${dependency.name}\",
-//\t\t\t\"url\": \"${dependency.url}\"
-//\t\t}""" + (i != project.repositories.size() - 1 ? "," : "")
-//        }
-//    }
-//    repos += "\n\t]"
-//
-//    def contents = "{\n\t\"repos\": ${repos},\n\t\"common\": ["
-//
-//    for (i in 0..<configurations.commonBundle.allDependencies.size()) {
-//        def dependency = configurations.commonBundle.allDependencies[i];
-//        contents += """\n\t\t{
-//\t\t\t\"groupId\": \"${dependency.group}\",
-//\t\t\t\"artifactId\": \"${dependency.name}\",
-//\t\t\t\"version\": \"${dependency.version}\",
-//\t\t\t\"type\": \"implementation\"
-//\t\t}""" + (i != configurations.commonBundle.allDependencies.size() - 1 ? "," : "")
-//    }
-//    contents += "\n\t],\n\t\"client\": ["
-//
-//    for (i in 0..<configurations.clientImpl.allDependencies.size()) {
-//        def dependency = configurations.clientImpl.allDependencies[i];
-//        contents += """\n\t\t{
-//\t\t\t\"groupId\": \"${dependency.group}\",
-//\t\t\t\"artifactId\": \"${dependency.name}\",
-//\t\t\t\"version\": \"${dependency.version}\",
-//\t\t\t\"type\": \"compileOnly\"
-//\t\t}""" + (i != configurations.clientImpl.allDependencies.size() - 1 ? "," : "")
-//    }
-//    contents += "\n\t]"
-//
-//    file.write(contents + "\n}")
-//    from(file)
-//}
-
 processCommonResources {
     Map<String, Object> replacement_properties = [
             "version": ((String)version).contains(".") ? version : "69.69.69"
@@ -303,16 +257,6 @@ processCommonResources {
 
     filesMatching(["assets/puzzle-loader/core-version.txt"]) {
         expand replacement_properties
-    }
-}
-
-static def addDeps(dependenciesNode, dependencySet) {
-    for (final def dependency in dependencySet) {
-        def dependencyNode = dependenciesNode.appendNode('dependency')
-        dependencyNode.appendNode('groupId', dependency.group)
-        dependencyNode.appendNode('artifactId', dependency.name)
-        dependencyNode.appendNode('version', dependency.version)
-        dependencyNode.appendNode('scope', "compile")
     }
 }
 
@@ -337,18 +281,9 @@ publishing {
             groupId = p_group
             artifactId = p_id
 
-            from components.java
-
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
             artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
-
-//            artifact source: createDepJson, classifier: 'client-dep', extension: 'zip'
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                addDeps(dependenciesNode, configurations.commonBundle.allDependencies)
-            }
 
             pom {
                 name = p_name
