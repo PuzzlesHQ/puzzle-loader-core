@@ -205,7 +205,7 @@ tasks.register("buildSourcesJar", Jar) {
 }
 
 tasks.register("mkDeps") {
-    File file = new File("$buildDir/libs/dependencies.json")
+    File file = new File("$projectDir/dependencies.json")
 
     def repos = "["
 
