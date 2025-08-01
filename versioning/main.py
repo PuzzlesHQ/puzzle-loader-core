@@ -4,6 +4,17 @@ import subprocess
 import time
 import datetime
 
+# required since it executes differently depending on where the main file is called from
+try:
+    # python3 main.py
+    import git
+    import gradle
+except:
+    # python3 versioning/main.py
+    import versioning.git
+    import versioning.gradle
+
+
 def findPhase(ver):
     if "-a" in ver: return "alpha"
     if "-b" in ver: return "beta"
@@ -43,14 +54,10 @@ f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
 
-def initGit():
-    subprocess.call(args=["git", "config", "--local", "user.name", "github-actions"])
-    subprocess.call(args=["git", "config", "--local", "user.email", "github-actions@github.com"])
-    subprocess.call(args=["git", "checkout", "-b", "main"])
+git.init_credentials("github-actions", "github-actions@github.com")
+git.checkout("main", True)
 
-initGit()
-
-subprocess.call(args=["gradle", "mkDeps"])
+gradle.run(task_name="mkDeps")
 subprocess.call(args=["gh", "release", "upload", version, "./dependencies.json"])
-subprocess.call(args=["git", "commit", "-m", f"add {version} to version manifest", "--", "versions.json"])
-subprocess.call(args=["git", "push", "-u", "origin", "main"])
+git.commit(f"add {version} to version manifest", "versions.json")
+git.push()
