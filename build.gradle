@@ -204,6 +204,49 @@ tasks.register("buildSourcesJar", Jar) {
     archiveClassifier = "client-sources"
 }
 
+tasks.register("mkDeps") {
+    File file = new File("$buildDir/libs/dependencies.json")
+
+    def repos = "["
+
+    for (i in 0..<project.repositories.size()) {
+        def dependency = project.repositories[i];
+        if (dependency instanceof MavenArtifactRepository) {
+            repos += """\n\t\t{
+\t\t\t\"name\": \"${dependency.name}\",
+\t\t\t\"url\": \"${dependency.url}\"
+\t\t}""" + (i != project.repositories.size() - 1 ? "," : "")
+        }
+    }
+    repos += "\n\t]"
+
+    def contents = "{\n\t\"repos\": ${repos},\n\t\"common\": ["
+
+    for (i in 0..<configurations.commonBundle.allDependencies.size()) {
+        def dependency = configurations.commonBundle.allDependencies[i];
+        contents += """\n\t\t{
+\t\t\t\"groupId\": \"${dependency.group}\",
+\t\t\t\"artifactId\": \"${dependency.name}\",
+\t\t\t\"version\": \"${dependency.version}\",
+\t\t\t\"type\": \"implementation\"
+\t\t}""" + (i != configurations.commonBundle.allDependencies.size() - 1 ? "," : "")
+    }
+    contents += "\n\t],\n\t\"client\": ["
+
+    for (i in 0..<configurations.clientImpl.allDependencies.size()) {
+        def dependency = configurations.clientImpl.allDependencies[i];
+        contents += """\n\t\t{
+\t\t\t\"groupId\": \"${dependency.group}\",
+\t\t\t\"artifactId\": \"${dependency.name}\",
+\t\t\t\"version\": \"${dependency.version}\",
+\t\t\t\"type\": \"compileOnly\"
+\t\t}""" + (i != configurations.clientImpl.allDependencies.size() - 1 ? "," : "")
+    }
+    contents += "\n\t]"
+
+    file.write(contents + "\n}")
+}
+
 tasks.register("createDepJson", Jar) {
     archiveFileName = "dependencies.zip"
 

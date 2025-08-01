@@ -9,6 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 24
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -17,6 +30,7 @@ jobs:
         run: python versioning/main.py
         env:
           GITHUB_REF: ${{ github.ref }}
+          GH_TOKEN: ${{ github.token }}
 
 #  publish-release:
 #    uses: PuzzlesHQ/Puzzles-Workflows/.github/workflows/maven-publishing.yml@main
