@@ -2,7 +2,7 @@
 
 This is a branch dedicated to holding timestamps, dependencies & binaries to puzzle-loader-core
 
-```json
+```json5
 {
   // Map of each latest version according to phase (ex: *, alpha, beta, release-canadate, release).
 	"latest": {
