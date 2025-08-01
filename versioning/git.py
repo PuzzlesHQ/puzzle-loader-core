@@ -36,7 +36,7 @@ def add(files = None):
     subprocess.call(args=["git", "add", "."])
 
 def reset(file = None):
-    if not type(file) is None:
+    if not (file is None):
         subprocess.call(args=["git", "reset", file])
         return
     subprocess.call(args=["git", "reset"])
