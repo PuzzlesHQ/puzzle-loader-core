@@ -2,7 +2,7 @@ const versionsJsonURL = "https://raw.githubusercontent.com/PuzzlesHQ/puzzle-load
 
 export type StringUrl = string;
 export type Phase = "alpha" | "beta" | "release-canadate" | "release";
-export type PsudoPhase = Phase | "*";
+export type PseudoPhase = Phase | "*";
 export type VersionId = string;
 
 export type VersionInfo = {
