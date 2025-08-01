@@ -15,6 +15,15 @@
 			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:1.0.3-alpha",
 			"maven-central": "dev.puzzleshq:puzzle-loader-core:1.0.3-alpha",
 			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/1.0.3-alpha/dependencies.json"
+		},
+		"1.0.2-alpha": {
+			"epoch": 1751367480,
+			"date": "2025-07-01T10:58:00",
+			"id": "1.0.2-alpha",
+			"phase": "alpha",
+			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:1.0.2-alpha",
+			"maven-central": "dev.puzzleshq:puzzle-loader-core:1.0.2-alpha",
+			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/1.0.2-alpha/dependencies.json"
 		}
 	}
 }
