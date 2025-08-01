@@ -46,7 +46,7 @@ f.close()
 def initGit():
     subprocess.call(args=["git", "config", "--local", "user.name", "github-actions"])
     subprocess.call(args=["git", "config", "--local", "user.email", "github-actions@github.com"])
-    subprocess.call(args=["git", "checkout", "main"])
+    subprocess.call(args=["git", "checkout", "-b", "main"])
 
 initGit()
 
