@@ -39,6 +39,8 @@ f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
 
+subprocess.call(args=["gh", "auth", "setup-git"])
+
 subprocess.call(args=["gradle", "mkDeps"])
 subprocess.call(args=["gh", "release", "upload", version, "./dependencies.json"])
 subprocess.call(args=["git", "commit", "-m", f"add {version} to version manifest", "--", "versions.json"])

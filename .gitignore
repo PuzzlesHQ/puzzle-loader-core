@@ -10,3 +10,5 @@
 # buildSrc
 buildSrc/.gradle
 buildSrc/build
+
+dependencies.json
