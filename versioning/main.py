@@ -14,6 +14,10 @@ except:
     import versioning.git
     import versioning.gradle
 
+git.init_credentials("github-actions", "github-actions@github.com")
+git.checkout("main", "orphan")
+git.reset()
+git.pull(branch_name="versioning")
 
 def findPhase(ver):
     if "-a" in ver: return "alpha"
@@ -53,9 +57,6 @@ contents["versions"][version] = {
 f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
-
-git.init_credentials("github-actions", "github-actions@github.com")
-git.checkout("main", True)
 
 gradle.run(task_name="mkDeps")
 subprocess.call(args=["gh", "release", "upload", version, "./dependencies.json"])
