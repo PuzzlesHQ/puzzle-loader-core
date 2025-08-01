@@ -1,18 +1,5 @@
 {
-	"versions": {
-		"refs/tags/0.0.0-alpha": {
-			"epoch": 1754015157,
-			"date": "2025/08/01T02:25:57",
-			"id": "refs/tags/0.0.0-alpha",
-			"phase": "alpha",
-			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:refs/tags/0.0.0-alpha",
-			"maven-central": "dev.puzzleshq:puzzle-loader-core:refs/tags/0.0.0-alpha",
-			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/refs/tags/0.0.0-alpha/dependencies.json"
-		}
-	},
-	"existing-phases": [
-		"alpha"
-	],
-	"latest": "refs/tags/0.0.0-alpha",
-	"latest-alpha": "refs/tags/0.0.0-alpha"
+	"latest": {},
+	"existing-phases": [],
+	"versions": {}
 }

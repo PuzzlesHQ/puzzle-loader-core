@@ -14,12 +14,18 @@ repoUrl = f"https://github.com/{os.getenv("GITHUB_REPO")}"
 
 username = os.getenv("GITHUB_USERNAME")
 email = os.getenv("GITHUB_EMAIL")
-version = os.getenv("GITHUB_REF") or "0.0.0-alpha"
+version = (os.getenv("GITHUB_REF") or "refs/tags/0.0.0-alpha").replace("refs/tags/", "")
 phase = findPhase(version)
 
 f = open("versions.json", "r")
 contents = f.read()
 f.close()
+
+contents["latest"]["*"] = version
+contents["latest"][phase] = version
+
+if not phase in contents["existing-phases"]:
+    contents["existing-phases"].append(phase)
 
 contents = json.loads(contents)
 contents["versions"][version] = {
@@ -32,23 +38,13 @@ contents["versions"][version] = {
     "dependencies": f"https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/{version}/dependencies.json"
 }
 
-contents["latest"] = version
-contents["latest-" + phase] = version
-
-if not phase in contents["existing-phases"]:
-    contents["existing-phases"].append(phase)
-
 f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
 
 def initGit():
-    subprocess.call(args=["git", "config", "user.name", username])
-    subprocess.call(args=["git", "config", "user.email", email])
-    subprocess.call(args=["git", "init"])
-    subprocess.call(args=["git", "remote", "add", "origin", repoUrl])
-    subprocess.call(args=["git", "checkout", "-b", "main"])
-    subprocess.call(args=["git", "pull", "origin", "main"])
+    subprocess.call(args=["git", "config", "--local", "user.name", "github-actions"])
+    subprocess.call(args=["git", "config", "--local", "user.email", "github-actions@github.com"])
 
 initGit()
 
