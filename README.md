@@ -4,16 +4,16 @@ This is a branch dedicated to holding timestamps, dependencies & binaries to puz
 
 ```json5
 {
-  // Map of each latest version according to phase (ex: *, alpha, beta, release-canadate, release).
+  	// Map of each latest version according to phase (ex: *, alpha, beta, release-canadate, release).
 	"latest": {
 		"*": "0.0.0-alpha",
 		"alpha": "0.0.0-alpha"
 	},
-  // A list of phases that have been entered or passed (ex: alpha, beta, release-canadate, release).
+  	// A list of phases that have been entered or passed (ex: alpha, beta, release-canadate, release).
 	"existing-phases": [
 		"alpha"
 	],
-  // Map of each sem-ver compilent version
+ 	 // Map of each sem-ver compilent version
 	"versions": {
 		"0.0.0-alpha": {
 			"epoch": 1754019066, // Unix epoch of when this was released
