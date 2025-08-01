@@ -15,7 +15,7 @@ except:
     import versioning.gradle
 
 git.init_credentials("github-actions", "github-actions@github.com")
-git.checkout("main", "orphan")
+git.checkout("versioning", "orphan")
 git.reset()
 git.pull(branch_name="versioning")
 
