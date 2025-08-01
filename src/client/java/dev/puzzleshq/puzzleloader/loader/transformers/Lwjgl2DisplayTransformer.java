@@ -1,8 +1,11 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
+import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.util.Arrays;
 
 public class Lwjgl2DisplayTransformer extends ClassVisitor {
 
@@ -28,14 +31,9 @@ public class Lwjgl2DisplayTransformer extends ClassVisitor {
         public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
             if (opcode == Opcodes.GETSTATIC) {
                 if (owner.equals("org.lwjgl.opengl.Display".replaceAll("\\.", "/")) && name.equals("title")) {
-                    super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-                    super.visitInsn(Opcodes.DUP);
-                    super.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-                    super.visitLdcInsn("Puzzle Loader: ");
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
                     super.visitFieldInsn(opcode, owner, name, descriptor);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+                    if (LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER)
+                        super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConstants$CLIConfiguration", "formatTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
                     super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/minecraft/launch/MinecraftAppletLauncher", "setTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
                     return;
                 }

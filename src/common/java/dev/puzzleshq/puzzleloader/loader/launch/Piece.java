@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Mixins;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -58,21 +59,10 @@ public class Piece {
         classLoader.addURL(ClassPathUtil.getJVMClassPathUrls());
         Thread.currentThread().setContextClassLoader(classLoader);
 
-        ModFinder.setModFolder(new File("pmods").getAbsoluteFile());
-        ModFinder.crawlModsFolder();
-
         blackboard = new HashMap<>();
     }
 
     public static EnvType getSide() {
-        if (env.get() != null) return env.get();
-
-        try {
-            Class.forName("finalforeach.cosmicreach.ClientSingletons");
-        } catch (ClassNotFoundException e) {
-            env.set(EnvType.SERVER);
-        }
-        env.set(EnvType.CLIENT);
         return env.get();
     }
 
@@ -80,28 +70,43 @@ public class Piece {
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 
-        final OptionSet options = parser.parse(args);
         try {
-            OptionSpec<String> provider_option = parser.accepts("gameProvider").withOptionalArg().ofType(String.class);
-            OptionSpec<String> modFolder_option = parser.accepts("modFolder").withOptionalArg().ofType(String.class);
-            OptionSpec<String> modPaths = parser.accepts("mod-paths").withOptionalArg().ofType(String.class);
+            OptionSpec<String> game_provider = parser.accepts("game-provider")
+                    .withOptionalArg().ofType(String.class);
 
-//            if (options.has(modPaths)) {
-//                String v = modPaths.value(options);
-//                if (!v.contains(File.pathSeparator)) {
-//                    addFile(new File(v));
-//                } else {
-//                    String[] jars = modPaths.value(options).split(File.pathSeparator);
-//                    for (String jar : jars) addFile(new File(jar));
-//                }
-//            }
+            OptionSpec<String> mod_folder = parser.accepts("mod-folder")
+                    .withOptionalArg().ofType(String.class).defaultsTo(new File("pmods").getAbsolutePath());
 
-//            if (options.has(modFolder_option))
-//                ModFinder.setModFolder(new File(modFolder_option.value(options)).getAbsoluteFile());
-//            else
-//                ModFinder.setModFolder(new File("pmods").getAbsoluteFile());
-//
-//            ModFinder.crawlModsFolder();
+            OptionSpec<String> mod_paths = parser.accepts("mod-paths")
+                    .withOptionalArg().ofType(String.class);
+
+            OptionSpec<Boolean> do_title_transformer = parser.accepts("do-title-transformer")
+                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
+
+            OptionSpec<String> custom_title_format = parser.accepts("custom-title-formatter")
+                    .withOptionalArg().ofType(String.class).defaultsTo("Puzzle Loader: %s");
+
+            OptionSpec<Boolean> mixins_enabled = parser.accepts("mixins-enabled")
+                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
+
+            final OptionSet options = parser.parse(args);
+
+            LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
+            LoaderConstants.CLIConfiguration.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
+            LoaderConstants.CLIConfiguration.MIXINS_ENABLED = mixins_enabled.value(options);
+
+            if (options.has(mod_paths)) {
+                String v = mod_paths.value(options);
+                if (!v.contains(File.pathSeparator)) {
+                    addFile(new File(v));
+                } else {
+                    String[] jars = mod_paths.value(options).split(File.pathSeparator);
+                    for (String jar : jars) addFile(new File(jar));
+                }
+            }
+
+            ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
+            ModFinder.crawlModsFolder();
 
             /* Support places where the old packages are used */
             classLoader.addClassLoaderExclusion("com.github.puzzle.loader.launch");
@@ -115,8 +120,8 @@ public class Piece {
             classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider");
             classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.transformers");
 
-            if (options.has(provider_option))
-                provider = (IGameProvider) Class.forName(provider_option.value(options), true, classLoader).newInstance();
+            if (options.has(game_provider))
+                provider = (IGameProvider) Class.forName(game_provider.value(options), true, classLoader).newInstance();
             else {
                 for (String builtInProvider : BUILT_IN_PROVIDERS) {
                     provider = (IGameProvider) Class.forName(builtInProvider, true, classLoader).newInstance();
@@ -161,6 +166,14 @@ public class Piece {
         } catch (Exception e) {
             LOGGER.error("Unable To Launch", e);
             System.exit(1);
+        }
+    }
+
+    private void addFile(File file) {
+        try {
+            classLoader.addURL(file.getAbsoluteFile().toURI().toURL());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 

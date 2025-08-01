@@ -6,11 +6,20 @@ import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
 import dev.puzzleshq.puzzleloader.loader.util.ResourceLocation;
-import net.neoforged.bus.BusBuilderImpl;
 import net.neoforged.bus.api.BusBuilder;
 import net.neoforged.bus.api.IEventBus;
 
 public class LoaderConstants {
+
+    public static class CLIConfiguration {
+        public static String CUSTOM_TITLE_FORMAT = "Puzzle Loader: %s";
+        public static boolean DO_TITLE_TRANSFORMER = true;
+        public static boolean MIXINS_ENABLED = true;
+
+        public static String formatTitle(String input) {
+            return String.format(CUSTOM_TITLE_FORMAT, input);
+        }
+    }
 
     public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
 

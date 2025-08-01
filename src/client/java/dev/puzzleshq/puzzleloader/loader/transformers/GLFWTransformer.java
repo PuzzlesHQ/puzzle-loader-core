@@ -1,5 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
+import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -32,15 +33,9 @@ public class GLFWTransformer extends ClassVisitor {
 
         @Override
         public void visitVarInsn(int opcode, int varIndex) {
-            if (opcode == Opcodes.ALOAD && varIndex == index) {
-                super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-                super.visitInsn(Opcodes.DUP);
-                super.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-                super.visitLdcInsn("Puzzle Loader: ");
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+            if (opcode == Opcodes.ALOAD && varIndex == index && LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER) {
                 super.visitVarInsn(opcode, varIndex);
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/CharSequence;)Ljava/lang/StringBuilder;", false);
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConstants$CLIConfiguration", "formatTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
                 return;
             }
             super.visitVarInsn(opcode, varIndex);
