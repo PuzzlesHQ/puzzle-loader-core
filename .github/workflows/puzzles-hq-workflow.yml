@@ -38,7 +38,8 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.triggering_actor }}
           GITHUB_EMAIL: ${{ steps.test.outputs.emailGetter }}
-          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
 
 #  publish-release:

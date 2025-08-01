@@ -10,10 +10,11 @@ def findPhase(ver):
     if "-rc" in ver: return "release-candidate"
     return "release"
 
-ref = os.getenv("GITHUB_REF") or "refs/tags/0.0.0-alpha"
+repoUrl = f"https://github.com/{os.getenv("GITHUB_REPO")}"
+
 username = os.getenv("GITHUB_USERNAME")
 email = os.getenv("GITHUB_EMAIL")
-version = ref.replace("refs/tags/", "")
+version = os.getenv("GITHUB_REF") or "0.0.0-alpha"
 phase = findPhase(version)
 
 f = open("versions.json", "r")
@@ -41,9 +42,17 @@ f = open("versions.json", "w")
 f.write(json.dumps(contents, indent="\t"))
 f.close()
 
+def initGit():
+    subprocess.call(args=["git", "config", "user.name", username])
+    subprocess.call(args=["git", "config", "user.email", email])
+    subprocess.call(args=["git", "init"])
+    subprocess.call(args=["git", "remote", "add", "origin", repoUrl])
+    subprocess.call(args=["git", "checkout", "-b", "main"])
+    subprocess.call(args=["git", "pull", "origin", "main"])
+
+initGit()
+
 subprocess.call(args=["gradle", "mkDeps"])
-subprocess.call(args=["git", "config", "user.name", username])
-subprocess.call(args=["git", "config", "user.email", email])
 subprocess.call(args=["gh", "release", "upload", version, "./dependencies.json"])
 subprocess.call(args=["git", "commit", "-m", f"add {version} to version manifest", "--", "versions.json"])
-subprocess.call(args=["git", "push"])
+subprocess.call(args=["git", "push", "-u", "origin", "main"])
