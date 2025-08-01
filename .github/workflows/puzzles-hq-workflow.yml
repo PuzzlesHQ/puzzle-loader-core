@@ -34,9 +34,8 @@ jobs:
           GITHUB_REF: ${{ github.ref }}
           GH_TOKEN: ${{ github.token }}
 
-#  publish-release:
-#    uses: PuzzlesHQ/Puzzles-Workflows/.github/workflows/maven-publishing.yml@main
-#    secrets: inherit
-#    with:
-#      TAG_NAME: ${{ github.event.release.tag_name }}
-#
+  publish-release:
+    uses: PuzzlesHQ/Puzzles-Workflows/.github/workflows/maven-publishing.yml@main
+    secrets: inherit
+    with:
+      TAG_NAME: ${{ github.event.release.tag_name }}
