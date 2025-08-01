@@ -21,13 +21,14 @@ f = open("versions.json", "r")
 contents = f.read()
 f.close()
 
+contents = json.loads(contents)
+
 contents["latest"]["*"] = version
 contents["latest"][phase] = version
 
 if not phase in contents["existing-phases"]:
     contents["existing-phases"].append(phase)
 
-contents = json.loads(contents)
 contents["versions"][version] = {
     "epoch": int(time.time()),
     "date": datetime.datetime.now().astimezone(datetime.timezone.utc).strftime("%Y/%m/%dT%H:%M:%S"),
