@@ -36,6 +36,7 @@ public class GLFWTransformer extends ClassVisitor {
             if (opcode == Opcodes.ALOAD && varIndex == index && LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER) {
                 super.visitVarInsn(opcode, varIndex);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConstants$CLIConfiguration", "formatTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
+                super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/CharSequence");
                 return;
             }
             super.visitVarInsn(opcode, varIndex);
