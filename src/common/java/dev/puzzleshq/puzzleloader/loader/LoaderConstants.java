@@ -16,13 +16,10 @@ public class LoaderConstants {
         public static boolean DO_TITLE_TRANSFORMER = true;
         public static boolean MIXINS_ENABLED = true;
 
-        public static String formatTitle(String input) {
+        public static String formatTitle(CharSequence input) {
             return String.format(CUSTOM_TITLE_FORMAT, input);
         }
 
-        public static CharSequence formatTitleCS(String input) {
-            return String.format(CUSTOM_TITLE_FORMAT, input);
-        }
     }
 
     public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
