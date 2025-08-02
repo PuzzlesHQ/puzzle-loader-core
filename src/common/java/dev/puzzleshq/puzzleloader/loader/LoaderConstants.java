@@ -19,6 +19,10 @@ public class LoaderConstants {
         public static String formatTitle(String input) {
             return String.format(CUSTOM_TITLE_FORMAT, input);
         }
+
+        public static CharSequence formatTitleCS(String input) {
+            return String.format(CUSTOM_TITLE_FORMAT, input);
+        }
     }
 
     public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
