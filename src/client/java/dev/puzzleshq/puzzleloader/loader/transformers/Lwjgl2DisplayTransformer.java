@@ -32,8 +32,10 @@ public class Lwjgl2DisplayTransformer extends ClassVisitor {
             if (opcode == Opcodes.GETSTATIC) {
                 if (owner.equals("org.lwjgl.opengl.Display".replaceAll("\\.", "/")) && name.equals("title")) {
                     super.visitFieldInsn(opcode, owner, name, descriptor);
-                    if (LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER)
+                    if (LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER) {
                         super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConstants$CLIConfiguration", "formatTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
+                        super.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/CharSequence");
+                    }
                     super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/minecraft/launch/MinecraftAppletLauncher", "setTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
                     return;
                 }
