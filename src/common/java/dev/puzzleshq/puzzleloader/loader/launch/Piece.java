@@ -128,7 +128,8 @@ public class Piece {
                     if (provider.isValid()) break;
                 }
             }
-            if (!provider.isValid()) throw new RuntimeException("Couldn't load any game provider for this particular application.");
+            if (!provider.isValid())
+                throw new RuntimeException("Couldn't load any game provider for this particular application.");
 
             ModFormats.register(ModFinder::getMod);
             ModFinder.findMods();
@@ -142,11 +143,13 @@ public class Piece {
             provider.registerTransformers(classLoader);
             provider.inject(classLoader);
 
-            MixinUtil.start();
-            MixinUtil.doInit(new ArrayList<>());
-            Piece.setupModMixins();
-            MixinUtil.inject();
-            MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
+            if (LoaderConstants.CLIConfiguration.MIXINS_ENABLED) {
+                MixinUtil.start();
+                MixinUtil.doInit(new ArrayList<>());
+                Piece.setupModMixins();
+                MixinUtil.inject();
+                MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
+            }
 
             String entryPoint = provider.getEntrypoint();
             String ranEntrypoint = entryPoint;
