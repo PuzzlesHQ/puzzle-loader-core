@@ -53,6 +53,10 @@ public class GenericTransformer {
 
         reader.accept(new AccessTransformerASM(writer), ClassReader.SKIP_DEBUG);
 
+//        if ((reader.getAccess() & Opcodes.ACC_ENUM) != 0) {
+//            reader.accept(new EnumVisitor(writer), 0);
+//        }
+
         return writer.toByteArray();
     }
 

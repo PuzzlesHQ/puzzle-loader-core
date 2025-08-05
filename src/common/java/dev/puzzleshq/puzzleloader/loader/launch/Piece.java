@@ -15,6 +15,8 @@ import dev.puzzleshq.mod.util.MixinConfig;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -67,6 +69,8 @@ public class Piece {
     }
 
     private void launch(String[] args) {
+        LoaderConstants.CLIConfiguration.COMMAND_LINE_ARGUMENTS = args;
+
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
 

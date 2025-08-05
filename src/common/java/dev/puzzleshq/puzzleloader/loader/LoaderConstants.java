@@ -12,6 +12,8 @@ import net.neoforged.bus.api.IEventBus;
 public class LoaderConstants {
 
     public static class CLIConfiguration {
+        public static String[] COMMAND_LINE_ARGUMENTS;
+
         public static String CUSTOM_TITLE_FORMAT = "Puzzle Loader: %s";
         public static boolean DO_TITLE_TRANSFORMER = true;
         public static boolean MIXINS_ENABLED = true;
