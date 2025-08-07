@@ -6,7 +6,6 @@ public class ServerPiece {
 
     public static void main(String[] args) {
         BootstrapPiece.launch(args, "SERVER");
-//        PrePiece.launch(args, EnvType.SERVER);
     }
 
 }

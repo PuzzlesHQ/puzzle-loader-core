@@ -59,8 +59,6 @@ public class Piece {
 
         classLoader = new PieceClassLoader(BootstrapPiece.boostrapClassloader);
 
-//        classLoader = BootstrapPiece.transformedClassLoader;
-//        classLoader = (PieceClassLoader) Thread.currentThread().getContextClassLoader();
         classLoader.addURL(ClassPathUtil.getJVMClassPathUrls());
         Thread.currentThread().setContextClassLoader(classLoader);
 

@@ -110,11 +110,6 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return super.defineClass(clazzName, bytes, 0, bytes.length);
     }
 
-//    @Override
-//    public Class<?> loadClass(String name) throws ClassNotFoundException {
-//        return findClass(name);
-//    }
-
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         if (missingClasses.contains(name)) throw new ClassNotFoundException(name);
