@@ -96,6 +96,12 @@ public class Piece {
             OptionSpec<Boolean> mixins_enabled = parser.accepts("mixins-enabled")
                     .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
 
+            OptionSpec<Boolean> transformers_enabled = parser.accepts("transformers-enabled")
+                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
+
+            OptionSpec<Boolean> user_transformers_enabled = parser.accepts("user-transformers-enabled")
+                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
+
             final OptionSet options = parser.parse(args);
 
             LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
@@ -103,6 +109,8 @@ public class Piece {
             LoaderConstants.CLIConfiguration.MIXINS_ENABLED = mixins_enabled.value(options);
             LoaderConstants.CLIConfiguration.DUMP_TRANSFORMED_CLASSES = BootstrapClassLoader.dumpClasses;
             LoaderConstants.CLIConfiguration.ALLOWS_CLASS_OVERRIDES = BootstrapClassLoader.overrides;
+            LoaderConstants.CLIConfiguration.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
+            LoaderConstants.CLIConfiguration.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
 
             if (options.has(mod_paths)) {
                 String v = mod_paths.value(options);
@@ -133,11 +141,13 @@ public class Piece {
 
             AccessWriters.init(classLoader);
             discoverAccessWriters(ModFinder.getModsArray());
-            TransformerInitializer.invokeTransformers(classLoader);
+            if (LoaderConstants.CLIConfiguration.USER_TRANSFORMERS_ENABLED)
+                TransformerInitializer.invokeTransformers(classLoader);
 
             provider.initArgs(args);
 
-            provider.registerTransformers(classLoader);
+            if (LoaderConstants.CLIConfiguration.TRANSFORMERS_ENABLED)
+                provider.registerTransformers(classLoader);
             provider.inject(classLoader);
 
             if (LoaderConstants.CLIConfiguration.MIXINS_ENABLED) {

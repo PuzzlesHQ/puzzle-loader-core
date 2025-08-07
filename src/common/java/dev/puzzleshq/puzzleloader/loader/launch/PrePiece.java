@@ -1,16 +1,15 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
+import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapClassLoader;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
-import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -39,11 +38,7 @@ public class PrePiece {
         }
 
         try {
-            boolean dumpClasses = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.dumpTransformedClasses"));
-            boolean overrides = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides"));
-
-            BootstrapClassLoader.usesOverrides(overrides);
-            BootstrapClassLoader.dumps(dumpClasses);
+            LoaderConstants.CLIConfiguration.BOOTSTRAPPED = BootstrapPiece.loadFlags();
 
             Piece.launch(args, EnvType.valueOf(type));
         } catch (Exception e) {

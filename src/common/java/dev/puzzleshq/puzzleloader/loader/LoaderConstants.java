@@ -12,6 +12,9 @@ import net.neoforged.bus.api.IEventBus;
 public class LoaderConstants {
 
     public static class CLIConfiguration {
+        public static boolean TRANSFORMERS_ENABLED;
+        public static boolean USER_TRANSFORMERS_ENABLED;
+        public static boolean BOOTSTRAPPED;
         public static boolean DUMP_TRANSFORMED_CLASSES;
         public static boolean ALLOWS_CLASS_OVERRIDES;
         public static String[] COMMAND_LINE_ARGUMENTS;
