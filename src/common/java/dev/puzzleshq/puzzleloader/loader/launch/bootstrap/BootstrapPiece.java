@@ -52,8 +52,9 @@ public class BootstrapPiece {
                 case "--allow-class-overrides=true" -> overrides = true;
                 case "--allow-class-overrides=false" -> overrides = false;
                 case "--allow-class-overrides" -> {
-                    if (value.equals("true")) overrides = true;
-                    else overrides = !value.equals("false");
+                    if (value.equals("false") || value.equals("true")) {
+                        overrides = value.equals("true");
+                    } else overrides = true;
                 }
             }
 
@@ -61,8 +62,9 @@ public class BootstrapPiece {
                 case "--dump-transformed-classes=true" -> dumpClasses = true;
                 case "--dump-transformed-classes=false" -> dumpClasses = false;
                 case "--dump-transformed-classes" -> {
-                    if (value.equals("true")) dumpClasses = true;
-                    else dumpClasses = !value.equals("false");
+                    if (value.equals("false") || value.equals("true")) {
+                        overrides = value.equals("true");
+                    } else overrides = true;
                 }
             }
 
@@ -70,8 +72,9 @@ public class BootstrapPiece {
                 case "--skip-boostrap-classloader=true" -> skipBoostrap = true;
                 case "--skip-boostrap-classloader=false" -> skipBoostrap = false;
                 case "--skip-boostrap-classloader" -> {
-                    if (value.equals("true")) skipBoostrap = true;
-                    else skipBoostrap = !value.equals("false");
+                    if (value.equals("false") || value.equals("true")) {
+                        overrides = value.equals("true");
+                    } else overrides = true;
                 }
             }
         }

@@ -193,6 +193,7 @@ public class BootstrapClassLoader extends URLClassLoader {
 
     public byte[] getResourceBytes(String name) {
         if (overrides) {
+            if (!classOverridesDir.exists()) classOverridesDir.mkdirs();
             RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelRelativeAssetErrors(classOverridesDir, "/".concat(toFileName(name)), false);
             if (handle != null) {
                 byte[] bytes = handle.getBytes();
@@ -225,7 +226,6 @@ public class BootstrapClassLoader extends URLClassLoader {
     }
 
     public static void usesOverrides(boolean overrides) {
-        if (!classOverridesDir.exists()) classOverridesDir.mkdirs();
         BootstrapClassLoader.overrides = overrides;
     }
 

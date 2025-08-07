@@ -207,6 +207,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
     public byte[] getResourceBytes(String name) {
         if (BootstrapClassLoader.overrides) {
+            if (!BootstrapClassLoader.classOverridesDir.exists()) BootstrapClassLoader.classOverridesDir.mkdirs();
             RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelRelativeAssetErrors(BootstrapClassLoader.classOverridesDir, "/".concat(toFileName(name)), false);
             if (handle != null) {
                 byte[] bytes = handle.getBytes();
