@@ -45,7 +45,7 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public String getRawVersion() {
         if (rawVersion != null) return rawVersion;
-        return rawVersion = RawAssetLoader.getLowLevelClassPathAsset("/build_assets/version.txt").getString().replaceAll("[A-Za-z]", "");
+        return rawVersion = RawAssetLoader.getLowLevelClassPathAssetErrors("/build_assets/version.txt", false).getString().replaceAll("[A-Za-z]", "");
     }
 
     AtomicReference<Boolean> paradoxExist = new AtomicReference<>();
@@ -60,7 +60,7 @@ public class CosmicReachProvider implements IGameProvider {
         }
 
         try {
-            RawAssetLoader.getLowLevelClassPathAsset(PARADOX_SERVER_ENTRYPOINT_CLASS).dispose();
+            RawAssetLoader.getLowLevelClassPathAssetErrors(PARADOX_SERVER_ENTRYPOINT_CLASS, false).dispose();
             paradoxExist.set(true);
             return true;
         } catch (NullPointerException ignore) {
@@ -121,7 +121,7 @@ public class CosmicReachProvider implements IGameProvider {
             String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "/finalforeach/cosmicreach/server/ServerLauncher.class";
             if (LoaderConstants.SIDE == EnvType.SERVER) {
                 try {
-                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                     return true;
                 } catch (Exception ignore) {
                     throw new RuntimeException("Cosmic Reach Server Main does not exist.");
@@ -129,7 +129,7 @@ public class CosmicReachProvider implements IGameProvider {
             }
             try {
                 launcher = "/finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
             } catch (Exception e) {
                 throw new RuntimeException("Cosmic Reach Main does not exist.");
             }

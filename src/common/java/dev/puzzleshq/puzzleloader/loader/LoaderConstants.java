@@ -12,6 +12,8 @@ import net.neoforged.bus.api.IEventBus;
 public class LoaderConstants {
 
     public static class CLIConfiguration {
+        public static boolean DUMP_TRANSFORMED_CLASSES;
+        public static boolean ALLOWS_CLASS_OVERRIDES;
         public static String[] COMMAND_LINE_ARGUMENTS;
 
         public static String CUSTOM_TITLE_FORMAT = "Puzzle Loader: %s";

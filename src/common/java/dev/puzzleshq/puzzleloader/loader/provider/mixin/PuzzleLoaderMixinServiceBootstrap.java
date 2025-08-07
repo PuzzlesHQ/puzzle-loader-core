@@ -55,18 +55,19 @@ public class PuzzleLoaderMixinServiceBootstrap implements IMixinServiceBootstrap
         try {
             Piece.classLoader.hashCode();
         } catch (Throwable th) {
+            th.printStackTrace();
             throw new ServiceInitialisationException(this.getName() + " is not available");
         }
 
         // Essential ones
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.SERVICE_PACKAGE);
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LAUNCH_PACKAGE);
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LOGGING_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.SERVICE_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LAUNCH_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LOGGING_PACKAGE);
 
         // Important ones
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.ASM_PACKAGE);
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LEGACY_ASM_PACKAGE);
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.MIXIN_PACKAGE);
-        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.MIXIN_UTIL_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.ASM_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.LEGACY_ASM_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.MIXIN_PACKAGE);
+//        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.MIXIN_UTIL_PACKAGE);
     }
 }

@@ -4,6 +4,8 @@ import dev.puzzleshq.accesswriter.AccessWriters;
 import dev.puzzleshq.accesswriter.api.IWriterFormat;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapClassLoader;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInitializer;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInitializer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
@@ -15,8 +17,6 @@ import dev.puzzleshq.mod.util.MixinConfig;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.SubscribeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -49,7 +49,7 @@ public class Piece {
     public static void launch(String[] args, EnvType type) {
         Piece piece = new Piece();
         env.set(type);
-        piece.launch(args);
+        piece.launchPriv(args);
     }
 
     private Piece() {
@@ -57,7 +57,10 @@ public class Piece {
 
         if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
 
-        classLoader = new PieceClassLoader();
+        classLoader = new PieceClassLoader(BootstrapPiece.boostrapClassloader);
+
+//        classLoader = BootstrapPiece.transformedClassLoader;
+//        classLoader = (PieceClassLoader) Thread.currentThread().getContextClassLoader();
         classLoader.addURL(ClassPathUtil.getJVMClassPathUrls());
         Thread.currentThread().setContextClassLoader(classLoader);
 
@@ -68,7 +71,7 @@ public class Piece {
         return env.get();
     }
 
-    private void launch(String[] args) {
+    private void launchPriv(String[] args) {
         LoaderConstants.CLIConfiguration.COMMAND_LINE_ARGUMENTS = args;
 
         final OptionParser parser = new OptionParser();
@@ -98,6 +101,8 @@ public class Piece {
             LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
             LoaderConstants.CLIConfiguration.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
             LoaderConstants.CLIConfiguration.MIXINS_ENABLED = mixins_enabled.value(options);
+            LoaderConstants.CLIConfiguration.DUMP_TRANSFORMED_CLASSES = BootstrapClassLoader.dumpClasses;
+            LoaderConstants.CLIConfiguration.ALLOWS_CLASS_OVERRIDES = BootstrapClassLoader.overrides;
 
             if (options.has(mod_paths)) {
                 String v = mod_paths.value(options);
@@ -111,18 +116,6 @@ public class Piece {
 
             ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
             ModFinder.crawlModsFolder();
-
-            /* Support places where the old packages are used */
-            classLoader.addClassLoaderExclusion("com.github.puzzle.loader.launch");
-            classLoader.addClassLoaderExclusion("com.github.puzzle.core.loader.launch");
-
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.util");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.launch");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.loading");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider");
-            classLoader.addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.transformers");
 
             if (options.has(game_provider))
                 provider = (IGameProvider) Class.forName(game_provider.value(options), true, classLoader).newInstance();
@@ -140,10 +133,10 @@ public class Piece {
 
             AccessWriters.init(classLoader);
             discoverAccessWriters(ModFinder.getModsArray());
+            TransformerInitializer.invokeTransformers(classLoader);
 
             provider.initArgs(args);
 
-            TransformerInitializer.invokeTransformers(classLoader);
             provider.registerTransformers(classLoader);
             provider.inject(classLoader);
 

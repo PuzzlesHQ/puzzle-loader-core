@@ -1,13 +1,16 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapClassLoader;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap;
-import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
+import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -21,23 +24,31 @@ public class PrePiece {
 
     private static Logger LOGGER;
 
-    public static void launch(String[] args, EnvType type) {
+    public static void launch(String[] args, String type) {
         System.setProperty("mixin.bootstrapService", PuzzleLoaderMixinServiceBootstrap.class.getName());
         System.setProperty("mixin.service", PuzzleLoaderMixinService.class.getName());
-        ThreadExceptionCatcher.attach(Thread.currentThread());
 
         try {
-            System.getProperties().setProperty("log4j.configurationFile", Objects.requireNonNull(PieceClassLoader.class.getResource("/log4j2.xml")).toURI().toString());
+            System.getProperties().setProperty(
+                    "log4j.configurationFile",
+                    Objects.requireNonNull(BootstrapClassLoader.class.getResource("/log4j2.xml")).toURI().toString()
+            );
         } catch (URISyntaxException e) {
-            getLogger().error("Uh Oh stinky, an Illegal Error happened.", e);
-            System.exit(-69);
+            getLogger().error("PrePiece seemed to have crashed when setting the LOG4J file, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);
+            System.exit(-14);
         }
 
         try {
-            Piece.launch(args, type);
+            boolean dumpClasses = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.dumpTransformedClasses"));
+            boolean overrides = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides"));
+
+            BootstrapClassLoader.usesOverrides(overrides);
+            BootstrapClassLoader.dumps(dumpClasses);
+
+            Piece.launch(args, EnvType.valueOf(type));
         } catch (Exception e) {
-            getLogger().error("Piece seemed to have crashed, please contact a ⚙️Mod⚙️ Dev or 🧩Puzzle🧩 Dev near 🫵 to resolve this error 😎", e);
-            System.exit(-69);
+            getLogger().error("Piece seemed to have crashed, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);
+            System.exit(-15);
         }
     }
 

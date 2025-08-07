@@ -1,5 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapClassLoader;
 import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;
@@ -36,30 +37,44 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public final List<IClassTransformer> transformers = new ArrayList<>();
 
     public PieceClassLoader() {
-        this(new URL[0]);
+        this(new URL[0], ClassLoader.class.getClassLoader());
     }
 
-    public PieceClassLoader(URL[] sources) {
-        super(sources, null);
+    public PieceClassLoader(ClassLoader parent) {
+        this(new URL[0], parent);
+    }
+
+    public PieceClassLoader(URL[] sources, ClassLoader parent) {
+        super(sources, parent);
         this.sources.addAll(List.of(sources));
 
         addClassLoaderExclusion("java.");
+        addClassLoaderExclusion("com.sun.");
         addClassLoaderExclusion("javax.");
         addClassLoaderExclusion("sun.");
         addClassLoaderExclusion("org.apache.logging.");
         addClassLoaderExclusion("org.slf4j");
         addClassLoaderExclusion("com.google.");
-        addClassLoaderExclusion("org.hjson");
+        addClassLoaderExclusion("org.hjson.");
+
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.fix.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.util.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.launch.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.loading.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.transformers.");
 
         addTransformerExclusion("javax.");
         addTransformerExclusion("argo.");
-        addTransformerExclusion("org.objectweb.asm.");
         addTransformerExclusion("com.google.common.");
         addTransformerExclusion("org.bouncycastle.");
     }
 
-    public PieceClassLoader(List<URL> sources) {
-        this(sources.toArray(URL[]::new));
+
+    public PieceClassLoader(List<URL> sources, ClassLoader parent) {
+        this(sources.toArray(URL[]::new), parent);
     }
 
     @Override
@@ -94,10 +109,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return super.defineClass(clazzName, bytes, 0, bytes.length);
     }
 
-    @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
-        return super.loadClass(name);
-    }
+//    @Override
+//    public Class<?> loadClass(String name) throws ClassNotFoundException {
+//        return findClass(name);
+//    }
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
@@ -124,9 +139,6 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         }
 
         try {
-            if (isClassLoaded(name))
-                return classCache.get(name);
-
             int lastDot = name.lastIndexOf('.');
             String pkgName = lastDot == -1 ? "" : name.substring(0, lastDot);
 
@@ -172,10 +184,14 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     }
 
     private byte[] transform(String name, String fileName, byte[] bytes) {
+        byte[] transformed = bytes;
         for (IClassTransformer transformer : transformers) {
-            bytes = transformer.transform(fileName, name, bytes);
+            transformed = transformer.transform(fileName, name, transformed);
         }
-        return bytes;
+        if (transformed != bytes) {
+            BootstrapClassLoader.outputClass(name, transformed);
+        }
+        return transformed;
     }
 
     private URLConnection getConnection(String name) {
@@ -192,8 +208,18 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     }
 
     public byte[] getResourceBytes(String name) {
+        if (BootstrapClassLoader.overrides) {
+            RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelRelativeAssetErrors(BootstrapClassLoader.classOverridesDir, "/".concat(toFileName(name)), false);
+            if (handle != null) {
+                byte[] bytes = handle.getBytes();
+                resourceCache.put(name, bytes);
+                handle.dispose();
+                return bytes;
+            }
+        }
+
         if (missingResourceCache.contains(name)) return null;
-        RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelClassPathAsset("/".concat(toFileName(name)));
+        RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelClassPathAssetErrors("/".concat(toFileName(name)), false);
 
         if (handle == null) {
             missingResourceCache.add(name);
@@ -276,4 +302,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return this.transformerExcludedClasses;
     }
 
+    public void usesOverrides(boolean overrides) {
+        BootstrapClassLoader.overrides = overrides;
+    }
 }

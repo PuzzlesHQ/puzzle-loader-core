@@ -36,6 +36,18 @@ public class RawAssetLoader {
         }
     }
 
+    public static RawFileHandle getLowLevelZipAssetErrors(ZipFile file, String path, boolean errorOut) {
+        try {
+            ZipEntry entry = file.getEntry(path);
+            InputStream stream = file.getInputStream(entry);
+            String[] strings = entry.getName().split("/");
+            return new RawFileHandle(getBytesFromStream(stream), strings[strings.length - 1]);
+        } catch (Exception ignore) {
+            if (errorOut) LOGGER.error("Cannot find resoxurce {} in zip {}.", path, file);
+            return null;
+        }
+    }
+
     /**
      * Gets the asset from a zip file.
      * @param file the zip file to get the file from.
@@ -43,15 +55,7 @@ public class RawAssetLoader {
      * @return a {@link RawFileHandle}
      */
     public static RawFileHandle getLowLevelZipAsset(ZipFile file, String path) {
-        try {
-            ZipEntry entry = file.getEntry(path);
-            InputStream stream = file.getInputStream(entry);
-            String[] strings = entry.getName().split("/");
-            return new RawFileHandle(getBytesFromStream(stream), strings[strings.length - 1]);
-        } catch (Exception ignore) {
-            LOGGER.error("Cannot find resource {} in zip {}.", path, file);
-            return null;
-        }
+        return getLowLevelZipAssetErrors(file, path, true);
     }
 
     /**
@@ -60,16 +64,20 @@ public class RawAssetLoader {
      * @param location the {@link ResourceLocation} of the file.
      * @return a {@link RawFileHandle}
      */
-    public static RawFileHandle getZipAsset(ZipFile file, ResourceLocation location) {
+    public static RawFileHandle getZipAssetErrors(ZipFile file, ResourceLocation location, boolean errorOut) {
         try {
             ZipEntry entry = file.getEntry(location.toPath());
             InputStream stream = file.getInputStream(entry);
             String[] strings = entry.getName().split("/");
             return new RawFileHandle(getBytesFromStream(stream), strings[strings.length - 1]);
         } catch (Exception ignore) {
-            LOGGER.error("Cannot find resource {} in zip {}.", location, file);
+            if (errorOut) LOGGER.error("Cannot find resource {} in zip {}.", location, file);
             return null;
         }
+    }
+
+    public static RawFileHandle getZipAsset(ZipFile file, ResourceLocation location) {
+        return getZipAssetErrors(file, location, true);
     }
 
     /**
@@ -77,23 +85,27 @@ public class RawAssetLoader {
      * @param path the path of the asset.
      * @return a {@link RawFileHandle}
      */
-    public static RawFileHandle getLowLevelClassPathAsset(String path) {
+    public static RawFileHandle getLowLevelClassPathAssetErrors(String path, boolean errorOut) {
         URL url = LoaderConstants.class.getResource(path);
         if (url == null) {
             try {
                 url = PieceClassLoader.class.getClassLoader().getResource(path);
                 return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
             } catch (Exception ignore) {
-                LOGGER.error("Cannot find resource {} on the classpath.", path);
+                if (errorOut) LOGGER.error("Cannot find resource {} on the classpath.", path);
                 return null;
             }
         }
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
         } catch (Exception ignore) {
-            LOGGER.error("Cannot find resource {} on the classpath.", path);
+            if (errorOut) LOGGER.error("Cannot find resource {} on the classpath.", path);
             return null;
         }
+    }
+
+    public static RawFileHandle getLowLevelClassPathAsset(String path) {
+        return getLowLevelClassPathAssetErrors(path, true);
     }
 
     /**
@@ -101,23 +113,27 @@ public class RawAssetLoader {
      * @param location the ResourceLocation of the asset.
      * @return a {@link RawFileHandle}
      */
-    public static RawFileHandle getClassPathAsset(ResourceLocation location) {
+    public static RawFileHandle getClassPathAssetErrors(ResourceLocation location, boolean errors) {
         URL url = LoaderConstants.class.getResource(location.toPath());
         if (url == null) {
             try {
                 url = PieceClassLoader.class.getClassLoader().getResource(location.toPath());
                 return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
             } catch (Exception ignore) {
-                LOGGER.error("Cannot find resource {} on the classpath.", location);
+                if (errors) LOGGER.error("Cannot find resource {} on the classpath.", location);
                 return null;
             }
         }
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
         } catch (Exception ignore) {
-            LOGGER.error("Cannot find resource {} on the classpath.", location);
+            if (errors) LOGGER.error("Cannot find resource {} on the classpath.", location);
             return null;
         }
+    }
+
+    public static RawFileHandle getClassPathAsset(ResourceLocation location) {
+        return getClassPathAssetErrors(location, true);
     }
 
     /**
@@ -126,15 +142,19 @@ public class RawAssetLoader {
      * @param path the asset path.
      * @return a {@link RawFileHandle}
      */
-    public static RawFileHandle getLowLevelRelativeAsset(File dir, String path) {
+    public static RawFileHandle getLowLevelRelativeAssetErrors(File dir, String path, boolean errors) {
         try {
             URL url = new File(dir, path).toURI().toURL();
             InputStream stream = url.openStream();
             return new RawFileHandle(getBytesFromStream(stream), url.getFile());
         } catch (IOException ignore) {
-            LOGGER.error("Cannot find resource relative {} in dir {}", path, dir);
+            if (errors) LOGGER.error("Cannot find resource relative {} in dir {}", path, dir);
             return null;
         }
+    }
+
+    public static RawFileHandle getLowLevelRelativeAsset(File dir, String path) {
+        return getLowLevelRelativeAssetErrors(dir, path, true);
     }
 
     /**
@@ -143,15 +163,19 @@ public class RawAssetLoader {
      * @param location the ResourceLocation of the asset.
      * @return a {@link RawFileHandle}
      */
-    public static RawFileHandle getRelativeAsset(File dir, ResourceLocation location) {
+    public static RawFileHandle getRelativeAssetErrors(File dir, ResourceLocation location, boolean errors) {
         try {
             URL url = new File(dir, location.toPath()).toURI().toURL();
             InputStream stream = url.openStream();
             return new RawFileHandle(getBytesFromStream(stream), url.getFile());
         } catch (IOException ignore) {
-            LOGGER.error("Cannot find resource relative {} in dir {}", location, dir);
+            if (errors) LOGGER.error("Cannot find resource relative {} in dir {}", location, dir);
             return null;
         }
+    }
+
+    public static RawFileHandle getRelativeAsset(File dir, ResourceLocation location) {
+        return getRelativeAssetErrors(dir, location, true);
     }
 
     public static class RawFileHandle {

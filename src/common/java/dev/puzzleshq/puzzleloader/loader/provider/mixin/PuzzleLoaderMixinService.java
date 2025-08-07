@@ -187,15 +187,16 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
 
     @Override
     public IContainerHandle getPrimaryContainer() {
-        try {
-            URI uri = this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-            if (uri != null) {
-                return new ContainerHandleURI(uri);
-            }
-        } catch (URISyntaxException ex) {
-            ex.printStackTrace();
-        }
         return new ContainerHandleVirtual(this.getName());
+//        try {
+//            URI uri = this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
+//            if (uri != null) {
+//                return new ContainerHandleURI(uri);
+//            }
+//        } catch (URISyntaxException ex) {
+//            ex.printStackTrace();
+//        }
+//        return new ContainerHandleVirtual(this.getName());
     }
 
     @Override
