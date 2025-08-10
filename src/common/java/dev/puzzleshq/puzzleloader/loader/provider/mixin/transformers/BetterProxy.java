@@ -24,7 +24,7 @@ public final class BetterProxy implements IClassTransformer, ILegacyClassTransfo
      * True if this is the active proxy, newer proxies disable their older
      * siblings
      */
-    private boolean isActive = true;
+    public boolean isActive = true;
     
     public BetterProxy() {
         for (BetterProxy proxy : BetterProxy.proxies) {

@@ -1,7 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game;
 
 import com.github.zafarkhaja.semver.Version;
-import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
+import dev.puzzleshq.puzzleloader.loader.provider.classloading.IFlexClassloader;
 
 import java.util.Collection;
 
@@ -19,10 +19,10 @@ public interface IGameProvider {
     String getEntrypoint();
     Collection<String> getArgs();
 
-    // Inits
-    void registerTransformers(PieceClassLoader classLoader);
-    void initArgs(String[] args);
-    void inject(PieceClassLoader classLoader);
+    // Init
+    default void registerTransformers(IFlexClassloader classLoader) {}
+    default void initArgs(String[] args) {}
+    default void inject(IFlexClassloader classLoader) {}
 
     void addBuiltinMods();
 

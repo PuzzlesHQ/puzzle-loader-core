@@ -1,11 +1,10 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
+import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
 import org.objectweb.asm.*;
 import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
-import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
@@ -22,7 +21,7 @@ public class ProjectZomboidProvider implements IGameProvider {
     private Version cachedVersion = null;
 
     public ProjectZomboidProvider() {
-        Piece.provider = this;
+        FlexPiece.INSTANCE.gameProvider = this;
     }
 
     @Override
@@ -77,18 +76,12 @@ public class ProjectZomboidProvider implements IGameProvider {
         return args;
     }
 
-    @Override
-    public void registerTransformers(PieceClassLoader classLoader) {}
-
     List<String> args;
 
     @Override
     public void initArgs(String[] args) {
         this.args = new ArrayList<>(Arrays.asList(args));
     }
-
-    @Override
-    public void inject(PieceClassLoader classLoader) {}
 
     @Override
     public void addBuiltinMods() {

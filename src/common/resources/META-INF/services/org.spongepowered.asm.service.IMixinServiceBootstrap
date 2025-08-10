@@ -1,1 +1,1 @@
-dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap
+dev.puzzleshq.puzzleloader.loader.provider.mixin.service.FlexMixinServiceBootstrap

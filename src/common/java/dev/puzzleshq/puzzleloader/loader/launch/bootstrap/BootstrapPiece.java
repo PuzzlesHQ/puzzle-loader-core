@@ -1,6 +1,12 @@
 package dev.puzzleshq.puzzleloader.loader.launch.bootstrap;
 
 import dev.puzzleshq.puzzleloader.loader.launch.PrePiece;
+import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
+import dev.puzzleshq.puzzleloader.loader.provider.classloading.FlexGlobalCLSettings;
+import dev.puzzleshq.puzzleloader.loader.provider.classloading.impl.FlexClassLoader;
+import dev.puzzleshq.puzzleloader.loader.transformers.MixinProxyTransformer;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,28 +18,46 @@ public class BootstrapPiece {
 
     private static Logger LOGGER;
 
-    public static BootstrapClassLoader boostrapClassloader;
+    public static FlexClassLoader boostrapClassloader;
+    public static FlexClassLoader generalClassloader;
+    public static String ENV;
 
-    public static void launch(String[] args, String name) {
+    public static void launch(String[] args, String envType) {
+        ENV = envType;
+
         testArgs(args);
         boolean skipBoostrap = loadFlags();
 
-        if (skipBoostrap) loadWithoutBootstrap(args, name);
-        else loadBootstrap(args, name);
+        if (skipBoostrap) loadWithoutBootstrap(args, envType);
+        else loadBootstrap(args, envType);
     }
 
-    public static void loadWithoutBootstrap(String[] args, String name) {
-        PrePiece.launch(args, name);
+    public static void loadWithoutBootstrap(String[] args, String envType) {
+        PrePiece.launch(args, envType);
     }
 
-    public static void loadBootstrap(String[] args, String name) {
-        boostrapClassloader = new BootstrapClassLoader(new URL[0], BootstrapPiece.class.getClassLoader());
+    public static void loadBootstrap(String[] args, String envType) {
+        boostrapClassloader = new FlexClassLoader("Bootstrap-FlexClassLoader", new URL[0], BootstrapPiece.class.getClassLoader());
+        boostrapClassloader.registerTransformer(new IClassTransformer() {
+            @Override
+            public byte[] transform(String name, String fileName, byte[] bytes) {
+                if (!name.equals("org.spongepowered.asm.mixin.transformer.MixinTransformer")) {
+                    return bytes;
+                }
+                ClassReader reader = new ClassReader(bytes);
+                ClassWriter writer = new ClassWriter(0);
+
+                reader.accept(new MixinProxyTransformer(writer), 0);
+                return writer.toByteArray();
+            }
+        });
+
         Thread.currentThread().setContextClassLoader(boostrapClassloader);
 
         try {
             Class.forName("dev.puzzleshq.puzzleloader.loader.launch.PrePiece", false, boostrapClassloader)
                     .getMethod("launch", String[].class, String.class)
-                    .invoke(null, args, name);
+                    .invoke(null, args, envType);
         } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             getLogger().error("PrePiece seemed to have crashed BootstrapPiece, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);
             System.exit(-14);
@@ -95,8 +119,8 @@ public class BootstrapPiece {
         boolean overrides = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides"));
         boolean skipBootstrap = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.skipBootstrapClassloader"));
 
-        BootstrapClassLoader.usesOverrides(overrides);
-        BootstrapClassLoader.dumps(dumpClasses);
+        FlexGlobalCLSettings.ALLOW_CLASS_OVERRIDING.set(overrides);
+        FlexGlobalCLSettings.DUMP_TRANSFORMED_CLASSES.set(dumpClasses);
 
         return skipBootstrap;
     }

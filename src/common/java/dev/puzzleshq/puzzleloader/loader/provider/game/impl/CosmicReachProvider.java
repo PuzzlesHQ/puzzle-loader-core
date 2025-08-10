@@ -2,8 +2,7 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
-import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
+import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
@@ -14,7 +13,6 @@ import org.hjson.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 public class CosmicReachProvider implements IGameProvider {
 
@@ -22,7 +20,7 @@ public class CosmicReachProvider implements IGameProvider {
     public static final String PARADOX_SERVER_ENTRYPOINT_CLASS = "/com/github/puzzle/paradox/loader/launch/PuzzlePiece.class";
 
     public CosmicReachProvider() {
-        Piece.provider = this;
+        FlexPiece.INSTANCE.gameProvider = this;
     }
 
     @Override
@@ -82,18 +80,11 @@ public class CosmicReachProvider implements IGameProvider {
         return Arrays.asList(args);
     }
 
-    @Override
-    public void registerTransformers(PieceClassLoader classLoader) {}
-
     String[] args;
 
     @Override
     public void initArgs(String[] args) {
         this.args = args;
-    }
-
-    @Override
-    public void inject(PieceClassLoader classLoader) {
     }
 
     @Override

@@ -1,6 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -43,6 +44,6 @@ public class ClassPathUtil {
      * Gets the Puzzle class path
      */
     public static Collection<URL> getPuzzleClasspath() {
-        return Piece.classLoader.sources;
+        return BootstrapPiece.generalClassloader.classPath;
     }
 }

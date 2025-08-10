@@ -1,7 +1,5 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,15 +84,19 @@ public class RawAssetLoader {
      * @return a {@link RawFileHandle}
      */
     public static RawFileHandle getLowLevelClassPathAssetErrors(String path, boolean errorOut) {
-        URL url = LoaderConstants.class.getResource(path);
+        String softPath;
+        String hardPath;
+        if (path.startsWith("/")) {
+            hardPath = path;
+            softPath = ("/" + path).replaceAll("//", "");
+        } else {
+            softPath = path;
+            hardPath = "/" + path;
+        }
+
+        URL url = Thread.currentThread().getContextClassLoader().getResource(softPath);
         if (url == null) {
-            try {
-                url = PieceClassLoader.class.getClassLoader().getResource(path);
-                return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
-            } catch (Exception ignore) {
-                if (errorOut) LOGGER.error("Cannot find resource {} on the classpath.", path);
-                return null;
-            }
+            url = Thread.currentThread().getContextClassLoader().getResource(hardPath);
         }
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
@@ -114,15 +116,9 @@ public class RawAssetLoader {
      * @return a {@link RawFileHandle}
      */
     public static RawFileHandle getClassPathAssetErrors(ResourceLocation location, boolean errors) {
-        URL url = LoaderConstants.class.getResource(location.toPath());
+        URL url = Thread.currentThread().getContextClassLoader().getResource(location.toPath());
         if (url == null) {
-            try {
-                url = PieceClassLoader.class.getClassLoader().getResource(location.toPath());
-                return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
-            } catch (Exception ignore) {
-                if (errors) LOGGER.error("Cannot find resource {} on the classpath.", location);
-                return null;
-            }
+            url = Thread.currentThread().getContextClassLoader().getResource(location.toSoftPath());
         }
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());

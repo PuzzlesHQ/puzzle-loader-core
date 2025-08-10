@@ -1,6 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.provider.lang.impl;
 
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
 import dev.puzzleshq.mod.info.ModInfo;
@@ -24,7 +25,7 @@ public class JavaLangProvider implements ILangProvider {
 
         Class<?> clazz;
         try {
-            clazz = Class.forName(split[0], false, Piece.classLoader);
+            clazz = Class.forName(split[0], false, BootstrapPiece.generalClassloader);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -1,7 +1,10 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
+import dev.puzzleshq.accesswriter.AccessWriters;
+import dev.puzzleshq.accesswriter.api.IWriterFormat;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
@@ -77,7 +80,7 @@ public class ModFinder {
             if (file.getName().endsWith(".jar")) {
                 LOGGER.debug("Found Jar at \"{}\"", file);
                 try {
-                    Piece.classLoader.addURL(file.toURI().toURL());
+                    BootstrapPiece.generalClassloader.addURL(file.toURI().toURL());
                 } catch (MalformedURLException e) {
                     LOGGER.error("File {} could not be added to Classpath.", file, e);
                 }
@@ -105,7 +108,7 @@ public class ModFinder {
                 try {
                     URLConnection connection = url.openConnection();
                     if (connection instanceof JarURLConnection) {
-                        JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
+                        JarURLConnection jarConnection = (JarURLConnection) connection;
                         JarFile jar = jarConnection.getJarFile();
                         JarEntry entry = jar.getJarEntry("puzzle.mod.json");
                         if (entry != null) {
@@ -113,7 +116,7 @@ public class ModFinder {
                             byte[] bytes = jsonInputStream.readAllBytes();
                             jsonInputStream.close();
 
-                            addModToArray(ModInfo.readFromString(new String(bytes)), jar);
+                            addModToArray(ModInfo.readFromString(new String(bytes)), jar, false);
                         }
                         continue;
                     }
@@ -125,7 +128,7 @@ public class ModFinder {
 
                         byte[] bytes = stream.readAllBytes();
 
-                        addModToArray(ModInfo.readFromString(new String(bytes)), null);
+                        addModToArray(ModInfo.readFromString(new String(bytes)), null, false);
                         break;
                     }
                 } catch (IOException e) {
@@ -168,7 +171,7 @@ public class ModFinder {
                 byte[] bytes = jsonInputStream.readAllBytes();
                 jsonInputStream.close();
 
-                addModToArray(ModInfo.readFromString(new String(bytes)), null);
+                addModToArray(ModInfo.readFromString(new String(bytes)), null, true);
                 } catch (FileNotFoundException e) {
                     LOGGER.error("Could not find file \"{}\"", f, e);
                 } catch (IOException e) {
@@ -183,18 +186,18 @@ public class ModFinder {
      * @param info the mod-json for the mod.
      * @param jar the jar of the mod.
      */
-    private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar) {
+    private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar, boolean isDev) {
         if (!info.getLoadableSides().get(LoaderConstants.SIDE.name)) {
             LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), jar, LoaderConstants.SIDE.name);
             return;
         }
 
-        String text = jar == null ? "Development" : "";
+        String text = isDev ? "Development" : "";
         if (MODS.containsKey(info.getId()))
             throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + info.getId() + "}\" at jar \"" + jar + "\""));
 
         LOGGER.info(
-                "Discovered {} Mod DisplayName: \"{}\", ID: \"{}\", JarFile: \"{}\"",
+                "Discovered {}Mod, DisplayName: \"{}\", ID: \"{}\", JarFile: \"{}\"",
                 text, info.getDisplayName(), info.getId(), jar
         );
 
@@ -242,7 +245,7 @@ public class ModFinder {
             }
         }
         ModFinder.MODS_ARRAY.sort(Comparator.comparingInt(IModContainer::getPriority));
-        // Re-Order ModContainer to get the right indices.
+        // Re-Orders ModContainer to get the right indices.
         for (IModContainer container : ModFinder.MODS_ARRAY) ModFinder.MODS.put(container.getID(), ModFinder.MODS_ARRAY.indexOf(container));
         ModFinder.hadModSortingFinished = true;
     }
@@ -259,7 +262,7 @@ public class ModFinder {
 
             puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader:icons/PuzzleLoaderIconx160.png"));
             puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
-            puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
+            puzzleCoreModInfo.addDependency(new ModDependency(FlexPiece.INSTANCE.gameProvider.getId(), FlexPiece.INSTANCE.gameProvider.getRawVersion(), false));
             puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
             puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
 
@@ -269,7 +272,7 @@ public class ModFinder {
         }
         ModFinder.addModWithContainer(new ModContainer(puzzleCoreModInfo.build()));
 
-        Piece.provider.addBuiltinMods();
+        FlexPiece.INSTANCE.gameProvider.addBuiltinMods();
     }
 
 
@@ -325,4 +328,29 @@ public class ModFinder {
         return MODS_ARRAY;
     }
 
+    public static void getAccessWriters(List<IModContainer> modsArray) {
+        for (IModContainer container : modsArray) {
+            ModInfo info = container.getInfo();
+
+            String[] transformers = info.getAccessTransformers();
+
+            for (String transformerPath : transformers) {
+                RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelClassPathAsset(transformerPath);
+                if (handle == null) {
+                    LOGGER.warn("AccessWriter at \"{}\" does not exist, please remove from your puzzle.mod.json manifest", transformerPath);
+                    continue;
+                }
+
+                IWriterFormat format = AccessWriters.getFormat(transformerPath);
+                if (format == null)
+                    throw new RuntimeException("Unsupported AccessWriter format found in file \"" + transformerPath + "\", please remove this file or fix the format or the crash will persist.");
+
+                try {
+                    AccessWriters.MERGED.add(format.parse(handle.getString()));
+                } catch (Exception e) {
+                    LOGGER.error("Error on File: {}", handle.getFile(), e);
+                }
+            }
+        }
+    }
 }
