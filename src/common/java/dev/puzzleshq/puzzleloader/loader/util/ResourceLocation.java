@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 
 import java.util.regex.Pattern;
 
@@ -42,7 +42,7 @@ public class ResourceLocation {
     public static ResourceLocation of(String id) {
         String[] parts = ID_SPLITTER_PATTERN.split(id);
         if (parts.length < 2)
-            return new ResourceLocation(FlexPiece.INSTANCE.gameProvider.getDefaultNamespace(), parts[0]);
+            return new ResourceLocation(Piece.provider.getDefaultNamespace(), parts[0]);
         if (parts.length > 2)
             throw new RuntimeException("Invalid ResourceLocation Format \"" + id + "\", must be formatted like \"namespace:path\"");
 

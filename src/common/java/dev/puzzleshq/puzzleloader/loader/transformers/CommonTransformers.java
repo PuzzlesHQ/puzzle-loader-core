@@ -1,12 +1,12 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
+import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInitializer;
-import dev.puzzleshq.puzzleloader.loader.provider.classloading.IFlexClassloader;
 
 public class CommonTransformers implements TransformerInitializer {
 
-    public void onTransformerInit(IFlexClassloader classLoader) {
-        classLoader.registerTransformer(new CommonASMTransformer());
+    public void onTransformerInit(PieceClassLoader classLoader) {
+        classLoader.registerTransformer("dev.puzzleshq.puzzleloader.loader.transformers.CommonASMTransformer");
     }
 
 }

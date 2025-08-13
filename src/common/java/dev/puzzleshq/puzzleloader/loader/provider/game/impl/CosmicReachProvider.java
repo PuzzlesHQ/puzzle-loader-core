@@ -2,7 +2,8 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
@@ -13,14 +14,15 @@ import org.hjson.JsonObject;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class CosmicReachProvider implements IGameProvider {
 
     public static final String PARADOX_SERVER_ENTRYPOINT = "com.github.puzzle.paradox.loader.launch.PuzzlePiece";
-    public static final String PARADOX_SERVER_ENTRYPOINT_CLASS = "/com/github/puzzle/paradox/loader/launch/PuzzlePiece.class";
+    public static final String PARADOX_SERVER_ENTRYPOINT_CLASS = "com/github/puzzle/paradox/loader/launch/PuzzlePiece.class";
 
     public CosmicReachProvider() {
-        FlexPiece.INSTANCE.gameProvider = this;
+        Piece.provider = this;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public String getRawVersion() {
         if (rawVersion != null) return rawVersion;
-        return rawVersion = RawAssetLoader.getLowLevelClassPathAssetErrors("/build_assets/version.txt", false).getString().replaceAll("[A-Za-z]", "");
+        return rawVersion = RawAssetLoader.getLowLevelClassPathAssetErrors("build_assets/version.txt", false).getString().replaceAll("[A-Za-z]", "");
     }
 
     AtomicReference<Boolean> paradoxExist = new AtomicReference<>();
@@ -80,11 +82,18 @@ public class CosmicReachProvider implements IGameProvider {
         return Arrays.asList(args);
     }
 
+    @Override
+    public void registerTransformers(PieceClassLoader classLoader) {}
+
     String[] args;
 
     @Override
     public void initArgs(String[] args) {
         this.args = args;
+    }
+
+    @Override
+    public void inject(PieceClassLoader classLoader) {
     }
 
     @Override
@@ -109,7 +118,7 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public boolean isValid() {
         try {
-            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "/finalforeach/cosmicreach/server/ServerLauncher.class";
+            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "finalforeach/cosmicreach/server/ServerLauncher.class";
             if (LoaderConstants.SIDE == EnvType.SERVER) {
                 try {
                     RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
@@ -119,7 +128,7 @@ public class CosmicReachProvider implements IGameProvider {
                 }
             }
             try {
-                launcher = "/finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
+                launcher = "finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
                 RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
             } catch (Exception e) {
                 throw new RuntimeException("Cosmic Reach Main does not exist.");

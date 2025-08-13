@@ -331,4 +331,4 @@ wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
 
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(24))
+//java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))

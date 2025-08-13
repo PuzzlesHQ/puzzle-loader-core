@@ -1,7 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader;
 
 import dev.puzzleshq.annotation.documentation.Note;
-import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
@@ -12,11 +12,11 @@ import net.neoforged.bus.api.IEventBus;
 public class LoaderConstants {
 
     public static class CLIConfiguration {
-        public static boolean TRANSFORMERS_ENABLED = true;
-        public static boolean USER_TRANSFORMERS_ENABLED = true;
-        public static boolean BOOTSTRAPPED = true;
-        public static boolean DUMP_TRANSFORMED_CLASSES = false;
-        public static boolean ALLOWS_CLASS_OVERRIDES = false;
+        public static boolean TRANSFORMERS_ENABLED;
+        public static boolean USER_TRANSFORMERS_ENABLED;
+        public static boolean BOOTSTRAPPED;
+        public static boolean DUMP_TRANSFORMED_CLASSES;
+        public static boolean ALLOWS_CLASS_OVERRIDES;
         public static String[] COMMAND_LINE_ARGUMENTS;
 
         public static String CUSTOM_TITLE_FORMAT = "Puzzle Loader: %s";
@@ -31,7 +31,7 @@ public class LoaderConstants {
 
     public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
 
-    public static final EnvType SIDE = FlexPiece.INSTANCE.envType.get();
+    public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
@@ -51,7 +51,7 @@ public class LoaderConstants {
             Class<?> gdxClass = Class.forName("com.badlogic.gdx");
             Object app = ReflectionUtil.getField(gdxClass, "app").get(null);
             if (app == null) {
-                System.out.println("LoaderConstants.shouldClose() not implemented for this game.");
+                System.out.println("Constants.shouldClose() not implemented for this game.");
                 return false;
             }
 

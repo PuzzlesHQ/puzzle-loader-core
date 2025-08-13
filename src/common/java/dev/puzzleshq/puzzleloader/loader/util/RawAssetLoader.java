@@ -85,19 +85,15 @@ public class RawAssetLoader {
      */
     public static RawFileHandle getLowLevelClassPathAssetErrors(String path, boolean errorOut) {
         String softPath;
-        String hardPath;
+
         if (path.startsWith("/")) {
-            hardPath = path;
             softPath = ("/" + path).replaceAll("//", "");
         } else {
             softPath = path;
-            hardPath = "/" + path;
         }
 
         URL url = Thread.currentThread().getContextClassLoader().getResource(softPath);
-        if (url == null) {
-            url = Thread.currentThread().getContextClassLoader().getResource(hardPath);
-        }
+
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
         } catch (Exception ignore) {
@@ -116,10 +112,8 @@ public class RawAssetLoader {
      * @return a {@link RawFileHandle}
      */
     public static RawFileHandle getClassPathAssetErrors(ResourceLocation location, boolean errors) {
-        URL url = Thread.currentThread().getContextClassLoader().getResource(location.toPath());
-        if (url == null) {
-            url = Thread.currentThread().getContextClassLoader().getResource(location.toSoftPath());
-        }
+        URL url = Thread.currentThread().getContextClassLoader().getResource(location.toSoftPath());
+
         try {
             return new RawFileHandle(getBytesFromStream(url.openStream()), url.getFile());
         } catch (Exception ignore) {

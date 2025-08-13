@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
-import dev.puzzleshq.accesswriter.AccessWriters;
+import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import dev.puzzleshq.accesswriter.transformers.AccessTransformerASM;
@@ -11,8 +11,6 @@ public class CommonASMTransformer implements IClassTransformer {
         if (basicClass == null) System.out.println(name);
         // errors with package-info.class
         if (!name.endsWith("package-info")) {
-            if (!AccessWriters.MERGED.has(transformedName)) return basicClass;
-
             ClassReader reader = new ClassReader(basicClass);
             ClassWriter writer = new ClassWriter(0);
 

@@ -2,7 +2,8 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.FlexPiece;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
@@ -19,7 +20,7 @@ import java.util.*;
 public class MinecraftProvider implements IGameProvider {
 
     public MinecraftProvider() {
-        FlexPiece.INSTANCE.gameProvider = this;
+        Piece.provider = this;
     }
 
     @Override
@@ -94,6 +95,9 @@ public class MinecraftProvider implements IGameProvider {
         return args;
     }
 
+    @Override
+    public void registerTransformers(PieceClassLoader classLoader) {}
+
     List<String> args;
 
     @Override
@@ -106,6 +110,11 @@ public class MinecraftProvider implements IGameProvider {
         version = versionSpec.value(optionSet);
 
         this.args = new ArrayList<>(Arrays.asList(args));
+    }
+
+    @Override
+    public void inject(PieceClassLoader classLoader) {
+
     }
 
     @Override
