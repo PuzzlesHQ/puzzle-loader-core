@@ -53,18 +53,18 @@ public class ProjectZomboidProvider implements IGameProvider {
 
     @Override
     public String getEntrypoint() {
-        String launcher = "/zombie/network/GameServer.class";
+        String launcher = "zombie/network/GameServer.class";
         if (LoaderConstants.SIDE == EnvType.SERVER) {
             try {
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                 return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
             } catch (Exception ignore) {
                 throw new RuntimeException("Project Zomboid Server Main does not exist.");
             }
         }
         try {
-            launcher = "/zombie/gameStates/MainScreenState.class";
-            RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            launcher = "zombie/gameStates/MainScreenState.class";
+            RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
         } catch (Exception e) {
             throw new RuntimeException("Project Zomboid Client Main does not exist.");
         }
@@ -113,18 +113,18 @@ public class ProjectZomboidProvider implements IGameProvider {
     @Override
     public boolean isValid() {
         try {
-            String launcher = "/zombie/network/GameServer.class";
+            String launcher = "zombie/network/GameServer.class";
             if (LoaderConstants.SIDE == EnvType.SERVER) {
                 try {
-                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                     return true;
                 } catch (Exception ignore) {
                     throw new RuntimeException("Project Zomboid Server Main does not exist.");
                 }
             }
             try {
-                launcher = "/zombie/gameStates/MainScreenState.class";
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                launcher = "zombie/gameStates/MainScreenState.class";
+                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
             } catch (Exception e) {
                 throw new RuntimeException("Project Zomboid Client Main does not exist.");
             }
@@ -136,7 +136,7 @@ public class ProjectZomboidProvider implements IGameProvider {
 
     private void fetchGameVersion() {
         try {
-            RawAssetLoader.RawFileHandle core = RawAssetLoader.getLowLevelClassPathAsset("/zombie/core/Core.class");
+            RawAssetLoader.RawFileHandle core = RawAssetLoader.getLowLevelClassPathAssetErrors("zombie/core/Core.class", false);
             ByteArrayInputStream is = new ByteArrayInputStream(core.getBytes());
             ClassReader cr = new ClassReader(is);
             VersionVisitor finder = new VersionVisitor();

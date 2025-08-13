@@ -47,30 +47,30 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public String getEntrypoint() {
-        String launcher = "/net/minecraft/server/Main.class";
+        String launcher = "net/minecraft/server/Main.class";
         if (LoaderConstants.SIDE == EnvType.SERVER) {
             try {
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                 return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
             } catch (Exception ignore) {
                 throw new RuntimeException("Minecraft Server Main does not exist.");
             }
         }
         try {
-            launcher = "/net/minecraft/client/main/Main.class";
-            RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            launcher = "net/minecraft/client/main/Main.class";
+            RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
         } catch (Exception e) {
             try {
-                launcher = "/net/minecraft/client/MinecraftApplet.class";
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                launcher = "net/minecraft/client/MinecraftApplet.class";
+                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
             } catch (Exception a) {
                 try {
-                    launcher = "/com/mojang/MinecraftApplet.class";
-                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                    launcher = "com/mojang/MinecraftApplet.class";
+                    RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                 } catch (Exception sports) {
                     try {
-                        launcher = "/com/mojang/rubydung/RubyDung.class";
-                        RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+                        launcher = "com/mojang/rubydung/RubyDung.class";
+                        RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                     } catch (Exception ignore) {
                         throw new RuntimeException("Minecraft Client Main does not exist.");
                     }
