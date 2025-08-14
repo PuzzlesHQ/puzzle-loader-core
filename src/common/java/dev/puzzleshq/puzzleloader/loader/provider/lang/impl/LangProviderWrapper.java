@@ -1,8 +1,8 @@
 package dev.puzzleshq.puzzleloader.loader.provider.lang.impl;
 
+import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
-import dev.puzzleshq.mod.info.ModInfo;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

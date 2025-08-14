@@ -1,8 +1,8 @@
 package dev.puzzleshq.puzzleloader.loader.provider.lang;
 
+import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.provider.lang.impl.JavaLangProvider;
-import dev.puzzleshq.mod.info.ModInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

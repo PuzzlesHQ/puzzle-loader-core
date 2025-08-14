@@ -1,7 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;

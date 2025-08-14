@@ -5,8 +5,6 @@ import dev.puzzleshq.puzzleloader.loader.launch.PrePiece;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.Locale;
 
 public class BootstrapPiece {

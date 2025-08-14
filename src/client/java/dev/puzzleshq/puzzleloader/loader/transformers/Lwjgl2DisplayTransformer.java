@@ -5,8 +5,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import java.util.Arrays;
-
 public class Lwjgl2DisplayTransformer extends ClassVisitor {
 
     protected Lwjgl2DisplayTransformer(ClassVisitor classVisitor) {

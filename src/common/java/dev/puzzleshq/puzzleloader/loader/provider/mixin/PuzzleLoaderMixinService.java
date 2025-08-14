@@ -24,13 +24,12 @@
  */
 package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 
-import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
-import org.objectweb.asm.tree.ClassNode;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.transformers.BetterProxy;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.platform.IMixinPlatformAgent;
@@ -48,6 +47,7 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import org.spongepowered.asm.util.ReEntranceLock;
 import org.spongepowered.asm.util.perf.Profiler;
 import org.spongepowered.asm.util.perf.Profiler.Section;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;

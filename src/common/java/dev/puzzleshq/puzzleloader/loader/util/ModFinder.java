@@ -1,14 +1,14 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import dev.puzzleshq.mod.util.MixinConfig;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
-import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
+import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.mod.util.ModDependency;
+import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import javassist.bytecode.DuplicateMemberException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,10 +1,10 @@
 package dev.puzzleshq.puzzleloader.loader.mod;
 
-import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
-import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
 import dev.puzzleshq.mod.api.IEntrypointContainer;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.util.EntrypointPair;
+import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
+import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

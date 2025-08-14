@@ -1,6 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.zafarkhaja.semver.Version;
+import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
@@ -9,13 +10,15 @@ import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
-import dev.puzzleshq.mod.info.ModInfoBuilder;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class MinecraftProvider implements IGameProvider {
 

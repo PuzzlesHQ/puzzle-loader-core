@@ -1,10 +1,9 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
-import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import dev.puzzleshq.accesswriter.transformers.AccessTransformerASM;
 import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 
 public class CommonASMTransformer implements IClassTransformer {
     public byte[] transform(String name, String transformedName, byte[] basicClass) {

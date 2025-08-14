@@ -1,9 +1,9 @@
 package dev.puzzleshq.puzzleloader.loader.provider.lang.impl;
 
+import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
-import dev.puzzleshq.mod.info.ModInfo;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleProxies;

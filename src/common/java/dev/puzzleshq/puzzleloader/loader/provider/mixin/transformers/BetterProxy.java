@@ -2,7 +2,6 @@ package dev.puzzleshq.puzzleloader.loader.provider.mixin.transformers;
 
 import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
-import org.spongepowered.asm.mixin.transformer.MixinTransformer;
 import org.spongepowered.asm.service.ILegacyClassTransformer;
 import org.spongepowered.asm.service.MixinService;
 

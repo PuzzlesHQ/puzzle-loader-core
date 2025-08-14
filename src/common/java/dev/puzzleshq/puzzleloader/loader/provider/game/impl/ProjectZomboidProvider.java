@@ -1,6 +1,5 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
-import org.objectweb.asm.*;
 import com.github.zafarkhaja.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
@@ -12,6 +11,8 @@ import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.hjson.JsonObject;
+import org.objectweb.asm.*;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
