@@ -1,5 +1,8 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
+import com.github.villadora.semver.SemVer;
+import com.github.villadora.semver.Version;
+import com.github.villadora.semver.ranges.Range;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
@@ -218,7 +221,7 @@ public class ModFinder {
                     continue;
                 }
 
-                boolean doesSatisfy = dependencyContainer.getVersion().satisfies(dependency.getConstraint());
+                boolean doesSatisfy = SemVer.satisfies(dependencyContainer.getVersion(), dependency.getConstraint());
                 if (doesSatisfy) continue;
                 throw new RuntimeException(new InputMismatchException("Dependency mis-match for mod \"" + dependencyContainer.getID() + "\", it wanted \"" + dependency.getConstraint() + "\" but got \"" + dependencyContainer.getVersion() + "\""));
             }

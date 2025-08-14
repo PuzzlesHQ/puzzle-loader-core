@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.mod;
 
-import com.github.zafarkhaja.semver.Version;
+import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.api.IEntrypointContainer;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
@@ -10,12 +10,14 @@ public class ModContainer implements IModContainer {
 
     private final ModInfo info;
     private final Version version;
+    private final String versionStr;
     private int priority = 0;
     private final IEntrypointContainer container;
 
     public ModContainer(ModInfo info) {
         this.info = info;
-        this.version = Version.parse(info.getVersion());
+        this.version = Version.valueOf(info.getVersion());
+        this.versionStr = info.getVersion();
         this.container = new EntrypointContainer(this);
     }
 
@@ -32,6 +34,11 @@ public class ModContainer implements IModContainer {
     @Override
     public Version getVersion() {
         return version;
+    }
+
+    @Override
+    public String getVersionStr() {
+        return versionStr;
     }
 
     @Override

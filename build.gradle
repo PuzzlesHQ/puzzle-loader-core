@@ -144,7 +144,7 @@ dependencies {
     }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
 
-    commonBundle "com.github.zafarkhaja:java-semver:0.10.2"
+    commonBundle "com.github.villadora:semver:0.0.3"
 
     commonBundle 'org.slf4j:slf4j-ext:1.7.23'
     commonBundle 'org.slf4j:slf4j-api:1.7.23'
@@ -165,7 +165,7 @@ dependencies {
 
     commonBundle "dev.puzzleshq:puzzle-annotations:1.0.0"
     commonBundle "dev.puzzleshq:access-writer:1.0.4+c"
-    commonBundle "dev.puzzleshq:mod-format-framework:1.0.0"
+    commonBundle "dev.puzzleshq:mod-format-framework:1.1.1"
 
     commonBundle "org.hjson:hjson:$hjson_version"
 }

@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
-import com.github.zafarkhaja.semver.Version;
+import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
@@ -39,7 +39,7 @@ public class MinecraftProvider implements IGameProvider {
     @Override
     public Version getGameVersion() {
 //        return Version.parse(version);
-        return Version.parse("1.0.0");
+        return Version.valueOf("1.0.0");
     }
 
     @Override

@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game;
 
-import com.github.zafarkhaja.semver.Version;
+import com.github.villadora.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 
 import java.util.Collection;

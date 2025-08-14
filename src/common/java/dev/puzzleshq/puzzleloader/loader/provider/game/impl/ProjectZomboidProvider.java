@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
-import com.github.zafarkhaja.semver.Version;
+import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
@@ -236,9 +236,9 @@ public class ProjectZomboidProvider implements IGameProvider {
                 ) {
                     if (major instanceof Integer && minor instanceof Integer && build != null && suffix instanceof String) {
                         if (((String) suffix).isEmpty()) {
-                            detectedVersion = Version.of((int) major, (int) minor, build);
+                            detectedVersion = Version.valueOf(major + "." + minor + "." + build);
                         } else {
-                            detectedVersion = Version.of((int) major, (int) minor, build, (String) suffix);
+                            detectedVersion = Version.valueOf(major + "." + minor + "." + build + "-" + suffix);
                         }
                     }
 

@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
-import com.github.zafarkhaja.semver.Version;
+import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
@@ -37,7 +37,7 @@ public class CosmicReachProvider implements IGameProvider {
 
     @Override
     public Version getGameVersion() {
-        return Version.parse(getRawVersion());
+        return Version.valueOf(getRawVersion());
     }
 
     String rawVersion;
