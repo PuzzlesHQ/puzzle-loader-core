@@ -249,13 +249,13 @@ tasks.register("mkDeps") {
 
 processCommonResources {
     Map<String, Object> replacement_properties = [
-            "version": ((String)version).contains(".") ? version : "69.69.69"
+            "version": ((String)version).contains(".") ? version : "69.69.69",
+            "mixinVersion": mixin_version,
     ]
 
     inputs.properties replacement_properties
-    replacement_properties.put("project", project)
 
-    filesMatching(["assets/puzzle-loader/core-version.txt"]) {
+    filesMatching(["assets/puzzle-loader-core/core-version.txt", "assets/puzzle-loader-core/mixin-version.txt"]) {
         expand replacement_properties
     }
 }

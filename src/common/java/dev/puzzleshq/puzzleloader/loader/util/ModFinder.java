@@ -261,16 +261,40 @@ public class ModFinder {
             puzzleCoreModInfo.setId("puzzle-loader-core");
             puzzleCoreModInfo.setDescription("The core mod-loading mechanics of puzzle-loader");
 
-            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader:icons/PuzzleLoaderIconx160.png"));
+            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/puzzle.png"));
             puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
-            puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
             puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
-            puzzleCoreModInfo.addMixinConfig(new MixinConfig("mixinextras.init.mixins.json", "unknown"));
             puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
 
             puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers");
             if (LoaderConstants.SIDE.equals(EnvType.CLIENT))
                 puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.ClientTransformers");
+
+        }
+        if (LoaderConstants.CLIConfiguration.MIXINS_ENABLED) {
+            ModInfoBuilder mixinModInfo = new ModInfoBuilder();
+            {
+                mixinModInfo.setDisplayName("Sponge Mixin Fabric");
+                mixinModInfo.setId("sponge-mixin-fabric");
+                mixinModInfo.setDescription("Mixin is a trait/mixin framework for Java using ASM.");
+
+                mixinModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/mixin.png"));
+                mixinModInfo.addAuthor(
+                        "Mumfrey", "skinnyBat", "LlamaLad7",
+                        "Aaron1011", "simon816", "shartte",
+                        "zml2008", "bloodmc", "SizableShrimp",
+                        "The-PPWD", "LexManos", "jordin",
+                        "gabizou", "xIGBClutchIx", "asiekierka",
+                        "Runemoro", "caseif", "modmuss50",
+                        "JBYoshi", "AbrarSyed", "Kobata",
+                        "progwml6"
+                );
+                mixinModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
+                mixinModInfo.setVersion(LoaderConstants.MIXIN_VERSION);
+                mixinModInfo.addMixinConfig(new MixinConfig("mixinextras.init.mixins.json", "unknown"));
+                puzzleCoreModInfo.addDependency(new ModDependency("sponge-mixin-fabric", LoaderConstants.MIXIN_VERSION, false));
+            }
+            ModFinder.addModWithContainer(new ModContainer(mixinModInfo.build()));
         }
         ModFinder.addModWithContainer(new ModContainer(puzzleCoreModInfo.build()));
 

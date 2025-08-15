@@ -34,10 +34,20 @@ public class LoaderConstants {
     public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
+    public static final String MIXIN_VERSION = getMixinVersion();
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
 
     private static String getPuzzleCoreVersion() {
-        RawAssetLoader.RawFileHandle handle = RawAssetLoader.getClassPathAsset(ResourceLocation.of("puzzle-loader:core-version.txt"));
+        RawAssetLoader.RawFileHandle handle = RawAssetLoader.getClassPathAsset(ResourceLocation.of("puzzle-loader-core:core-version.txt"));
+        String version = handle.getString();
+        handle.dispose();
+        if (!version.contains(".")) {
+            return "69.69.69";
+        } else return version;
+    }
+
+    private static String getMixinVersion() {
+        RawAssetLoader.RawFileHandle handle = RawAssetLoader.getClassPathAsset(ResourceLocation.of("puzzle-loader-core:mixin-version.txt"));
         String version = handle.getString();
         handle.dispose();
         if (!version.contains(".")) {
