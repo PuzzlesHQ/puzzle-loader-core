@@ -98,9 +98,6 @@ public class MinecraftProvider implements IGameProvider {
         return args;
     }
 
-    @Override
-    public void registerTransformers(PieceClassLoader classLoader) {}
-
     List<String> args;
 
     @Override
@@ -113,11 +110,6 @@ public class MinecraftProvider implements IGameProvider {
         version = versionSpec.value(optionSet);
 
         this.args = new ArrayList<>(Arrays.asList(args));
-    }
-
-    @Override
-    public void inject(PieceClassLoader classLoader) {
-
     }
 
     @Override

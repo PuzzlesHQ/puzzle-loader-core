@@ -20,9 +20,9 @@ public interface IGameProvider {
     Collection<String> getArgs();
 
     // Inits
-    void registerTransformers(PieceClassLoader classLoader);
     void initArgs(String[] args);
-    void inject(PieceClassLoader classLoader);
+    default void registerTransformers(PieceClassLoader classLoader) {}
+    default void inject(PieceClassLoader classLoader) {}
 
     void addBuiltinMods();
 

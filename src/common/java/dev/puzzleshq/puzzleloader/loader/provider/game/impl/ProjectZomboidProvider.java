@@ -78,9 +78,6 @@ public class ProjectZomboidProvider implements IGameProvider {
         return args;
     }
 
-    @Override
-    public void registerTransformers(PieceClassLoader classLoader) {}
-
     List<String> args;
 
     @Override

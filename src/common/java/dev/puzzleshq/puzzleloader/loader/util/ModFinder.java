@@ -292,7 +292,7 @@ public class ModFinder {
                 mixinModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
                 mixinModInfo.setVersion(LoaderConstants.MIXIN_VERSION);
                 mixinModInfo.addMixinConfig(new MixinConfig("mixinextras.init.mixins.json", "unknown"));
-                puzzleCoreModInfo.addDependency(new ModDependency("sponge-mixin-fabric", LoaderConstants.MIXIN_VERSION, false));
+                puzzleCoreModInfo.addDependency(new ModDependency("sponge-mixin-fabric", "~" + LoaderConstants.MIXIN_VERSION, false));
             }
             ModFinder.addModWithContainer(new ModContainer(mixinModInfo.build()));
         }

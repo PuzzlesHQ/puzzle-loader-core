@@ -54,7 +54,7 @@ public class CosmicReachProvider implements IGameProvider {
         if (paradoxExist.get() != null) return paradoxExist.get();
         String property = System.getProperty("puzzle.useParadox");
         if (property != null) {
-            boolean paradoxExist = Boolean.valueOf(property);
+            boolean paradoxExist = Boolean.parseBoolean(property);
             this.paradoxExist.set(paradoxExist);
             return paradoxExist;
         }
@@ -82,18 +82,11 @@ public class CosmicReachProvider implements IGameProvider {
         return Arrays.asList(args);
     }
 
-    @Override
-    public void registerTransformers(PieceClassLoader classLoader) {}
-
     String[] args;
 
     @Override
     public void initArgs(String[] args) {
         this.args = args;
-    }
-
-    @Override
-    public void inject(PieceClassLoader classLoader) {
     }
 
     @Override
