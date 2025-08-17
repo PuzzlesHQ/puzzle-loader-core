@@ -34,7 +34,10 @@ public class LoaderConstants {
     public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
-    public static final String MIXIN_VERSION = getMixinVersion();
+
+    public static final String FULL_MIXIN_VERSION = getMixinVersion();
+    public static final String SHORT_MIXIN_VERSION = FULL_MIXIN_VERSION.replaceAll("\\+.*", "");
+
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
 
     private static String getPuzzleCoreVersion() {
