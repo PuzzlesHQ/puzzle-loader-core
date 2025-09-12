@@ -83,7 +83,7 @@ public class CosmicReachProvider implements IGameProvider {
 
     @Override
     public String getEntrypoint() {
-        if (LoaderConstants.SIDE == EnvType.SERVER) {
+        if (Piece.getSide() == EnvType.SERVER) {
             return isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT : "finalforeach.cosmicreach.server.ServerLauncher";
         }
 

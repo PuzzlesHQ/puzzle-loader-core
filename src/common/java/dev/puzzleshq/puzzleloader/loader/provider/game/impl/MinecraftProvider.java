@@ -51,7 +51,7 @@ public class MinecraftProvider implements IGameProvider {
     @Override
     public String getEntrypoint() {
         String launcher = "net/minecraft/server/Main.class";
-        if (LoaderConstants.SIDE == EnvType.SERVER) {
+        if (Piece.getSide() == EnvType.SERVER) {
             try {
                 RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                 return launcher.replaceAll("/", ".").replace(".class", "");

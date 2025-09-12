@@ -221,7 +221,7 @@ public class Piece {
             }
         }
 
-        EnvType envType = LoaderConstants.SIDE;
+        EnvType envType = Piece.getSide();
         mixinConfigs.forEach((e) -> {
             if (Objects.equals(envType.name, e.environment()) || Objects.equals(e.environment(), EnvType.UNKNOWN.name)) {
                 Mixins.addConfiguration(e.path());

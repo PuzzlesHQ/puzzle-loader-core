@@ -188,8 +188,8 @@ public class ModFinder {
      * @param jar the jar of the mod.
      */
     private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar) {
-        if (!info.getLoadableSides().get(LoaderConstants.SIDE.name)) {
-            LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), jar, LoaderConstants.SIDE.name);
+        if (!info.getLoadableSides().get(Piece.getSide().name)) {
+            LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), jar, Piece.getSide().name);
             return;
         }
 
@@ -268,7 +268,7 @@ public class ModFinder {
             puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getGameVersion().toString(), false));
 
             puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers");
-            if (LoaderConstants.SIDE.equals(EnvType.CLIENT))
+            if (Piece.getSide().equals(EnvType.CLIENT))
                 puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.ClientTransformers");
 
         }
