@@ -29,7 +29,7 @@ public class LoaderConstants {
 
     }
 
-    public static final IEventBus CORE_EVENT_BUS = BusBuilder.builder().build();
+    public static IEventBus CORE_EVENT_BUS;
 
     public static final EnvType SIDE = Piece.getSide();
 
@@ -39,6 +39,10 @@ public class LoaderConstants {
     public static final String SHORT_MIXIN_VERSION = FULL_MIXIN_VERSION.replaceAll("\\+.*", "");
 
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
+
+    static {
+        CORE_EVENT_BUS = BusBuilder.builder().build();
+    }
 
     private static String getPuzzleCoreVersion() {
         RawAssetLoader.RawFileHandle handle = RawAssetLoader.getClassPathAsset(ResourceLocation.of("puzzle-loader-core:core-version.txt"));

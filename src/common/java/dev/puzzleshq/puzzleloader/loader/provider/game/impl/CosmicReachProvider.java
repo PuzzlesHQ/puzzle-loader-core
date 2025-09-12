@@ -124,7 +124,7 @@ public class CosmicReachProvider implements IGameProvider {
     public boolean isValid() {
         try {
             String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "finalforeach/cosmicreach/server/ServerLauncher.class";
-            if (LoaderConstants.SIDE == EnvType.SERVER) {
+            if (Piece.getSide() == EnvType.SERVER) {
                 try {
                     RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                     return true;

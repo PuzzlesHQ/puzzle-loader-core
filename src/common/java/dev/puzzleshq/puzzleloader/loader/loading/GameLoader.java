@@ -30,8 +30,6 @@ public class GameLoader {
     public ProgressBar bar2;
     public ProgressBar bar3;
 
-    private Thread thread;
-
     public GameLoader() {
         INSTANCES.add(this);
     }
@@ -43,7 +41,7 @@ public class GameLoader {
 
         LoaderConstants.CORE_EVENT_BUS.post(new RegisterStagesEvent(this));
 
-        thread = new Thread(this::gameLoadingThread, "Game-Loader");
+        Thread thread = new Thread(this::gameLoadingThread, "Game-Loader");
         ThreadExceptionCatcher.attach(thread);
         thread.setDaemon(true);
         thread.start();

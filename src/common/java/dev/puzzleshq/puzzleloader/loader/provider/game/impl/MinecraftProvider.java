@@ -135,8 +135,8 @@ public class MinecraftProvider implements IGameProvider {
     @Override
     public boolean isValid() {
         try {
-            String launcher = "/net/minecraft/server/Main.class";
-            if (LoaderConstants.SIDE == EnvType.SERVER) {
+            String launcher = "net/minecraft/server/Main.class";
+            if (Piece.getSide() == EnvType.SERVER) {
                 try {
                     RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
                     return true;
@@ -145,19 +145,19 @@ public class MinecraftProvider implements IGameProvider {
                 }
             }
             try {
-                launcher = "/net/minecraft/client/main/Main.class";
+                launcher = "net/minecraft/client/main/Main.class";
                 RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
             } catch (Exception e) {
                 try {
-                    launcher = "/net/minecraft/client/MinecraftApplet.class";
+                    launcher = "net/minecraft/client/MinecraftApplet.class";
                     RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
                 } catch (Exception a) {
                     try {
-                        launcher = "/com/mojang/MinecraftApplet.class";
+                        launcher = "com/mojang/MinecraftApplet.class";
                         RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
                     } catch (Exception sports) {
                         try {
-                            launcher = "/com/mojang/rubydung/RubyDung.class";
+                            launcher = "com/mojang/rubydung/RubyDung.class";
                             RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
                         } catch (Exception ignore) {
                             throw new RuntimeException("Minecraft Client Main does not exist.");
