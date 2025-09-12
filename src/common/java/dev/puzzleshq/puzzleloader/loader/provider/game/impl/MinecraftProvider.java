@@ -54,7 +54,7 @@ public class MinecraftProvider implements IGameProvider {
         if (LoaderConstants.SIDE == EnvType.SERVER) {
             try {
                 RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
+                return launcher.replaceAll("/", ".").replace(".class", "");
             } catch (Exception ignore) {
                 throw new RuntimeException("Minecraft Server Main does not exist.");
             }
@@ -83,12 +83,12 @@ public class MinecraftProvider implements IGameProvider {
 
         if (launcher.contains("MinecraftApplet.class")) {
             if (args != null && !args.contains("--puzzleEdition")) {
-                args.add(0, launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", ""));
+                args.add(0, launcher.replaceAll("/", ".").replace(".class", ""));
                 args.add(0, "--puzzleEdition");
             }
         }
 
-        return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
+        return launcher.replaceAll("/", ".").replace(".class", "");
     }
 
     String version = "";

@@ -223,7 +223,7 @@ public class ModFinder {
 
                 boolean doesSatisfy = SemVer.satisfies(dependencyContainer.getVersion(), dependency.getConstraint());
                 if (doesSatisfy) continue;
-                throw new RuntimeException(new InputMismatchException("Dependency mis-match for mod \"" + dependencyContainer.getID() + "\", it wanted \"" + dependency.getConstraint() + "\" but got \"" + dependencyContainer.getVersion() + "\""));
+                throw new RuntimeException(new InputMismatchException("Dependency mis-match for mod \"" + container.getID() + "\", it wanted \"" + dependencyContainer.getID() + "\": \"" + dependency.getConstraint() + "\" but got \"" + dependencyContainer.getID() + "\": \"" + dependencyContainer.getVersion() + "\""));
             }
         }
         hasModFinderVerified = true;
@@ -265,6 +265,7 @@ public class ModFinder {
             puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
             puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
             puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
+            puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getGameVersion().toString(), false));
 
             puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers");
             if (LoaderConstants.SIDE.equals(EnvType.CLIENT))
@@ -289,7 +290,6 @@ public class ModFinder {
                         "JBYoshi", "AbrarSyed", "Kobata",
                         "progwml6"
                 );
-                mixinModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getRawVersion(), false));
                 mixinModInfo.setVersion(LoaderConstants.FULL_MIXIN_VERSION);
                 mixinModInfo.addMixinConfig(new MixinConfig("mixinextras.init.mixins.json", "unknown"));
                 puzzleCoreModInfo.addDependency(new ModDependency(

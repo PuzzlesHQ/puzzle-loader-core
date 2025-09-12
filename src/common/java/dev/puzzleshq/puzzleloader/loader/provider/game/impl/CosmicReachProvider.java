@@ -45,7 +45,19 @@ public class CosmicReachProvider implements IGameProvider {
     @Override
     public String getRawVersion() {
         if (rawVersion != null) return rawVersion;
-        return rawVersion = RawAssetLoader.getLowLevelClassPathAssetErrors("build_assets/version.txt", false).getString().replaceAll("[A-Za-z]", "");
+        rawVersion = RawAssetLoader.getLowLevelClassPathAssetErrors("build_assets/version.txt", false).getString().replaceAll("[A-Za-z]", "");
+
+        process();
+        return rawVersion;
+    }
+
+    private void process() {
+        rawVersion = rawVersion.replaceAll("\\+.*", "");
+        String[] parts = rawVersion.split("-");
+        if (parts.length == 3) {
+            rawVersion = rawVersion.replaceAll("-pre\\d+-", "");
+            rawVersion += "." + parts[1].replaceAll("pre", "");
+        }
     }
 
     AtomicReference<Boolean> paradoxExist = new AtomicReference<>();
@@ -97,7 +109,7 @@ public class CosmicReachProvider implements IGameProvider {
             cosmicModInfo.setId(getId());
             cosmicModInfo.setDescription("The base game.");
             cosmicModInfo.addAuthor("FinalForEach");
-            cosmicModInfo.setVersion(getRawVersion());
+            cosmicModInfo.setVersion(getGameVersion().toString());
             cosmicModInfo.addMeta("icon", JsonObject.valueOf("icons/logox256.png"));
             ModFinder.addModWithContainer(new ModContainer(cosmicModInfo.build()));
         }

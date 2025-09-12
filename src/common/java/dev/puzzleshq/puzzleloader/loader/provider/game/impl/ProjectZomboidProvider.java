@@ -58,7 +58,7 @@ public class ProjectZomboidProvider implements IGameProvider {
         if (LoaderConstants.SIDE == EnvType.SERVER) {
             try {
                 RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
+                return launcher.replaceAll("/", ".").replace(".class", "");
             } catch (Exception ignore) {
                 throw new RuntimeException("Project Zomboid Server Main does not exist.");
             }
@@ -70,7 +70,7 @@ public class ProjectZomboidProvider implements IGameProvider {
             throw new RuntimeException("Project Zomboid Client Main does not exist.");
         }
 
-        return launcher.replaceFirst("/", "").replaceAll("/", ".").replace(".class", "");
+        return launcher.replaceAll("/", ".").replace(".class", "");
     }
 
     @Override
