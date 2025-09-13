@@ -3,7 +3,7 @@ package dev.puzzleshq.puzzleloader.loader.loading;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventGameLoaderFinish;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
-import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.GameLoaderStageInitializer;
+import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.GameLoaderEntrypoint;
 import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 import org.apache.logging.log4j.LogManager;
@@ -44,8 +44,8 @@ public class GameLoader {
         EventRegisterStages registerStages = new EventRegisterStages(this);
 
         PuzzleEntrypointUtil.invoke(
-                GameLoaderStageInitializer.ENTRYPOINT_KEY,
-                GameLoaderStageInitializer.class,
+                GameLoaderEntrypoint.ENTRYPOINT_KEY,
+                GameLoaderEntrypoint.class,
                 (init) -> init.onGameLoadingStageRegister(registerStages)
         );
 
@@ -122,8 +122,8 @@ public class GameLoader {
         EventGameLoaderFinish gameLoaderFinish = new EventGameLoaderFinish();
 
         PuzzleEntrypointUtil.invoke(
-                GameLoaderStageInitializer.ENTRYPOINT_KEY,
-                GameLoaderStageInitializer.class,
+                GameLoaderEntrypoint.ENTRYPOINT_KEY,
+                GameLoaderEntrypoint.class,
                 (init) -> init.onGameLoadingFinish(gameLoaderFinish)
         );
 

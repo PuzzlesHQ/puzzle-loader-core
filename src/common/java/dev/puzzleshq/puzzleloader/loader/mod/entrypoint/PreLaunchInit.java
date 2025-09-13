@@ -2,7 +2,7 @@ package dev.puzzleshq.puzzleloader.loader.mod.entrypoint;
 
 import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 
-public interface PreLaunchInitializer {
+public interface PreLaunchInit {
     String ENTRYPOINT_KEY = "preLaunch";
 
     void onPreLaunch();
@@ -10,8 +10,8 @@ public interface PreLaunchInitializer {
     static void invoke() {
         PuzzleEntrypointUtil.invoke(
                 ENTRYPOINT_KEY,
-                PreLaunchInitializer.class,
-                PreLaunchInitializer::onPreLaunch
+                PreLaunchInit.class,
+                PreLaunchInit::onPreLaunch
         );
     }
 }

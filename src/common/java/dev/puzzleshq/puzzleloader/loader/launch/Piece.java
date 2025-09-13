@@ -7,8 +7,8 @@ import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInitializer;
-import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInitializer;
+import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
+import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
@@ -140,7 +140,7 @@ public class Piece {
             AccessWriters.init(classLoader);
             discoverAccessWriters(ModFinder.getModsArray());
             if (LoaderConstants.CLIConfiguration.USER_TRANSFORMERS_ENABLED)
-                TransformerInitializer.invokeTransformers(classLoader);
+                TransformerInit.invokeTransformers(classLoader);
 
             provider.initArgs(args);
 
@@ -167,7 +167,7 @@ public class Piece {
 
             Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
 
-            PreLaunchInitializer.invoke();
+            PreLaunchInit.invoke();
             OffThreadExecutor.start();
             LOGGER.info("Launching {} version {}", provider.getName(), provider.getRawVersion());
             main.invoke(null, (Object) providerArgs);
