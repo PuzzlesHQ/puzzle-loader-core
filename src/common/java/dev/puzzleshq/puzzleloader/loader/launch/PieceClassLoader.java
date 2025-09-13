@@ -177,7 +177,11 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
             }
 
             if (connection == null) {
-                throw new RuntimeException(name);
+                try {
+                    parent.loadClass(name);
+                } catch (Exception ignore) {
+                    throw new RuntimeException(name);
+                }
             }
             byte[] bytes = transform(name, name, getResourceBytes(name));
             if (bytes == null) {
