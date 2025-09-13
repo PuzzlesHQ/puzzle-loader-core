@@ -122,6 +122,8 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public Class<?> findClass(String name) throws ClassNotFoundException {
         if (missingClasses.contains(name)) throw new ClassNotFoundException(name);
 
+        if (name.endsWith(".package-info")) return parent.loadClass(name);
+
         for (String exclusion : excludedClasses) {
             if (name.startsWith(exclusion)) return parent.loadClass(name);
         }
@@ -181,8 +183,8 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
             if (connection == null) {
                 try {
                     return parent.loadClass(name);
-                } catch (Exception ignore) {
-                    throw new RuntimeException(name);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
             byte[] bytes = transform(name, name, getResourceBytes(name));
