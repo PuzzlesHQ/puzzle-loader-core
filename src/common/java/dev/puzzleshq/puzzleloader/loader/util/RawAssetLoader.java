@@ -1,7 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
  */
 public class RawAssetLoader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | RawAssetLoader");
+    private static final Logger LOGGER = LogManager.getLogger("Puzzle | RawAssetLoader");
 
     /**
      * Gets the bytes from a {@link InputStream}.

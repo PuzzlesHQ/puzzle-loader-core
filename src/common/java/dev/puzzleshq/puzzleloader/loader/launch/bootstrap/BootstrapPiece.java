@@ -2,8 +2,8 @@ package dev.puzzleshq.puzzleloader.loader.launch.bootstrap;
 
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.launch.PrePiece;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Locale;
 
@@ -60,7 +60,7 @@ public class BootstrapPiece {
 
     public static Logger getLogger() {
         if (LOGGER == null)
-            LOGGER = LoggerFactory.getLogger("Puzzle | Emergency Piece");
+            LOGGER = LogManager.getLogger("Puzzle | Emergency Piece");
         return LOGGER;
     }
 

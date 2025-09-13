@@ -4,8 +4,8 @@ import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.URISyntaxException;
 import java.util.Objects;
@@ -47,7 +47,7 @@ public class PrePiece {
 
     public static Logger getLogger() {
         if (LOGGER == null)
-            LOGGER = LoggerFactory.getLogger("Puzzle | Emergency Piece");
+            LOGGER = LogManager.getLogger("Puzzle | Emergency Piece");
         return LOGGER;
     }
 }

@@ -15,8 +15,8 @@ import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.FabricUtil;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
@@ -42,7 +42,7 @@ public class Piece {
 
     static AtomicReference<EnvType> env = new AtomicReference<>();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | Piece");
+    private static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
 
     public static Piece INSTANCE;
 

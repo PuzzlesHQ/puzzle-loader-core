@@ -146,11 +146,9 @@ dependencies {
 
     commonBundle "com.github.villadora:semver:0.0.3"
 
-    commonBundle 'org.slf4j:slf4j-ext:1.7.23'
-    commonBundle 'org.slf4j:slf4j-api:1.7.23'
-    commonBundle "org.apache.logging.log4j:log4j-api:$slf4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-core:$slf4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$slf4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-api:$log4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-core:$log4j_version"
+    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
     commonBundle("net.neoforged:bus:$eventbus_version") {
