@@ -180,7 +180,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
             if (connection == null) {
                 try {
-                    parent.loadClass(name);
+                    return parent.loadClass(name);
                 } catch (Exception ignore) {
                     throw new RuntimeException(name);
                 }
