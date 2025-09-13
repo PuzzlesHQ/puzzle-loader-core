@@ -148,8 +148,6 @@ dependencies {
 
     commonBundle "org.apache.logging.log4j:log4j-api:$log4j_version"
     commonBundle "org.apache.logging.log4j:log4j-core:$log4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
-
     commonBundle "org.reflections:reflections:$reflections_version"
 
     commonBundle "org.ow2.asm:asm:$asm_version"
