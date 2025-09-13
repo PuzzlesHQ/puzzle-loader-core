@@ -62,13 +62,18 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.fix.");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.util.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.launch.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.loading.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.transformers.");
         addClassLoaderExclusion("com.llamalad7");
+
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.ModContainer");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.EntrypointContainer");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Pre");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Tra");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Ga");
 
         addTransformerExclusion("javax.");
         addTransformerExclusion("argo.");
