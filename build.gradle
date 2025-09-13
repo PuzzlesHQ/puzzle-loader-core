@@ -27,8 +27,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = '17'
-    targetCompatibility = '17'
+    sourceCompatibility = '8'
+    targetCompatibility = '8'
 }
 
 sourceSets {
@@ -151,9 +151,6 @@ dependencies {
     commonBundle "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
 
     commonBundle "org.reflections:reflections:$reflections_version"
-    commonBundle("net.neoforged:bus:$eventbus_version") {
-        exclude group: "org.apache.logging.log4j", module: "log4j-api"
-    }
 
     commonBundle "org.ow2.asm:asm:$asm_version"
     commonBundle "org.ow2.asm:asm-tree:$asm_version"
@@ -328,5 +325,7 @@ wrapper {
     gradleVersion = "8.14"
     distributionType = Wrapper.DistributionType.ALL
 }
+
+//java.toolchain.languageVersion.set(JavaLanguageVersion.of("8"))
 
 //java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))

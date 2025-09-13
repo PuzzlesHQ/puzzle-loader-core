@@ -1,7 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.loading.events;
 
 import dev.puzzleshq.puzzleloader.loader.loading.GameLoader;
-import net.neoforged.bus.api.Event;
 
 /**
  * An event that gets called after all the game-loading stages have been executed.
@@ -11,6 +10,6 @@ import net.neoforged.bus.api.Event;
  *
  * @see GameLoader
  */
-public class GameLoaderFinishEvent extends Event {
+public class EventGameLoaderFinish {
 
 }

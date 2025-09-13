@@ -6,8 +6,6 @@ import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
 import dev.puzzleshq.puzzleloader.loader.util.ResourceLocation;
-import net.neoforged.bus.api.BusBuilder;
-import net.neoforged.bus.api.IEventBus;
 
 public class LoaderConstants {
 
@@ -29,8 +27,6 @@ public class LoaderConstants {
 
     }
 
-    public static IEventBus CORE_EVENT_BUS;
-
     public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
@@ -39,10 +35,6 @@ public class LoaderConstants {
     public static final String SHORT_MIXIN_VERSION = FULL_MIXIN_VERSION.replaceAll("\\+.*", "");
 
     public static final boolean IS_CORE_DEV = getPuzzleCoreVersion().equals("69.69.69");
-
-    static {
-        CORE_EVENT_BUS = BusBuilder.builder().build();
-    }
 
     private static String getPuzzleCoreVersion() {
         RawAssetLoader.RawFileHandle handle = RawAssetLoader.getClassPathAsset(ResourceLocation.of("puzzle-loader-core:core-version.txt"));

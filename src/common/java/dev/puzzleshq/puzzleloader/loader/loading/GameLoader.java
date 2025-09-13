@@ -1,9 +1,11 @@
 package dev.puzzleshq.puzzleloader.loader.loading;
 
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
-import dev.puzzleshq.puzzleloader.loader.loading.events.GameLoaderFinishEvent;
-import dev.puzzleshq.puzzleloader.loader.loading.events.RegisterStagesEvent;
+import dev.puzzleshq.puzzleloader.loader.loading.events.EventGameLoaderFinish;
+import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
+import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.GameLoaderStageInitializer;
 import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
+import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +41,13 @@ public class GameLoader {
         bar2.setVisible(false);
         bar3.setVisible(false);
 
-        LoaderConstants.CORE_EVENT_BUS.post(new RegisterStagesEvent(this));
+        EventRegisterStages registerStages = new EventRegisterStages(this);
+
+        PuzzleEntrypointUtil.invoke(
+                GameLoaderStageInitializer.ENTRYPOINT_KEY,
+                GameLoaderStageInitializer.class,
+                (init) -> init.onGameLoadingStageRegister(registerStages)
+        );
 
         Thread thread = new Thread(this::gameLoadingThread, "Game-Loader");
         ThreadExceptionCatcher.attach(thread);
@@ -111,7 +119,13 @@ public class GameLoader {
             System.gc();
         }
 
-        LoaderConstants.CORE_EVENT_BUS.post(new GameLoaderFinishEvent());
+        EventGameLoaderFinish gameLoaderFinish = new EventGameLoaderFinish();
+
+        PuzzleEntrypointUtil.invoke(
+                GameLoaderStageInitializer.ENTRYPOINT_KEY,
+                GameLoaderStageInitializer.class,
+                (init) -> init.onGameLoadingFinish(gameLoaderFinish)
+        );
 
         this.cleanup();
 

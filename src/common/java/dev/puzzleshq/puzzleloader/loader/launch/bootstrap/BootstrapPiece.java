@@ -33,22 +33,36 @@ public class BootstrapPiece {
             String value = i == args.length - 1 ? "true" : args[i + 1].toLowerCase(Locale.ROOT).toLowerCase(Locale.ROOT);
 
             switch (arg) {
-                case "--allow-class-overrides=true" -> overrides = true;
-                case "--allow-class-overrides=false" -> overrides = false;
-                case "--allow-class-overrides" -> {
+                case "--allow-class-overrides=true": {
+                    overrides = true;
+                    break;
+                }
+                case "--allow-class-overrides=false": {
+                    overrides = false;
+                    break;
+                }
+                case "--allow-class-overrides": {
                     if (value.equals("false") || value.equals("true")) {
                         overrides = value.equals("true");
                     } else overrides = true;
+                    break;
                 }
             }
 
             switch (arg) {
-                case "--dump-transformed-classes=true" -> dumpClasses = true;
-                case "--dump-transformed-classes=false" -> dumpClasses = false;
-                case "--dump-transformed-classes" -> {
+                case "--dump-transformed-classes=true": {
+                    overrides = true;
+                    break;
+                }
+                case "--dump-transformed-classes=false": {
+                    overrides = false;
+                    break;
+                }
+                case "--dump-transformed-classes": {
                     if (value.equals("false") || value.equals("true")) {
                         overrides = value.equals("true");
                     } else overrides = true;
+                    break;
                 }
             }
 

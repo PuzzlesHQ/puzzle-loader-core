@@ -152,7 +152,9 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
             CodeSource source = null;
 
-            if (connection instanceof JarURLConnection jarConnection) {
+            if (connection instanceof JarURLConnection) {
+                JarURLConnection  jarConnection = (JarURLConnection) connection;
+
                 JarFile jar = jarConnection.getJarFile();
 
                 if (jar != null && jar.getManifest() != null) {
