@@ -47,7 +47,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
     public PieceClassLoader(URL[] sources, ClassLoader parent) {
         super(sources, parent);
-        this.sources.addAll(List.of(sources));
+        this.sources.addAll(Arrays.asList(sources));
 
         addClassLoaderExclusion("java.");
         addClassLoaderExclusion("com.sun.");
@@ -76,7 +76,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
 
     public PieceClassLoader(List<URL> sources, ClassLoader parent) {
-        this(sources.toArray(URL[]::new), parent);
+        this(sources.toArray(new URL[0]), parent);
     }
 
     @Override

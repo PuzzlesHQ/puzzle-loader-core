@@ -1,6 +1,7 @@
 package dev.puzzleshq.puzzleloader.minecraft.launch;
 
 import org.hjson.JsonObject;
+import sun.misc.IOUtils;
 
 import java.io.*;
 
@@ -18,7 +19,7 @@ public class MinecraftAssetDictionary {
             File index = new File(dir, "indexes/" + indexStr + ".json");
             FileInputStream stream = new FileInputStream(index);
 
-            String s = new String(stream.readAllBytes());
+            String s = new String(IOUtils.readAllBytes(stream));
             stream.close();
             object = JsonObject.readJSON(s).asObject();
             assets = object.get("objects").asObject();
@@ -43,7 +44,7 @@ public class MinecraftAssetDictionary {
 
             InputStream in = new FileInputStream(hashFile);
             OutputStream out = new FileOutputStream(assetFile);
-            out.write(in.readAllBytes());
+            out.write(IOUtils.readAllBytes(in));
             out.close();
             in.close();
         } catch (IOException e) {

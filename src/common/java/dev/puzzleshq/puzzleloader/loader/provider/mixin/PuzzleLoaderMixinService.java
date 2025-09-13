@@ -47,6 +47,7 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import org.spongepowered.asm.util.ReEntranceLock;
 import org.spongepowered.asm.util.perf.Profiler;
 import org.spongepowered.asm.util.perf.Profiler.Section;
+import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -434,7 +435,8 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             final String resourcePath = transformedName.replace('.', '/').concat(".class");
             classStream = appClassLoader.getResourceAsStream(resourcePath);
             assert classStream != null;
-            return classStream.readAllBytes();
+
+            return IOUtils.readAllBytes(classStream);
         } catch (Exception ex) {
             return null;
         } finally {

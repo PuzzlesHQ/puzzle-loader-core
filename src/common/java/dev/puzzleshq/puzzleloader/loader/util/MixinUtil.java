@@ -6,6 +6,7 @@ import org.spongepowered.asm.launch.platform.CommandLineOptions;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -34,7 +35,7 @@ public class MixinUtil {
 
     public static void doInit(String[] args) {
         try {
-            ReflectionUtil.getMethod(MixinBootstrap.class, MIXIN_DO_INIT, CommandLineOptions.class).invoke(null, CommandLineOptions.of(List.of(args)));
+            ReflectionUtil.getMethod(MixinBootstrap.class, MIXIN_DO_INIT, CommandLineOptions.class).invoke(null, CommandLineOptions.of(Arrays.asList(args)));
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }

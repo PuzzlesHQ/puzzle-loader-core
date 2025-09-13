@@ -16,6 +16,7 @@ import javassist.bytecode.DuplicateMemberException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hjson.JsonObject;
+import sun.misc.IOUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -114,7 +115,7 @@ public class ModFinder {
                         JarEntry entry = jar.getJarEntry("puzzle.mod.json");
                         if (entry != null) {
                             InputStream jsonInputStream = jar.getInputStream(entry);
-                            byte[] bytes = jsonInputStream.readAllBytes();
+                            byte[] bytes = IOUtils.readAllBytes(jsonInputStream);
                             jsonInputStream.close();
 
                             addModToArray(ModInfo.readFromString(new String(bytes)), jar);
@@ -127,7 +128,7 @@ public class ModFinder {
                     while ((entry = stream.getNextEntry()) != null) {
                         if (!entry.getName().equals("puzzle.mod.json")) continue;
 
-                        byte[] bytes = stream.readAllBytes();
+                        byte[] bytes = IOUtils.readAllBytes(stream);
 
                         addModToArray(ModInfo.readFromString(new String(bytes)), null);
                         break;
@@ -169,7 +170,7 @@ public class ModFinder {
                 try {
                 InputStream jsonInputStream = new FileInputStream(f);
 
-                byte[] bytes = jsonInputStream.readAllBytes();
+                byte[] bytes = IOUtils.readAllBytes(jsonInputStream);
                 jsonInputStream.close();
 
                 addModToArray(ModInfo.readFromString(new String(bytes)), null);

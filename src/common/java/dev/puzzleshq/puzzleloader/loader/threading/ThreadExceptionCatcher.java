@@ -26,7 +26,7 @@ public class ThreadExceptionCatcher implements Thread.UncaughtExceptionHandler {
 
         try {
             byte[] bytes = dataStream.toByteArray();
-            System.err.writeBytes(bytes);
+            System.err.write(bytes);
 
             File file = new File("thread-exception-log--" + t.getName() + ".txt");
             if (!file.exists()) file.createNewFile();
