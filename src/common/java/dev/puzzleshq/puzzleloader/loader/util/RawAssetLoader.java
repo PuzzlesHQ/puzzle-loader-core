@@ -2,7 +2,6 @@ package dev.puzzleshq.puzzleloader.loader.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.misc.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class RawAssetLoader {
      */
     private static byte[] getBytesFromStream(InputStream stream) {
         try {
-            byte[] bytes = IOUtils.readAllBytes(stream);
+            byte[] bytes = JavaUtils.readAllBytes(stream);
             stream.close();
             return bytes;
         } catch (Exception ignore) {

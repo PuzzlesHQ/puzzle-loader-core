@@ -1,7 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.mod.entrypoint;
 
-import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventGameLoaderFinish;
+import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
 
 public interface GameLoaderStageInitializer {
 

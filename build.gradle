@@ -1,8 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.puzzleshq.accesswriter.AccessWriters
+import dev.puzzleshq.buildsrc.GenericTransformer
 import me.lucko.jarrelocator.JarRelocator
 import me.lucko.jarrelocator.Relocation
-import dev.puzzleshq.buildsrc.GenericTransformer
+
 import static org.gradle.api.artifacts.transform.TransformParameters.None
 
 plugins {

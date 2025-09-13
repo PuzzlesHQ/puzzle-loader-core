@@ -1,8 +1,8 @@
+import datetime
 import json
 import os
 import subprocess
 import time
-import datetime
 
 # required since it executes differently depending on where the main file is called from
 try:

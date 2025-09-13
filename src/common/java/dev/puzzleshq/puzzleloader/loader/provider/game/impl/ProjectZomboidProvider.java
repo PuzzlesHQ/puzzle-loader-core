@@ -2,7 +2,6 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;

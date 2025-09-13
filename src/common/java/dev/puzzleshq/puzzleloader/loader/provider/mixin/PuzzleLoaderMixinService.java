@@ -27,6 +27,7 @@ package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
 import dev.puzzleshq.puzzleloader.loader.provider.mixin.transformers.BetterProxy;
+import dev.puzzleshq.puzzleloader.loader.util.JavaUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,6 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import org.spongepowered.asm.util.ReEntranceLock;
 import org.spongepowered.asm.util.perf.Profiler;
 import org.spongepowered.asm.util.perf.Profiler.Section;
-import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -436,7 +436,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             classStream = appClassLoader.getResourceAsStream(resourcePath);
             assert classStream != null;
 
-            return IOUtils.readAllBytes(classStream);
+            return JavaUtils.readAllBytes(classStream);
         } catch (Exception ex) {
             return null;
         } finally {

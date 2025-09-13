@@ -1,8 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
 import com.github.villadora.semver.SemVer;
-import com.github.villadora.semver.Version;
-import com.github.villadora.semver.ranges.Range;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
@@ -16,7 +14,6 @@ import javassist.bytecode.DuplicateMemberException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hjson.JsonObject;
-import sun.misc.IOUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -115,7 +112,7 @@ public class ModFinder {
                         JarEntry entry = jar.getJarEntry("puzzle.mod.json");
                         if (entry != null) {
                             InputStream jsonInputStream = jar.getInputStream(entry);
-                            byte[] bytes = IOUtils.readAllBytes(jsonInputStream);
+                            byte[] bytes = JavaUtils.readAllBytes(jsonInputStream);
                             jsonInputStream.close();
 
                             addModToArray(ModInfo.readFromString(new String(bytes)), jar);
@@ -128,7 +125,7 @@ public class ModFinder {
                     while ((entry = stream.getNextEntry()) != null) {
                         if (!entry.getName().equals("puzzle.mod.json")) continue;
 
-                        byte[] bytes = IOUtils.readAllBytes(stream);
+                        byte[] bytes = JavaUtils.readAllBytes(stream);
 
                         addModToArray(ModInfo.readFromString(new String(bytes)), null);
                         break;
@@ -170,7 +167,7 @@ public class ModFinder {
                 try {
                 InputStream jsonInputStream = new FileInputStream(f);
 
-                byte[] bytes = IOUtils.readAllBytes(jsonInputStream);
+                byte[] bytes = JavaUtils.readAllBytes(jsonInputStream);
                 jsonInputStream.close();
 
                 addModToArray(ModInfo.readFromString(new String(bytes)), null);
