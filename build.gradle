@@ -192,6 +192,13 @@ tasks.register("buildMergedTestJar", ShadowJar) {
     from sourceSets.client.output
 }
 
+tasks.register("buildServerJar", ShadowJar) {
+    mergeServiceFiles()
+
+    archiveClassifier = "server"
+    from sourceSets.server.output
+}
+
 tasks.register("buildCommonJar", ShadowJar) {
     mergeServiceFiles()
 
@@ -209,6 +216,7 @@ tasks.register("buildClientJar", ShadowJar) {
 tasks.register("buildSourcesJar", Jar) {
     from sourceSets.client.allSource
     from sourceSets.common.allSource
+    from sourceSets.server.allSource
     archiveClassifier = "sources"
 }
 
@@ -241,14 +249,25 @@ tasks.register("mkDeps") {
     }
     contents += "\n\t],\n\t\"client\": ["
 
-    for (i in 0..<configurations.clientImpl.allDependencies.size()) {
-        def dependency = configurations.clientImpl.allDependencies[i];
+    for (i in 0..<configurations.commonBundle.allDependencies.size()) {
+        def dependency = configurations.commonBundle.allDependencies[i];
+        contents += """\n\t\t{
+\t\t\t\"groupId\": \"${dependency.group}\",
+\t\t\t\"artifactId\": \"${dependency.name}\",
+\t\t\t\"version\": \"${dependency.version}\",
+\t\t\t\"type\": \"implementation\"
+\t\t}""" + (i != configurations.commonBundle.allDependencies.size() - 1 ? "," : "")
+    }
+    contents += "\n\t],\n\t\"server\": ["
+
+    for (i in 0..<configurations.serverImpl.allDependencies.size()) {
+        def dependency = configurations.serverImpl.allDependencies[i];
         contents += """\n\t\t{
 \t\t\t\"groupId\": \"${dependency.group}\",
 \t\t\t\"artifactId\": \"${dependency.name}\",
 \t\t\t\"version\": \"${dependency.version}\",
 \t\t\t\"type\": \"compileOnly\"
-\t\t}""" + (i != configurations.clientImpl.allDependencies.size() - 1 ? "," : "")
+\t\t}""" + (i != configurations.serverImpl.allDependencies.size() - 1 ? "," : "")
     }
     contents += "\n\t]"
 
@@ -291,6 +310,7 @@ publishing {
 
             artifact source: buildClientJar, classifier: 'client', extension: 'jar'
             artifact source: buildCommonJar, classifier: 'common', extension: 'jar'
+            artifact source: buildServerJar, classifier: 'server', extension: 'jar'
             artifact source: buildSourcesJar, classifier: 'sources', extension: 'jar'
 
             pom {
