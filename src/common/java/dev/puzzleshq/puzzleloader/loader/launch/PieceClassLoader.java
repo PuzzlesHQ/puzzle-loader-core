@@ -57,6 +57,8 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         addClassLoaderExclusion("org.slf4j");
         addClassLoaderExclusion("com.google.");
         addClassLoaderExclusion("org.hjson.");
+        addClassLoaderExclusion("org.xml.");
+        addClassLoaderExclusion("org.w3c.");
 
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.fix.");
