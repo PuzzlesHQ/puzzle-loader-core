@@ -158,6 +158,7 @@ dependencies {
         exclude group: "com.google.guava", module: "guava"
     }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
+    commonBundle "com.google.guava:guava:$guava_version"
 
     commonBundle "com.github.villadora:semver:0.0.3"
 
