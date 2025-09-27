@@ -4,7 +4,7 @@ import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 
 public interface ClientPostModInit {
 
-    String ENTRYPOINT_KEY = "client-init";
+    String ENTRYPOINT_KEY = "client-postInit";
 
     void onClientPostInit();
 
