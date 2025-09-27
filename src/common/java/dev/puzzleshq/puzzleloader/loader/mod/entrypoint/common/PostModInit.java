@@ -4,7 +4,7 @@ import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 
 public interface PostModInit {
 
-    String ENTRYPOINT_KEY = "init";
+    String ENTRYPOINT_KEY = "postInit";
 
     void onPostInit();
 
