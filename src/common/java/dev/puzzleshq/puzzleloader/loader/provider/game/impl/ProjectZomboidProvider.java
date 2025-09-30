@@ -131,9 +131,15 @@ public class ProjectZomboidProvider implements IGameProvider {
         }
     }
 
+    @Override
+    public boolean isBinaryPatchable() {
+        return false;
+    }
+
     private void fetchGameVersion() {
         try {
             RawAssetLoader.RawFileHandle core = RawAssetLoader.getLowLevelClassPathAssetErrors("zombie/core/Core.class", false);
+            assert core != null;
             ByteArrayInputStream is = new ByteArrayInputStream(core.getBytes());
             ClassReader cr = new ClassReader(is);
             VersionVisitor finder = new VersionVisitor();

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -76,6 +77,18 @@ public class RawAssetLoader {
 
     public static RawFileHandle getZipAsset(ZipFile file, ResourceLocation location) {
         return getZipAssetErrors(file, location, true);
+    }
+
+    public static URL getLowLevelClassPathUrl(String path) {
+        String softPath;
+
+        if (path.startsWith("/")) {
+            softPath = ("/" + path).replaceAll("//", "");
+        } else {
+            softPath = path;
+        }
+
+        return Thread.currentThread().getContextClassLoader().getResource(softPath);
     }
 
     /**

@@ -16,7 +16,7 @@ plugins {
 var manipulator = file("$projectDir/src/common/resources/puzzle-loader-core.manipulator")
 
 def ref = System.getenv("GITHUB_REF")
-version = (ref != null && ref.startsWith("refs/tags/")) ? ref.tokenize('/').last().replaceFirst(/^v/, '') : p_version
+version = ((ref == null) ? "refs/tags/0.0.0-alpha" : ref).replaceAll("refs/tags/", "")
 
 String mavenUrl = System.getenv("MAVEN_URL")
 
@@ -151,6 +151,7 @@ dependencies {
 
     // Common
     commonImplementation 'org.jetbrains:annotations:24.0.0'
+    commonImplementation 'io.sigpipe:jbsdiff:1.0'
 
     commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
     commonBundle("net.fabricmc:sponge-mixin:$mixin_version") {
@@ -277,7 +278,7 @@ tasks.register("mkDeps") {
 
 processCommonResources {
     Map<String, Object> replacement_properties = [
-            "version": ((String)version).contains(".") ? version : "69.69.69",
+            "version": ((String)version).contains(".") ? version : "0.0.0-alpha",
             "mixinVersion": mixin_version,
     ]
 

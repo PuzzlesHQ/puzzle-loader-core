@@ -3,6 +3,8 @@ package dev.puzzleshq.puzzleloader.loader.provider.game;
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 
+import javax.annotation.Nullable;
+import java.net.URL;
 import java.util.Collection;
 
 public interface IGameProvider {
@@ -29,4 +31,13 @@ public interface IGameProvider {
     String getDefaultNamespace();
 
     boolean isValid();
+
+    default @Nullable URL getJarLocation() {
+        return null;
+    }
+
+    default boolean isBinaryPatchable() {
+        return true;
+    }
+
 }

@@ -187,17 +187,16 @@ public class ModFinder {
      */
     private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar) {
         if (!info.getLoadableSides().get(Piece.getSide().name)) {
-            LOGGER.warn("Found Mod \"{}\" at jar \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), jar, Piece.getSide().name);
+            LOGGER.warn("Found Mod \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), Piece.getSide().name);
             return;
         }
 
-        String text = jar == null ? "Development" : "";
         if (MODS.containsKey(info.getId()))
-            throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + info.getId() + "}\" at jar \"" + jar + "\""));
+            throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + info.getId() + "}\", Version: \"" + info.getVersion()));
 
         LOGGER.info(
-                "Discovered {} Mod DisplayName: \"{}\", ID: \"{}\", JarFile: \"{}\"",
-                text, info.getDisplayName(), info.getId(), jar
+                "Discovered Mod DisplayName: \"{}\", ID: \"{}\", Version: \"{}\"",
+                info.getDisplayName(), info.getId(), info.getVersion()
         );
 
         IModContainer container = new ModContainer(info);

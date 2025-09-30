@@ -2,6 +2,7 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
+import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
@@ -9,7 +10,12 @@ import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.hjson.JsonObject;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
@@ -118,27 +124,37 @@ public class CosmicReachProvider implements IGameProvider {
         return "base";
     }
 
+    boolean isValid = false;
+    String validClass;
+
     @Override
     public boolean isValid() {
+        if (isValid) return true;
+
+        String launcher = "finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
+        if (Piece.getSide() == EnvType.SERVER) launcher = "finalforeach/cosmicreach/server/ServerLauncher.class";
         try {
-            String launcher = isRunningOnParadox() ? CosmicReachProvider.PARADOX_SERVER_ENTRYPOINT_CLASS : "finalforeach/cosmicreach/server/ServerLauncher.class";
-            if (Piece.getSide() == EnvType.SERVER) {
-                try {
-                    RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                    return true;
-                } catch (Exception ignore) {
-                    throw new RuntimeException("Cosmic Reach Server Main does not exist.");
-                }
-            }
-            try {
-                launcher = "finalforeach/cosmicreach/lwjgl3/Lwjgl3Launcher.class";
-                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-            } catch (Exception e) {
-                throw new RuntimeException("Cosmic Reach Main does not exist.");
-            }
-            return true;
-        } catch (Exception ignore) {
-            return false;
+            RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
+            validClass = launcher;
+            return isValid = true;
+        } catch (Exception ignore) {}
+        return isValid = false;
+    }
+
+    @Override
+    public @Nullable URL getJarLocation() {
+        if (LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE == null) return null;
+
+        URL url = RawAssetLoader.getLowLevelClassPathUrl(validClass);
+        try {
+            URLConnection connection = url.openConnection();
+            if (connection instanceof JarURLConnection) {
+                JarURLConnection jarURLConnection = ((JarURLConnection) connection);
+
+                return jarURLConnection.getJarFileURL();
+            } else throw new RuntimeException("HoW?!");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

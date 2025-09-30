@@ -9,6 +9,8 @@ import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
+import dev.puzzleshq.puzzleloader.loader.patching.PatchLoader;
+import dev.puzzleshq.puzzleloader.loader.patching.PatchPamphlet;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
@@ -25,6 +27,7 @@ import org.spongepowered.asm.mixin.transformer.Config;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -100,7 +103,12 @@ public class Piece {
             OptionSpec<Boolean> user_transformers_enabled = parser.accepts("user-transformers-enabled")
                     .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
 
+            OptionSpec<String> patch_file = parser.accepts("pamphlet")
+                    .withOptionalArg().ofType(String.class).defaultsTo(null);
+
             final OptionSet options = parser.parse(args);
+
+            LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE = patch_file.value(options);
 
             LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
             LoaderConstants.CLIConfiguration.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
@@ -133,6 +141,15 @@ public class Piece {
             }
             if (!provider.isValid())
                 throw new RuntimeException("Couldn't load any game provider for this particular application.");
+
+            URL jarURL = provider.getJarLocation();
+            if (provider.isBinaryPatchable() && jarURL != null) {
+                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE));
+                if (!pamphlet.isRipped()) {
+                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ") :D");
+                    // TODO: Continue
+                }
+            }
 
             ModFormats.register(ModFinder::getMod);
             ModFinder.findMods();
