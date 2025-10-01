@@ -1,0 +1,31 @@
+{
+  "display-name": "Patchy The Pirate's Patch",
+  "version": "69.69.69-alpha",
+  "canMerge": false,
+  "client": {
+    "patch-order": [
+      "binary-patch-one.patch",
+      "binary-patch-two.patch",
+      "binary-patch-three.patch",
+      "binary-patch-four.patch",
+      "binary-patch-five.patch",
+      "binary-patch-six.patch",
+      "binary-patch-seven.patch",
+      "binary-patch-eight.patch"
+    ],
+    "SHA-256": "d45f682e4e2c75d1301efafe630282fbad7a53b513b81053790c244087073748"
+  },
+  "server": {
+    "patch-order": [
+      "binary-patch-one.patch",
+      "binary-patch-two.patch",
+      "binary-patch-three.patch",
+      "binary-patch-four.patch",
+      "binary-patch-five.patch",
+      "binary-patch-six.patch",
+      "binary-patch-seven.patch",
+      "binary-patch-eight.patch"
+    ],
+    "SHA-256": "d167591a98933317f4397e638b6e622fa09cce52640b06d2cbca176e25742f4d"
+  }
+}

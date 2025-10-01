@@ -10,6 +10,7 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
 import dev.puzzleshq.puzzleloader.loader.patching.PatchLoader;
+import dev.puzzleshq.puzzleloader.loader.patching.PatchPage;
 import dev.puzzleshq.puzzleloader.loader.patching.PatchPamphlet;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
@@ -24,7 +25,7 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.transformer.Config;
 
-import java.io.File;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -104,7 +105,7 @@ public class Piece {
                     .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
 
             OptionSpec<String> patch_file = parser.accepts("pamphlet")
-                    .withOptionalArg().ofType(String.class).defaultsTo(null);
+                    .withOptionalArg().ofType(String.class).defaultsTo("");
 
             final OptionSet options = parser.parse(args);
 
@@ -129,25 +130,23 @@ public class Piece {
             }
 
             ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
-            ModFinder.crawlModsFolder();
+            {
+                AtomicReference<String> atomicGameProvider = new AtomicReference<>();
+                AtomicReference<URL> gameJar = new AtomicReference<>();
+                if (options.has(game_provider)) atomicGameProvider.set(options.valueOf(game_provider));
+                URL url = setup(atomicGameProvider, gameJar, true);
+                if (gameJar.get() != null) {
+                    classLoader = new PieceClassLoader();
+                    Thread.currentThread().setContextClassLoader(classLoader);
+                    classLoader.addURL(url);
 
-            if (options.has(game_provider))
-                provider = (IGameProvider) Class.forName(game_provider.value(options), true, classLoader).newInstance();
-            else {
-                for (String builtInProvider : BUILT_IN_PROVIDERS) {
-                    provider = (IGameProvider) Class.forName(builtInProvider, true, classLoader).newInstance();
-                    if (provider.isValid()) break;
-                }
-            }
-            if (!provider.isValid())
-                throw new RuntimeException("Couldn't load any game provider for this particular application.");
+                    for (URL jvmClassPathUrl : ClassPathUtil.getJVMClassPathUrls()) {
+                        if (!jvmClassPathUrl.equals(gameJar.get())) {
+                            classLoader.addURL(jvmClassPathUrl);
+                        }
+                    }
 
-            URL jarURL = provider.getJarLocation();
-            if (provider.isBinaryPatchable() && jarURL != null) {
-                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE));
-                if (!pamphlet.isRipped()) {
-                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ") :D");
-                    // TODO: Continue
+                    setup(atomicGameProvider, new AtomicReference<>(), false);
                 }
             }
 
@@ -186,12 +185,70 @@ public class Piece {
 
             PreLaunchInit.invoke();
             OffThreadExecutor.start();
-            LOGGER.info("Launching {} version {}", provider.getName(), provider.getRawVersion());
+            LOGGER.info("Launching {} version {}", provider.getName(), provider.getVisibleVersion());
             main.invoke(null, (Object) providerArgs);
         } catch (Exception e) {
             LOGGER.error("Unable To Launch", e);
             System.exit(1);
         }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private URL setup(AtomicReference<String> game_provider, AtomicReference<URL> gameJar, boolean doProviderChecks) throws Exception {
+        ModFinder.crawlModsFolder();
+
+        if (doProviderChecks) {
+            if (game_provider.get() != null)
+                provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
+            else {
+                for (String builtInProvider : BUILT_IN_PROVIDERS) {
+                    provider = (IGameProvider) Class.forName(builtInProvider, true, classLoader).newInstance();
+                    if (provider.isValid()) break;
+                }
+            }
+            if (!provider.isValid())
+                throw new RuntimeException("Couldn't load any game provider for this particular application.");
+        } else {
+            provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
+        }
+
+        if (doProviderChecks) {
+            game_provider.set(provider.getClass().getName());
+
+            URL jarURL = provider.getJarLocation();
+            if (provider.isBinaryPatchable() && jarURL != null && !LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE.isEmpty()) {
+                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE));
+                if (!pamphlet.isRipped()) {
+                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ") :D");
+
+                    PatchPage patchPage = pamphlet.getClientPatches();
+                    if (Piece.getSide() == EnvType.SERVER) patchPage = pamphlet.getServerPatches();
+                    if (patchPage != null) {
+                        gameJar.set(jarURL);
+
+                        File file = new File("./.puzzle/patched/" + patchPage.getChecksum().substring(0, 2) + "/" + patchPage.getChecksum() + ".jar");
+                        if (!file.exists()) {
+                            InputStream inputStream = jarURL.openStream();
+                            byte[] bytes = JavaUtils.readAllBytes(inputStream);
+                            inputStream.close();
+
+                            file.getParentFile().mkdirs();
+
+                            FileOutputStream out = new FileOutputStream(file);
+                            patchPage.apply(bytes, out);
+                            out.close();
+                        }
+
+                        return file.toURI().toURL();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void addURL(URL url) {
+        classLoader.addURL(url);
     }
 
     private void addFile(File file) {

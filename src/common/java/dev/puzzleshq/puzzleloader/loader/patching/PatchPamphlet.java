@@ -17,7 +17,13 @@ public class PatchPamphlet {
         this.clientPatches = clientPatches;
         this.serverPatches = serverPatches;
 
-        if (clientPatches == null || serverPatches == null)
+        if (this.clientPatches != null)
+            this.clientPatches.setParent(this);
+
+        if (this.serverPatches != null)
+            this.serverPatches.setParent(this);
+
+        if (clientPatches == null && serverPatches == null)
             System.out.println("Someone ripped a patch pamphlet (Name: \"" + this.displayName + "\", \"Version\": " + this.version + ") :( {insert_sad_trumpet_noise}");
     }
 

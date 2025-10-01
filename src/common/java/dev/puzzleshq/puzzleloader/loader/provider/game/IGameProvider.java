@@ -40,4 +40,7 @@ public interface IGameProvider {
         return true;
     }
 
+    default String getVisibleVersion() {
+        return getRawVersion();
+    }
 }

@@ -219,6 +219,11 @@ public class RawAssetLoader {
             bytes = null;
             file = null;
         }
+
+        @Override
+        public String toString() {
+            return "{ RawFileHandle, Name: \"" + file + "\", Size: \"" + bytes.length + "\" }";
+        }
     }
 
 }

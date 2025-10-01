@@ -1,6 +1,8 @@
 package dev.puzzleshq.puzzleloader.loader;
 
 import dev.puzzleshq.annotation.documentation.Note;
+import dev.puzzleshq.puzzleloader.loader.launch.Piece;
+import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import dev.puzzleshq.puzzleloader.loader.util.ReflectionUtil;
 import dev.puzzleshq.puzzleloader.loader.util.ResourceLocation;
@@ -24,6 +26,8 @@ public class LoaderConstants {
         }
 
     }
+
+    public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();
 

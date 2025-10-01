@@ -34,9 +34,11 @@ public class CosmicReachProvider implements IGameProvider {
         return "cosmic-reach";
     }
 
+    String name = "Cosmic Reach";
+
     @Override
     public String getName() {
-        return "Cosmic Reach";
+        return name;
     }
 
     @Override
@@ -78,6 +80,7 @@ public class CosmicReachProvider implements IGameProvider {
         try {
             RawAssetLoader.getLowLevelClassPathAssetErrors(PARADOX_SERVER_ENTRYPOINT_CLASS, false).dispose();
             paradoxExist.set(true);
+            name = "Puzzle Paradox";
             return true;
         } catch (NullPointerException ignore) {
             paradoxExist.set(false);
@@ -92,6 +95,21 @@ public class CosmicReachProvider implements IGameProvider {
         }
 
         return "finalforeach.cosmicreach.lwjgl3.Lwjgl3Launcher";
+    }
+
+    String paradoxVersion = "";
+
+    @Override
+    public String getVisibleVersion() {
+        if (isRunningOnParadox()) {
+            try {
+                return paradoxVersion = Class.forName("com.github.puzzle.paradox.core.PuzzlePL", false, Piece.classLoader).getPackage().getImplementationVersion();
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return getRawVersion();
     }
 
     public Collection<String> getArgs() {
@@ -109,13 +127,25 @@ public class CosmicReachProvider implements IGameProvider {
     public void addBuiltinMods() {
         ModInfoBuilder cosmicModInfo = new ModInfoBuilder();
         {
-            cosmicModInfo.setDisplayName(getName());
+            cosmicModInfo.setDisplayName("Cosmic Reach");
             cosmicModInfo.setId(getId());
             cosmicModInfo.setDescription("The base game.");
             cosmicModInfo.addAuthor("FinalForEach");
             cosmicModInfo.setVersion(getGameVersion().toString());
             cosmicModInfo.addMeta("icon", JsonObject.valueOf("icons/logox256.png"));
             ModFinder.addModWithContainer(new ModContainer(cosmicModInfo.build()));
+        }
+
+        if (isRunningOnParadox()) {
+            ModInfoBuilder paradoxModInfo = new ModInfoBuilder();
+            {
+                paradoxModInfo.setDisplayName("Paradox");
+                paradoxModInfo.setId("puzzle-paradox");
+                paradoxModInfo.setDescription("The Paradox Plugin Loader");
+                paradoxModInfo.addAuthor("Replet");
+                paradoxModInfo.setVersion(getVisibleVersion());
+                ModFinder.addModWithContainer(new ModContainer(paradoxModInfo.build()));
+            }
         }
     }
 
