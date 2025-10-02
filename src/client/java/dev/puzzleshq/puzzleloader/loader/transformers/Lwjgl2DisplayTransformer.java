@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -30,8 +30,8 @@ public class Lwjgl2DisplayTransformer extends ClassVisitor {
             if (opcode == Opcodes.GETSTATIC) {
                 if (owner.equals("org.lwjgl.opengl.Display".replaceAll("\\.", "/")) && name.equals("title")) {
                     super.visitFieldInsn(opcode, owner, name, descriptor);
-                    if (LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER) {
-                        super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConstants$CLIConfiguration", "formatTitle", "(Ljava/lang/CharSequence;)Ljava/lang/String;", false);
+                    if (LoaderConfig.DO_TITLE_TRANSFORMER) {
+                        super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/loader/LoaderConfig", "formatTitle", "(Ljava/lang/CharSequence;)Ljava/lang/String;", false);
                     }
                     super.visitMethodInsn(Opcodes.INVOKESTATIC, "dev/puzzleshq/puzzleloader/minecraft/launch/MinecraftAppletLauncher", "setTitle", "(Ljava/lang/String;)Ljava/lang/String;", false);
                     return;

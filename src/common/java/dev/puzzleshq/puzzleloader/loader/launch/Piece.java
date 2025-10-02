@@ -6,7 +6,7 @@ import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.util.MixinConfig;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
 import dev.puzzleshq.puzzleloader.loader.patching.PatchLoader;
@@ -25,7 +25,9 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.transformer.Config;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,7 +55,7 @@ public class Piece {
     public static void launch(String[] args, EnvType type) {
         Piece piece = new Piece();
         env.set(type);
-        piece.launchPriv(args);
+        piece.privateLaunch(args);
     }
 
     private Piece() {
@@ -73,8 +75,8 @@ public class Piece {
         return env.get();
     }
 
-    private void launchPriv(String[] args) {
-        LoaderConstants.CLIConfiguration.COMMAND_LINE_ARGUMENTS = args;
+    private void privateLaunch(String[] args) {
+        LoaderConfig.COMMAND_LINE_ARGUMENTS = args;
 
         final OptionParser parser = new OptionParser();
         parser.allowsUnrecognizedOptions();
@@ -109,15 +111,15 @@ public class Piece {
 
             final OptionSet options = parser.parse(args);
 
-            LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE = patch_file.value(options);
+            LoaderConfig.PATCH_PAMPHLET_FILE = patch_file.value(options);
 
-            LoaderConstants.CLIConfiguration.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
-            LoaderConstants.CLIConfiguration.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
-            LoaderConstants.CLIConfiguration.MIXINS_ENABLED = mixins_enabled.value(options);
-            LoaderConstants.CLIConfiguration.DUMP_TRANSFORMED_CLASSES = PieceClassLoader.dumpClasses;
-            LoaderConstants.CLIConfiguration.ALLOWS_CLASS_OVERRIDES = PieceClassLoader.overrides;
-            LoaderConstants.CLIConfiguration.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
-            LoaderConstants.CLIConfiguration.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
+            LoaderConfig.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
+            LoaderConfig.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
+            LoaderConfig.MIXINS_ENABLED = mixins_enabled.value(options);
+            LoaderConfig.DUMP_TRANSFORMED_CLASSES = PieceClassLoader.dumpClasses;
+            LoaderConfig.ALLOWS_CLASS_OVERRIDES = PieceClassLoader.overrides;
+            LoaderConfig.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
+            LoaderConfig.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
 
             if (options.has(mod_paths)) {
                 String v = mod_paths.value(options);
@@ -155,16 +157,16 @@ public class Piece {
 
             AccessWriters.init(classLoader);
             discoverAccessWriters(ModFinder.getModsArray());
-            if (LoaderConstants.CLIConfiguration.USER_TRANSFORMERS_ENABLED)
+            if (LoaderConfig.USER_TRANSFORMERS_ENABLED)
                 TransformerInit.invokeTransformers(classLoader);
 
             provider.initArgs(args);
 
-            if (LoaderConstants.CLIConfiguration.TRANSFORMERS_ENABLED)
+            if (LoaderConfig.TRANSFORMERS_ENABLED)
                 provider.registerTransformers(classLoader);
             provider.inject(classLoader);
 
-            if (LoaderConstants.CLIConfiguration.MIXINS_ENABLED) {
+            if (LoaderConfig.MIXINS_ENABLED) {
                 MixinUtil.start();
                 MixinUtil.doInit(new ArrayList<>());
                 Piece.setupModMixins();
@@ -194,10 +196,10 @@ public class Piece {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private URL setup(AtomicReference<String> game_provider, AtomicReference<URL> gameJar, boolean doProviderChecks) throws Exception {
+    private URL setup(AtomicReference<String> game_provider, AtomicReference<URL> gameJar, boolean firstInit) throws Exception {
         ModFinder.crawlModsFolder();
 
-        if (doProviderChecks) {
+        if (firstInit) {
             if (game_provider.get() != null)
                 provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
             else {
@@ -208,18 +210,14 @@ public class Piece {
             }
             if (!provider.isValid())
                 throw new RuntimeException("Couldn't load any game provider for this particular application.");
-        } else {
-            provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
-        }
 
-        if (doProviderChecks) {
             game_provider.set(provider.getClass().getName());
 
             URL jarURL = provider.getJarLocation();
-            if (provider.isBinaryPatchable() && jarURL != null && !LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE.isEmpty()) {
-                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE));
+            if (provider.isBinaryPatchable() && jarURL != null && !LoaderConfig.PATCH_PAMPHLET_FILE.isEmpty()) {
+                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConfig.PATCH_PAMPHLET_FILE));
                 if (!pamphlet.isRipped()) {
-                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ") :D");
+                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ")");
 
                     PatchPage patchPage = pamphlet.getClientPatches();
                     if (Piece.getSide() == EnvType.SERVER) patchPage = pamphlet.getServerPatches();
@@ -238,12 +236,14 @@ public class Piece {
                             patchPage.apply(bytes, out);
                             out.close();
                         }
-
                         return file.toURI().toURL();
                     }
                 }
             }
+            return null;
         }
+        provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
+
         return null;
     }
 

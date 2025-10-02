@@ -4,7 +4,6 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventGameLoaderFinish;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.GameLoaderEntrypoint;
-import dev.puzzleshq.puzzleloader.loader.threading.ThreadExceptionCatcher;
 import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +49,6 @@ public class GameLoader {
         );
 
         Thread thread = new Thread(this::gameLoadingThread, "Game-Loader");
-        ThreadExceptionCatcher.attach(thread);
         thread.setDaemon(true);
         thread.start();
     }

@@ -7,6 +7,7 @@ import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
 import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.mod.util.ModDependency;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
@@ -109,7 +110,7 @@ public class ModFinder {
                     if (connection instanceof JarURLConnection) {
                         JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
                         JarFile jar = jarConnection.getJarFile();
-                        JarEntry entry = jar.getJarEntry("puzzle.mod.json");
+                        JarEntry entry = jar.getJarEntry(LoaderConfig.MOD_JSON_NAME);
                         if (entry != null) {
                             InputStream jsonInputStream = jar.getInputStream(entry);
                             byte[] bytes = JavaUtils.readAllBytes(jsonInputStream);
@@ -123,7 +124,7 @@ public class ModFinder {
                     ZipInputStream stream = new ZipInputStream(connection.getInputStream());
                     ZipEntry entry;
                     while ((entry = stream.getNextEntry()) != null) {
-                        if (!entry.getName().equals("puzzle.mod.json")) continue;
+                        if (!entry.getName().equals(LoaderConfig.MOD_JSON_NAME)) continue;
 
                         byte[] bytes = JavaUtils.readAllBytes(stream);
 
@@ -160,10 +161,10 @@ public class ModFinder {
             if (!f.exists()) continue;
 
             if (f.isDirectory()) {
-                fileQueue.addAll(Arrays.asList(f.listFiles()));
+                fileQueue.addAll(Arrays.asList(Objects.requireNonNull(f.listFiles())));
                 continue;
             }
-            if (f.getName().equals("puzzle.mod.json")) {
+            if (f.getName().equals(LoaderConfig.MOD_JSON_NAME)) {
                 try {
                 InputStream jsonInputStream = new FileInputStream(f);
 
@@ -258,7 +259,7 @@ public class ModFinder {
             puzzleCoreModInfo.setId("puzzle-loader-core");
             puzzleCoreModInfo.setDescription("The core mod-loading mechanics of puzzle-loader");
 
-            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/puzzle.png"));
+            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/puzzle-loader-icon-16.png"));
             puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
             puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
             puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
@@ -269,14 +270,14 @@ public class ModFinder {
                 puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.ClientTransformers");
 
         }
-        if (LoaderConstants.CLIConfiguration.MIXINS_ENABLED) {
+        if (LoaderConfig.MIXINS_ENABLED) {
             ModInfoBuilder mixinModInfo = new ModInfoBuilder();
             {
                 mixinModInfo.setDisplayName("Sponge Mixin Fabric");
                 mixinModInfo.setId("sponge-mixin-fabric");
                 mixinModInfo.setDescription("Mixin is a trait/mixin framework for Java using ASM.");
 
-                mixinModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/mixin.png"));
+                mixinModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/mixin-icon.png"));
                 mixinModInfo.addAuthor(
                         "Mumfrey", "skinnyBat", "LlamaLad7",
                         "Aaron1011", "simon816", "shartte",

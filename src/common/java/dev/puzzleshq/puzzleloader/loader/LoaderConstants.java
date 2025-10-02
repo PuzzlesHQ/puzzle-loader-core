@@ -9,24 +9,6 @@ import dev.puzzleshq.puzzleloader.loader.util.ResourceLocation;
 
 public class LoaderConstants {
 
-    public static class CLIConfiguration {
-        public static String PATCH_PAMPHLET_FILE = null;
-        public static boolean TRANSFORMERS_ENABLED;
-        public static boolean USER_TRANSFORMERS_ENABLED;
-        public static boolean DUMP_TRANSFORMED_CLASSES;
-        public static boolean ALLOWS_CLASS_OVERRIDES;
-        public static String[] COMMAND_LINE_ARGUMENTS;
-
-        public static String CUSTOM_TITLE_FORMAT = "Puzzle Loader: %s";
-        public static boolean DO_TITLE_TRANSFORMER = true;
-        public static boolean MIXINS_ENABLED = true;
-
-        public static String formatTitle(CharSequence input) {
-            return String.format(CUSTOM_TITLE_FORMAT, input);
-        }
-
-    }
-
     public static final EnvType SIDE = Piece.getSide();
 
     public static final String PUZZLE_CORE_VERSION = getPuzzleCoreVersion();

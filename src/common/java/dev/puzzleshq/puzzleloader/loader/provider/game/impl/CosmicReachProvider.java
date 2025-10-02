@@ -2,7 +2,7 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
@@ -173,7 +173,7 @@ public class CosmicReachProvider implements IGameProvider {
 
     @Override
     public @Nullable URL getJarLocation() {
-        if (LoaderConstants.CLIConfiguration.PATCH_PAMPHLET_FILE == null) return null;
+        if (LoaderConfig.PATCH_PAMPHLET_FILE == null) return null;
 
         URL url = RawAssetLoader.getLowLevelClassPathUrl(validClass);
         try {

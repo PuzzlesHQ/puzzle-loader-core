@@ -2,7 +2,6 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
@@ -13,12 +12,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

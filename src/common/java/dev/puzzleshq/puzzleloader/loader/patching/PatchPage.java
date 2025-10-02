@@ -3,13 +3,10 @@ package dev.puzzleshq.puzzleloader.loader.patching;
 import com.google.common.hash.Hashing;
 import io.sigpipe.jbsdiff.InvalidHeaderException;
 import io.sigpipe.jbsdiff.Patch;
-import org.apache.commons.compress.compressors.CompressorException;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 

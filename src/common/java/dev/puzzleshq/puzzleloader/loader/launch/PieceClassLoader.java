@@ -1,6 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
-import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;
@@ -210,7 +210,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public static boolean dumpClasses;
 
     private byte[] transform(String name, String fileName, byte[] bytes) {
-        if (!LoaderConstants.CLIConfiguration.TRANSFORMERS_ENABLED) return bytes;
+        if (!LoaderConfig.TRANSFORMERS_ENABLED) return bytes;
 
         byte[] transformed = bytes;
         for (IClassTransformer transformer : transformers) {

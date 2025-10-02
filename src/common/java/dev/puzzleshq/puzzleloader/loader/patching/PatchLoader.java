@@ -1,5 +1,6 @@
 package dev.puzzleshq.puzzleloader.loader.patching;
 
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.util.JavaUtils;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
@@ -80,7 +81,7 @@ public class PatchLoader {
     public static PatchPamphlet readPamphlet(File file) throws Exception {
         ZipFile zipFile = new ZipFile(file);
 
-        ZipEntry entry = zipFile.getEntry("puzzle.patch.json");
+        ZipEntry entry = zipFile.getEntry(LoaderConfig.PATCH_JSON_NAME);
         if (entry == null) throw new RuntimeException("Invalid patch zip provided at \"" + file.getAbsoluteFile() + "\"");
         InputStream jsonInputStream = zipFile.getInputStream(entry);
         byte[] bytes = JavaUtils.readAllBytes(jsonInputStream);

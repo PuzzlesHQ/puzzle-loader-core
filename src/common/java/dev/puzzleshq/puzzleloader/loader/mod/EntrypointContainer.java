@@ -23,6 +23,7 @@ public class EntrypointContainer implements IEntrypointContainer {
         this.entrypointMap = container.getInfo().getEntrypointMap();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> void invoke(String key, Class<T> type, Consumer<? super T> invoker) {
         ILangProvider.init();

@@ -1,6 +1,5 @@
 package dev.puzzleshq.puzzleloader.loader.threading;
 
-import javax.swing.*;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -9,7 +8,12 @@ public class OffThreadExecutor implements Runnable {
     public static final OffThreadExecutor INSTANCE = new OffThreadExecutor();
 
     protected Queue<Runnable> runnableQueue = new ConcurrentLinkedQueue<>();
-    public static Thread t;
+    public static final Thread t;
+    static {
+        t = new Thread(INSTANCE);
+        t.setName("OffThread Executor");
+        t.setDaemon(true);
+    }
 
     public static void add(Runnable runnable) {
         if (runnable instanceof OffThreadExecutor) return;
@@ -18,18 +22,15 @@ public class OffThreadExecutor implements Runnable {
     }
 
     public static void start() {
-        SwingUtilities.invokeLater(INSTANCE);
+        t.start();
     }
 
     @Override
     public void run() {
-        t = Thread.currentThread();
-        t.setName("OffThread Executor");
-        ThreadExceptionCatcher.attach(t);
-        while (!runnableQueue.isEmpty()) {
+        while (true) {
+            if (runnableQueue.isEmpty()) continue;
             Runnable runnable = runnableQueue.poll();
             runnable.run();
         }
-        SwingUtilities.invokeLater(INSTANCE);
     }
 }

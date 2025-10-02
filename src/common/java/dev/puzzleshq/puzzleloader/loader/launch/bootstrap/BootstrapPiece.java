@@ -2,7 +2,6 @@ package dev.puzzleshq.puzzleloader.loader.launch.bootstrap;
 
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.launch.PrePiece;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Locale;
@@ -18,10 +17,6 @@ public class BootstrapPiece {
 
         ENV = name;
 
-        PrePiece.launch(args, name);
-    }
-
-    public static void loadWithoutBootstrap(String[] args, String name) {
         PrePiece.launch(args, name);
     }
 
@@ -72,17 +67,8 @@ public class BootstrapPiece {
         System.setProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides", String.valueOf(overrides));
     }
 
-    public static Logger getLogger() {
-        if (LOGGER == null)
-            LOGGER = LogManager.getLogger("Puzzle | Emergency Piece");
-        return LOGGER;
-    }
-
     public static void loadFlags() {
-        boolean dumpClasses = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.dumpTransformedClasses"));
-        boolean overrides = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides"));
-
-        PieceClassLoader.overrides = overrides;
-        PieceClassLoader.dumpClasses = dumpClasses;
+        PieceClassLoader.overrides = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.allowClassOverrides"));
+        PieceClassLoader.dumpClasses = Boolean.parseBoolean(System.getProperty("dev.puzzleshq.puzzleloader.loader.launch.boostrap.dumpTransformedClasses"));
     }
 }
