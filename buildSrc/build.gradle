@@ -18,6 +18,7 @@ dependencies {
 
     implementation "me.lucko:jar-relocator:1.7"
     implementation "dev.puzzleshq:access-writer:1.0.4+c"
+    implementation "org.hjson:hjson:3.1.0"
 }
 
 wrapper {

@@ -1,8 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import dev.puzzleshq.accesswriter.AccessWriters
+import dev.puzzleshq.buildsrc.DepUtils
 import dev.puzzleshq.buildsrc.GenericTransformer
 import me.lucko.jarrelocator.JarRelocator
 import me.lucko.jarrelocator.Relocation
+import org.hjson.JsonArray
+import org.hjson.JsonObject
 
 import static org.gradle.api.artifacts.transform.TransformParameters.None
 
@@ -161,6 +164,7 @@ dependencies {
     }
     commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
     commonBundle "com.google.guava:guava:$guava_version"
+    commonBundle "org.javassist:javassist:3.30.2-GA"
 
     commonBundle "com.github.villadora:semver:0.0.3"
 
@@ -223,58 +227,50 @@ tasks.register("buildSourcesJar", Jar) {
     archiveClassifier = "sources"
 }
 
+static def add(String side, JsonObject o, Configuration configuration, String type) {
+    JsonArray array
+    if (o.get(side) == null) array = new JsonArray()
+    else array = o.get(side).asArray()
+
+    for (final def dep in configuration.allDependencies) {
+        JsonObject object = new JsonObject();
+
+        def classifier = DepUtils.getClassifier(dep);
+        if (classifier != null) object.add("classifier", classifier);
+        object.add("groupId", dep.group);
+        object.add("artifactId", dep.name);
+        object.add("version", dep.version);
+        if (dep.name == "puzzle-loader-core")
+            object.add("type", "compileOnly");
+        else
+            object.add("type", type);
+        array.add(object)
+    }
+    o.add(side, array)
+}
+
 tasks.register("mkDeps") {
     File file = new File("$projectDir/dependencies.json")
 
-    def repos = "["
+    JsonObject object = new JsonObject();
+    add("client", object, configurations.clientImpl, "implementation")
+    add("server", object, configurations.serverImpl, "implementation")
+    add("common", object, configurations.commonBundle, "implementation")
 
+    JsonArray repos = new JsonArray()
     for (i in 0..<project.repositories.size()) {
         def dependency = project.repositories[i];
         if (dependency instanceof MavenArtifactRepository) {
-            repos += """\n\t\t{
-\t\t\t\"name\": \"${dependency.name}\",
-\t\t\t\"url\": \"${dependency.url}\"
-\t\t}""" + (i != project.repositories.size() - 1 ? "," : "")
+            if (dependency.name == "MavenLocal") continue
+            JsonObject repo = new JsonObject()
+            repo.add("name", dependency.name)
+            repo.add("url", dependency.url.toString())
+            repos.add(repo)
         }
     }
-    repos += "\n\t]"
+    object.add("repos", repos)
 
-    def contents = "{\n\t\"repos\": ${repos},\n\t\"common\": ["
-
-    for (i in 0..<configurations.commonBundle.allDependencies.size()) {
-        def dependency = configurations.commonBundle.allDependencies[i];
-        contents += """\n\t\t{
-\t\t\t\"groupId\": \"${dependency.group}\",
-\t\t\t\"artifactId\": \"${dependency.name}\",
-\t\t\t\"version\": \"${dependency.version}\",
-\t\t\t\"type\": \"implementation\"
-\t\t}""" + (i != configurations.commonBundle.allDependencies.size() - 1 ? "," : "")
-    }
-    contents += "\n\t],\n\t\"client\": ["
-
-    for (i in 0..<configurations.commonBundle.allDependencies.size()) {
-        def dependency = configurations.commonBundle.allDependencies[i];
-        contents += """\n\t\t{
-\t\t\t\"groupId\": \"${dependency.group}\",
-\t\t\t\"artifactId\": \"${dependency.name}\",
-\t\t\t\"version\": \"${dependency.version}\",
-\t\t\t\"type\": \"implementation\"
-\t\t}""" + (i != configurations.commonBundle.allDependencies.size() - 1 ? "," : "")
-    }
-    contents += "\n\t],\n\t\"server\": ["
-
-    for (i in 0..<configurations.serverImpl.allDependencies.size()) {
-        def dependency = configurations.serverImpl.allDependencies[i];
-        contents += """\n\t\t{
-\t\t\t\"groupId\": \"${dependency.group}\",
-\t\t\t\"artifactId\": \"${dependency.name}\",
-\t\t\t\"version\": \"${dependency.version}\",
-\t\t\t\"type\": \"compileOnly\"
-\t\t}""" + (i != configurations.serverImpl.allDependencies.size() - 1 ? "," : "")
-    }
-    contents += "\n\t]"
-
-    file.write(contents + "\n}")
+    file.write(object.toString(Stringify.FORMATTED))
 }
 
 processCommonResources {
