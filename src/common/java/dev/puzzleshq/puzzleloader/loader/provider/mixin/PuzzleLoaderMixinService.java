@@ -24,9 +24,8 @@
  */
 package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 
+import com.moulberry.mixinconstraints.MixinConstraints;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
-import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
-import dev.puzzleshq.puzzleloader.loader.provider.mixin.transformers.BetterProxy;
 import dev.puzzleshq.puzzleloader.loader.util.JavaUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,8 +60,7 @@ import java.util.*;
  * Mixin service for launchwrapper
  */
 public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, IClassBytecodeProvider, ITransformerProvider {
-    protected static final String LAUNCH_PACKAGE = "org.spongepowered.asm.launch.";
-    private static final String TRANSFORMER_PROXY_CLASS = BetterProxy.class.getName();
+    private static final String TRANSFORMER_PROXY_CLASS = "org.spongepowered.asm.mixin.transformer.Proxy";
     protected final ReEntranceLock lock = new ReEntranceLock(1);
     private final Map<Class<IMixinInternal>, IMixinInternal> internals = new HashMap();
     private List<IMixinPlatformServiceAgent> serviceAgents;
@@ -102,12 +100,12 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      */
     @Override
     public boolean isValid() {
-        try {
-            // Detect launchwrapper
-            Piece.classLoader.hashCode();
-        } catch (Throwable ex) {
-            return false;
-        }
+//        try {
+//            // Detect launchwrapper
+//            Piece.classLoader.hashCode();
+//        } catch (Throwable ex) {
+//            return false;
+//        }
         return true;
     }
 
@@ -117,7 +115,6 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     @Override
     public void prepare() {
         // Only needed in dev, in production this would be handled by the tweaker
-        Piece.classLoader.addClassLoaderExclusion(LAUNCH_PACKAGE);
     }
 
     /* (non-Javadoc)
@@ -136,15 +133,6 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     @Override
     public void offer(IMixinInternal iMixinInternal) {
 
-    }
-
-    /* (non-Javadoc)
-     * @see org.spongepowered.asm.service.IMixinService
-     *      #getMaxCompatibilityLevel()
-     */
-    @Override
-    public CompatibilityLevel getMaxCompatibilityLevel() {
-        return CompatibilityLevel.JAVA_6;
     }
 
     @Override
@@ -292,9 +280,9 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      */
     @Override
     public void checkEnv(@NotNull Object bootSource) {
-        if (bootSource.getClass().getClassLoader() != Piece.class.getClassLoader()) {
-            throw new MixinException("Attempted to init the mixin environment in the wrong classloader");
-        }
+//        if (bootSource.getClass().getClassLoader() != Piece.class.getClassLoader()) {
+//            throw new MixinException("Attempted to init the mixin environment in the wrong classloader");
+//        }
     }
 
     @Override
@@ -313,12 +301,21 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
 
     @Override
     public String getSideName() {
-        return BootstrapPiece.ENV;
+        return System.getProperty("puzzle.core.piece.side");
     }
 
     @Override
     public CompatibilityLevel getMinCompatibilityLevel() {
-        return CompatibilityLevel.JAVA_22;
+        return CompatibilityLevel.JAVA_25;
+    }
+
+    /* (non-Javadoc)
+     * @see org.spongepowered.asm.service.IMixinService
+     *      #getMaxCompatibilityLevel()
+     */
+    @Override
+    public CompatibilityLevel getMaxCompatibilityLevel() {
+        return CompatibilityLevel.JAVA_6;
     }
 
     /* (non-Javadoc)
@@ -455,16 +452,15 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     @Deprecated
     public byte[] getClassBytes(@NotNull String className, boolean runTransformers) throws ClassNotFoundException, IOException {
         String transformedName = className.replace('/', '.');
-        String name = transformedName;
 
         Profiler profiler = Profiler.getProfiler("mixin");
         Section loadTime = profiler.begin(Profiler.ROOT, "class.load");
-        byte[] classBytes = this.getClassBytes(name, transformedName);
+        byte[] classBytes = this.getClassBytes(transformedName, transformedName);
         loadTime.end();
 
         if (runTransformers) {
             Section transformTime = profiler.begin(Profiler.ROOT, "class.transform");
-            classBytes = this.applyTransformers(name, transformedName, classBytes, profiler);
+            classBytes = this.applyTransformers(transformedName, transformedName, classBytes, profiler);
             transformTime.end();
         }
 

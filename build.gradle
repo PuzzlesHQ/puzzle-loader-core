@@ -1,13 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.puzzleshq.accesswriter.AccessWriters
 import dev.puzzleshq.buildsrc.DepUtils
-import dev.puzzleshq.buildsrc.GenericTransformer
-import me.lucko.jarrelocator.JarRelocator
-import me.lucko.jarrelocator.Relocation
+
 import org.hjson.JsonArray
 import org.hjson.JsonObject
-
-import static org.gradle.api.artifacts.transform.TransformParameters.None
+import org.hjson.Stringify
 
 plugins {
     id 'java'
@@ -15,8 +11,6 @@ plugins {
     id("io.github.sgtsilvio.gradle.maven-central-publishing") version "0.4.0"
     id 'com.gradleup.shadow' version '8.3.6'
 }
-
-var manipulator = file("$projectDir/src/common/resources/puzzle-loader-core.manipulator")
 
 def ref = System.getenv("GITHUB_REF")
 version = ((ref == null) ? "refs/tags/0.0.0-alpha" : ref).replaceAll("refs/tags/", "")
@@ -27,6 +21,8 @@ String envRepo = System.getenv("MAVEN_REPO")
 String mavenRepo = envRepo != null ? envRepo : "releases"
 
 repositories {
+    maven { url "https://jitpack.io" }
+    maven { url "https://maven.bawnorton.com/releases" }
     mavenCentral()
 }
 
@@ -34,6 +30,8 @@ java {
     sourceCompatibility = '8'
     targetCompatibility = '8'
 }
+
+jar.enabled = false
 
 sourceSets {
     common
@@ -59,6 +57,7 @@ configurations {
     commonBundle
     commonImplementation.extendsFrom(commonBundle)
     clientImplementation.extendsFrom(commonBundle)
+    serverImplementation.extendsFrom(commonBundle)
 
     serverBundle
     commonImplementation.extendsFrom(serverBundle)
@@ -82,59 +81,35 @@ def natives(String lwjgl_natives) {
     }
 }
 
-FileInputStream stream = new FileInputStream(manipulator)
-byte[] bytes = stream.readAllBytes()
-stream.close()
-String str = new String(bytes)
-
-AccessWriters.init(null)
-AccessWriters.MERGED.add(AccessWriters.getFormat("manipulator").parse(str))
-
-abstract class MyTransform implements TransformAction<None> {
-
-    @InputArtifact
-    abstract Provider<FileSystemLocation> getInputArtifact();
-
-    @SuppressWarnings("unused")
-    void transform(TransformOutputs outputs) {
-        var inp = inputArtifact.get().asFile
-        var out = outputs.file(inp.name.replace(".jar", "-transformed.jar"))
-
-        List<Relocation> rules = new ArrayList<>()
-//        rules.add(new Relocation("org.objectweb", "bundled.org.objectweb"))
-//        rules.add(new Relocation("org.spongepowered.include", "bundled"))
-
-        JarRelocator relocator = new JarRelocator(inp, out, rules);
-        relocator.run();
-
-        GenericTransformer.transform(out)
-    }
-}
-
-Attribute<Boolean> manipulated = Attribute.of("manipulated", Boolean.class)
-
-afterEvaluate {
-    project.getDependencies().getAttributesSchema().attribute(manipulated);
-    project.getDependencies().getArtifactTypes().named("jar", artifact -> {
-        artifact.getAttributes().attribute(manipulated, false)
-    })
-
-    project.getDependencies().registerTransform(MyTransform) {
-        getFrom().attribute(manipulated, false)
-        getTo().attribute(manipulated, true)
-    }
-
-    project.getConfigurations().configureEach(config -> {
-        if (config.isCanBeResolved())
-            config.getAttributes().attribute(manipulated, true)
-    })
+final HashMap<String, String>[] excludes = new HashMap<String, String>[]{
+        ["group": "org.slf4j", "module": "slf4j-api"] as HashMap,
+        ["group": "com.google.code.gson", "module": "gson"] as HashMap,
+        ["group": "org.apache.logging.log4j", "module": "log4j-core"] as HashMap,
+        ["group": "org.apache.logging.log4j", "module": "log4j-api"] as HashMap,
+        ["group": "org.javassist", "module": "javassist"] as HashMap,
+        ["group": "com.google.errorprone", "module": "error_prone_annotations"] as HashMap,
+        ["group": "com.google.guava", "module": "guava"] as HashMap,
+        ["group": "com.google.guava", "module": "failureaccess"] as HashMap,
+        ["group": "com.google.guava", "module": "listenablefuture"] as HashMap,
+        ["group": "com.google.j2objc", "module": "j2objc-annotations"] as HashMap,
+        ["group": "org.jspecify", "module": "jspecify"] as HashMap,
+        ["group": "org.apache.commons", "module": "commons-compress"] as HashMap,
+        ["group": "org.apache.commons", "module": "commons-lang3"] as HashMap,
+        ["group": "commons-io", "module": "commons-io"] as HashMap,
+        ["group": "commons-codec", "module": "commons-codec"] as HashMap,
+        ["group": "com.google.code.findbugs", "module": "jsr305"] as HashMap,
+        ["group": "org.ow2.asm", "module": "asm"] as HashMap,
+        ["group": "org.ow2.asm", "module": "asm-tree"] as HashMap,
+        ["group": "org.ow2.asm", "module": "asm-commons"] as HashMap,
+        ["group": "org.ow2.asm", "module": "asm-analysis"] as HashMap,
+        ["group": "org.ow2.asm", "module": "asm-util"] as HashMap,
 }
 
 // Common Dependencies
 dependencies {
-    clientCompileOnly 'org.jetbrains:annotations:24.0.0'
-    commonCompileOnly 'org.jetbrains:annotations:24.0.0'
-    serverCompileOnly 'org.jetbrains:annotations:24.0.0'
+    clientCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
+    commonCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
+    serverCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
 
     clientImpl "org.lwjgl:lwjgl:$lwjgl_version"
     clientImpl "org.lwjgl:lwjgl-opengl:$lwjgl_version"
@@ -153,36 +128,47 @@ dependencies {
     serverInternal sourceSets.common.output
 
     // Common
-    commonImplementation 'org.jetbrains:annotations:24.0.0'
-    commonImplementation 'io.sigpipe:jbsdiff:1.0'
-    commonImplementation "org.apache.commons:commons-compress:1.28.0"
+    commonBundle ("io.sigpipe:jbsdiff:$jbsdiff_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixin_extras_version")
-    commonBundle("net.fabricmc:sponge-mixin:$mixin_version") {
-        exclude group: "com.google.code.gson", module: "gson"
-        exclude group: "com.google.guava", module: "guava"
-    }
-    commonBundle "net.sf.jopt-simple:jopt-simple:$jopt_simple_version"
-    commonBundle "com.google.guava:guava:$guava_version"
-    commonBundle "org.javassist:javassist:3.30.2-GA"
+    commonBundle("net.fabricmc:sponge-mixin:$mixin_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle annotationProcessor("io.github.llamalad7:mixinextras-common:$mixin_extras_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:$mixin_squared_version")) { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle("com.github.PuzzlesHQ:mixinconstraints-java8:$mixin_constraints_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle "com.github.villadora:semver:0.0.3"
+    commonBundle ("net.sf.jopt-simple:jopt-simple:$jopt_simple_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.guava:guava:$google_guava_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.code.gson:gson:$gson_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.javassist:javassist:$javassist_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle "org.apache.logging.log4j:log4j-api:$log4j_version"
-    commonBundle "org.apache.logging.log4j:log4j-core:$log4j_version"
-    commonBundle "org.reflections:reflections:$reflections_version"
+    commonBundle ("com.github.villadora:semver:$semver_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle "org.ow2.asm:asm:$asm_version"
-    commonBundle "org.ow2.asm:asm-tree:$asm_version"
-    commonBundle "org.ow2.asm:asm-util:$asm_version"
-    commonBundle "org.ow2.asm:asm-analysis:$asm_version"
-    commonBundle "org.ow2.asm:asm-commons:$asm_version"
+    commonBundle ("org.apache.logging.log4j:log4j-api:$log4j_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.apache.logging.log4j:log4j-core:$log4j_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.reflections:reflections:$reflections_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle "dev.puzzleshq:puzzle-annotations:1.0.0"
-    commonBundle "dev.puzzleshq:access-writer:1.0.4+c"
-    commonBundle "dev.puzzleshq:mod-format-framework:1.1.1"
+    commonBundle ("org.ow2.asm:asm:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.ow2.asm:asm-tree:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.ow2.asm:asm-util:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.ow2.asm:asm-analysis:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.ow2.asm:asm-commons:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
 
-    commonBundle "org.hjson:hjson:$hjson_version"
+    commonBundle ("dev.puzzleshq:puzzle-annotations:$puzzle_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("dev.puzzleshq:access-writer:$puzzle_access_writer_version" ) { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("dev.puzzleshq:mod-format-framework:$puzzle_mod_format_framework_version") { for (HashMap<String, String> map : excludes) exclude map }
+
+    commonBundle ("org.jspecify:jspecify:$jspecify_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.errorprone:error_prone_annotations:$google_error_prone_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.guava:failureaccess:$google_failureaccess_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.guava:listenablefuture:$google_listenablefuture_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.j2objc:j2objc-annotations:$google_j2objc_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("com.google.code.findbugs:jsr305:$google_findbugs_jsr305_version") { for (HashMap<String, String> map : excludes) exclude map }
+
+    commonBundle ("org.apache.commons:commons-compress:$apache_commons_compress_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.apache.commons:commons-lang3:$apache_commons_lang3_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("commons-codec:commons-codec:$apache_commons_codec_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("commons-io:commons-io:$apache_commons_io_version") { for (HashMap<String, String> map : excludes) exclude map }
+
+    commonBundle ("org.hjson:hjson:$hjson_version") {for (HashMap<String, String> map : excludes) exclude map }
 }
 
 tasks.register("buildMergedTestJar", ShadowJar) {
@@ -202,6 +188,14 @@ tasks.register("buildMergedTestJar", ShadowJar) {
 tasks.register("buildServerJar", ShadowJar) {
     mergeServiceFiles()
 
+    manifest {
+        attributes(
+                'Main-Class': "dev.puzzleshq.puzzleloader.loader.launch.pieces.ServerPiece",
+                'Add-Opens': "java.base/java.lang",
+                'Class-Path': "lib"
+        )
+    }
+
     archiveClassifier = "server"
     from sourceSets.server.output
 }
@@ -215,6 +209,14 @@ tasks.register("buildCommonJar", ShadowJar) {
 
 tasks.register("buildClientJar", ShadowJar) {
     mergeServiceFiles()
+
+    manifest {
+        attributes(
+                'Main-Class': "dev.puzzleshq.puzzleloader.loader.launch.pieces.ClientPiece",
+                'Add-Opens': "java.base/java.lang",
+                'Class-Path': "lib"
+        )
+    }
 
     archiveClassifier = "client"
     from sourceSets.client.output
@@ -240,10 +242,7 @@ static def add(String side, JsonObject o, Configuration configuration, String ty
         object.add("groupId", dep.group);
         object.add("artifactId", dep.name);
         object.add("version", dep.version);
-        if (dep.name == "puzzle-loader-core")
-            object.add("type", "compileOnly");
-        else
-            object.add("type", type);
+        object.add("type", type);
         array.add(object)
     }
     o.add(side, array)
@@ -275,13 +274,21 @@ tasks.register("mkDeps") {
 
 processCommonResources {
     Map<String, Object> replacement_properties = [
-            "version": ((String)version).contains(".") ? version : "0.0.0-alpha",
+            "p_name": p_name,
+            "p_version": ((String)version).contains(".") ? version : "69.69.69",
+            "p_desc": p_desc,
+
+            "p_id": p_id,
+            "p_group": p_group,
+
+            "p_git": p_git,
             "mixinVersion": mixin_version,
+            "shortMixinsVersion": mixin_version.replaceAll("\\+.*", "")
     ]
 
     inputs.properties replacement_properties
 
-    filesMatching(["assets/puzzle-loader-core/core-version.txt", "assets/puzzle-loader-core/mixin-version.txt"]) {
+    filesMatching(["assets/puzzle-loader-core/core-version.txt", "assets/puzzle-loader-core/mixin-version.txt", "puzzle.mod.json"]) {
         expand replacement_properties
     }
 }
@@ -357,5 +364,3 @@ wrapper {
     gradleVersion = "8.14"
     distributionType = Wrapper.DistributionType.ALL
 }
-
-java.toolchain.languageVersion.set(JavaLanguageVersion.of("8"))

@@ -1,15 +1,21 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
 import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
-import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
+import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.service.IClassTracker;
+import org.spongepowered.asm.service.ILegacyClassTransformer;
 import org.spongepowered.asm.service.ITransformer;
+import sun.misc.Unsafe;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -35,14 +41,18 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public final Set<String> excludedClasses = new HashSet<>();
     public final Set<String> transformerExcludedClasses = new HashSet<>();
 
-    public final List<IClassTransformer> transformers = new ArrayList<>();
+    public final List<ILegacyClassTransformer> transformers = new ArrayList<>();
 
     public PieceClassLoader() {
-        this(new URL[0], ClassLoader.class.getClassLoader());
+        this(new URL[0], PieceClassLoader.class.getClassLoader());
     }
 
     public PieceClassLoader(ClassLoader parent) {
         this(new URL[0], parent);
+    }
+
+    public PieceClassLoader(Collection<URL> urls) {
+        this(urls.toArray(new URL[0]), PieceClassLoader.class.getClassLoader());
     }
 
     public PieceClassLoader(URL[] sources, ClassLoader parent) {
@@ -59,21 +69,20 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         addClassLoaderExclusion("org.hjson.");
         addClassLoaderExclusion("org.xml.");
         addClassLoaderExclusion("org.w3c.");
+        addClassLoaderExclusion("org.objectweb.");
 
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.fix.");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.util.");
+        addClassLoaderExclusion("dev.puzzleshq.mod.");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.launch.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.util.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.LoaderConfig");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.LoaderConstants");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.loading.");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider.");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider");
+        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider");
         addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.transformers.");
-        addClassLoaderExclusion("com.llamalad7");
-
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.ModContainer");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.EntrypointContainer");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Pre");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Tra");
-        addClassLoaderExclusion("dev.puzzleshq.puzzleloader.loader.mod.entrypoint.Ga");
+        addClassLoaderExclusion("net.minecraft.launchwrapper.");
+        addClassLoaderExclusion("org.spongepowered.");
+        addClassLoaderExclusion("com.llamalad7.");
 
         addTransformerExclusion("javax.");
         addTransformerExclusion("argo.");
@@ -81,9 +90,13 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         addTransformerExclusion("org.bouncycastle.");
     }
 
-
     public PieceClassLoader(List<URL> sources, ClassLoader parent) {
         this(sources.toArray(new URL[0]), parent);
+    }
+
+    public static void loadSystemProperties() {
+        LoaderConfig.ALLOWS_CLASS_OVERRIDES = overrides = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classOverrides"));
+        LoaderConfig.DUMP_TRANSFORMED_CLASSES = dumpClasses = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classDump"));
     }
 
     @Override
@@ -96,13 +109,13 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         for (URL u : urls) addURL(u);
     }
 
-    public void registerTransformer(IClassTransformer transformer) {
+    public void registerTransformer(ILegacyClassTransformer transformer) {
         transformers.add(transformer);
     }
 
     public void registerTransformer(String s) {
         try {
-            registerTransformer((IClassTransformer) loadClass(s).newInstance());
+            registerTransformer((ILegacyClassTransformer) loadClass(s).newInstance());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Class transformer \"" + s + "\" failed, please report this to the creator of the transformer.");
         }
@@ -123,6 +136,18 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return findClass(name);
     }
 
+    private static Method I_HATE_YOU_JAVA_CLASSLOADERS;
+    private static boolean aboveJava8;
+
+    static {
+        try {
+            I_HATE_YOU_JAVA_CLASSLOADERS = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
+            I_HATE_YOU_JAVA_CLASSLOADERS.setAccessible(true);
+        } catch (Exception e) {
+            aboveJava8 = true;
+        }
+    }
+
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         if (missingClasses.contains(name)) throw new ClassNotFoundException(name);
@@ -131,6 +156,18 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
         for (String exclusion : excludedClasses) {
             if (name.startsWith(exclusion)) return parent.loadClass(name);
+        }
+
+        if (aboveJava8){
+
+        } else {
+            Class<?> parentTest;
+            try {
+                parentTest = (Class<?>) I_HATE_YOU_JAVA_CLASSLOADERS.invoke(parent, name);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+            if (parentTest != null) return parentTest;
         }
 
         if (isClassLoaded(name))
@@ -197,8 +234,16 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
                 missingClasses.add(name);
                 throw new ClassNotFoundException(name);
             }
-            Class<?> clazz = defineClass(name, bytes, 0, bytes.length, source);
-            classCache.put(name, clazz);
+            Class<?> clazz;
+            try {
+                clazz = defineClass(name, bytes, 0, bytes.length, source);
+                classCache.put(name, clazz);
+            } catch (LinkageError e) {
+                if (e.getMessage().contains("previously loaded")) {
+                    return Class.forName(name, false, parent);
+                }
+                throw e;
+            }
             return clazz;
         } catch (IOException e) {
             missingClasses.add(name);
@@ -213,8 +258,8 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         if (!LoaderConfig.TRANSFORMERS_ENABLED) return bytes;
 
         byte[] transformed = bytes;
-        for (IClassTransformer transformer : transformers) {
-            transformed = transformer.transform(fileName, name, transformed);
+        for (ILegacyClassTransformer transformer : transformers) {
+            transformed = transformer.transformClassBytes(fileName, name, transformed);
         }
         if (transformed != bytes) {
             outputClass(name, transformed);

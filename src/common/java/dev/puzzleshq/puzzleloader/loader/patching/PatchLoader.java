@@ -9,10 +9,14 @@ import org.hjson.JsonValue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class PatchLoader {
 
@@ -52,6 +56,28 @@ public class PatchLoader {
 
     */
 
+    public static PatchPage glanceAtPage(Map<String, byte[]> entryMap, JsonValue side) throws IOException {
+        if (side == null) return null;
+        JsonObject object = side.asObject();
+
+        JsonArray array = object.get("patch-order").asArray();
+        int patchCount = array.size();
+
+        List<String> headings = new ArrayList<>(patchCount);   // patch-name list
+        List<byte[]> paragraphs = new ArrayList<>(patchCount); // patch-contents list
+
+        for (int i = 0; i < patchCount; i++) {
+            JsonValue value = array.get(i);
+            String patchName = value.asString();
+            headings.add(patchName);
+            paragraphs.add(entryMap.get(patchName));
+        }
+
+        String endingSHA = object.get("SHA-256").asString();
+
+        return new PatchPage(headings, paragraphs, endingSHA);
+    }
+
     public static PatchPage glanceAtPage(ZipFile zipFile, JsonValue side) throws IOException {
         if (side == null) return null;
         JsonObject object = side.asObject();
@@ -78,6 +104,32 @@ public class PatchLoader {
         return new PatchPage(headings, paragraphs, endingSHA);
     }
 
+    public static PatchPamphlet readPamphlet(URL url) throws IOException {
+        Map<String, byte[]> entryMap = new HashMap<>();
+
+        InputStream stream = url.openStream();
+        ZipInputStream zipInputStream = new ZipInputStream(stream);
+
+        ZipEntry entry;
+        while ((entry = zipInputStream.getNextEntry()) != null) {
+            entryMap.put(entry.getName(), JavaUtils.readAllBytes(zipInputStream));
+        }
+
+        zipInputStream.close();
+        stream.close();
+
+        if (!entryMap.containsKey("puzzle.mod.json")) throw new RuntimeException("Invalid patch zip provided at url \"" + url + "\"");
+        JsonObject object = JsonValue.readHjson(new String(entryMap.get("puzzle.mod.json"))).asObject();
+        System.out.println("Reading Pamphlet(patches) (Name: \"" + object.get("display-name").asString() + "\", \"Version\": " + object.get("version").asString() + ")");
+        PatchPage clientSide = glanceAtPage(entryMap, object.get("client"));
+        PatchPage serverSide = glanceAtPage(entryMap, object.get("server"));
+        return new PatchPamphlet(object.get("display-name").asString(), object.get("version").asString(), clientSide, serverSide);
+    }
+
+    public static PatchPamphlet readPamphlet(String file) throws Exception {
+        return readPamphlet(new File(file));
+    }
+
     public static PatchPamphlet readPamphlet(File file) throws Exception {
         ZipFile zipFile = new ZipFile(file);
 
@@ -88,6 +140,7 @@ public class PatchLoader {
         jsonInputStream.close();
         String content = new String(bytes);
         JsonObject object = JsonValue.readHjson(content).asObject();
+        System.out.println("Reading Pamphlet(patches) (Name: \"" + object.get("display-name").asString() + "\", \"Version\": " + object.get("version").asString() + ")");
         PatchPage clientSide = glanceAtPage(zipFile, object.get("client"));
         PatchPage serverSide = glanceAtPage(zipFile, object.get("server"));
         zipFile.close();

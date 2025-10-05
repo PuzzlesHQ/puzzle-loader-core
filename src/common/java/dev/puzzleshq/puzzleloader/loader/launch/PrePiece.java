@@ -1,8 +1,5 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
-import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
-import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService;
-import dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,13 +19,15 @@ public class PrePiece {
     private static Logger LOGGER;
 
     public static void launch(String[] args, String type) {
-        System.setProperty("mixin.bootstrapService", PuzzleLoaderMixinServiceBootstrap.class.getName());
-        System.setProperty("mixin.service", PuzzleLoaderMixinService.class.getName());
+        System.setProperty("mixin.bootstrapService", "dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap");
+        System.setProperty("mixin.service", "dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService");
+        System.setProperty("mixinconstraints.abstraction", "dev.puzzleshq.puzzleloader.loader.mixin.PuzzleAbstractionsImpl");
+        System.setProperty("mixinconstraints.verbose", "true");
 
         try {
             System.getProperties().setProperty(
                     "log4j.configurationFile",
-                    Objects.requireNonNull(BootstrapPiece.class.getResource("/log4j2.xml")).toURI().toString()
+                    Objects.requireNonNull(PrePiece.class.getResource("/log4j2.xml")).toURI().toString()
             );
         } catch (URISyntaxException e) {
             getLogger().error("PrePiece seemed to have crashed when setting the LOG4J file, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);
@@ -36,8 +35,6 @@ public class PrePiece {
         }
 
         try {
-            BootstrapPiece.loadFlags();
-
             Piece.launch(args, EnvType.valueOf(type));
         } catch (Exception e) {
             getLogger().error("Piece seemed to have crashed, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);

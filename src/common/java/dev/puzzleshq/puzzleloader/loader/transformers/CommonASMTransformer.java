@@ -1,7 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.transformers;
 
 import dev.puzzleshq.accesswriter.transformers.AccessTransformerASM;
-import dev.puzzleshq.puzzleloader.loader.launch.fix.IClassTransformer;
+import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 

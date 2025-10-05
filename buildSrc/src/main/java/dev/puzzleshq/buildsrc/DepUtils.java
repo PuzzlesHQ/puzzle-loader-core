@@ -7,8 +7,8 @@ import org.gradle.api.internal.artifacts.dependencies.AbstractExternalModuleDepe
 public class DepUtils {
 
     public static String getClassifier(Dependency dependency) {
-        if (dependency instanceof AbstractExternalModuleDependency dependency1) {
-            for (DependencyArtifact artifact : dependency1.getArtifacts()) {
+        if (dependency instanceof AbstractExternalModuleDependency) {
+            for (DependencyArtifact artifact : ((AbstractExternalModuleDependency)dependency).getArtifacts()) {
                 return artifact.getClassifier();
             }
         }

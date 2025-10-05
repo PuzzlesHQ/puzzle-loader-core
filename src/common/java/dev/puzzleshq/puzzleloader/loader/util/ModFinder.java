@@ -5,13 +5,11 @@ import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
-import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.mod.util.ModDependency;
 import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
-import javassist.bytecode.DuplicateMemberException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hjson.JsonObject;
@@ -88,6 +86,10 @@ public class ModFinder {
         }
     }
 
+    public static final String modOutputFormatter = "\t\u001B[34mname\u001B[37m: %s, \u001B[34mid\u001B[37m: %s, \u001B[34mversion\u001B[37m: %s\u001b[0m";
+    public static final String dependencyOutputFormatter = "\t\t > \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
+    public static final String missingDependencyOutputFormatter = "\t\t \u001b[9m> \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
+
     /**
      * Finds the puzzle.mod.json in all the mod jars and adds it.
      */
@@ -146,6 +148,21 @@ public class ModFinder {
             }
         }
         verify();
+
+        System.out.println("\nPuzzle Mods:");
+        for (int i = 0; i < MODS_ARRAY.size(); i++) {
+            IModContainer container = MODS_ARRAY.get(i);
+            System.out.printf(modOutputFormatter + "\n", container.getDisplayName(), container.getID(), container.getVersion());
+            for (ModDependency dependency : container.getInfo().getDependencies()) {
+                IModContainer dependencyContainer = dependency.getContainer();
+                if (!(dependencyContainer instanceof IModContainer)) {
+                    System.out.printf(missingDependencyOutputFormatter + "\n", dependency.getModID(), dependency.getConstraintStr(), dependency.isOptional());
+                } else {
+                    System.out.printf(dependencyOutputFormatter + "\n", dependency.getModID(), dependency.getConstraintStr(), dependency.isOptional());
+                }
+            }
+        }
+        System.out.println();
     }
 
     /**
@@ -193,12 +210,16 @@ public class ModFinder {
         }
 
         if (MODS.containsKey(info.getId()))
-            throw new RuntimeException(new DuplicateMemberException("Found Duplicate Mod \"{" + info.getId() + "}\", Version: \"" + info.getVersion()));
+            throw new RuntimeException("Found Duplicate Mod \"{" + info.getId() + "}\", Version: \"" + info.getVersion());
 
-        LOGGER.info(
-                "Discovered Mod DisplayName: \"{}\", ID: \"{}\", Version: \"{}\"",
-                info.getDisplayName(), info.getId(), info.getVersion()
-        );
+//        LOGGER.info(
+//                "Discovered Mod {DisplayName: \"{}\", ID: \"{}\", Version: \"{}\"}",
+//                info.getDisplayName(), info.getId(), info.getVersion()
+//        );
+
+//        for (ModDependency dependency : info.getDependencies()) {
+//            LOGGER.info("\t↪ Dependency: { id: {}, version-constraint: {} }", dependency.getModID(), dependency.getConstraintStr());
+//        }
 
         IModContainer container = new ModContainer(info);
         MODS.put(container.getID(), MODS_ARRAY.size());
@@ -253,23 +274,6 @@ public class ModFinder {
      * Adds puzzle-Core as a mod.
      */
     private static void addPuzzleCoreBuiltin() {
-        ModInfoBuilder puzzleCoreModInfo = new ModInfoBuilder();
-        {
-            puzzleCoreModInfo.setDisplayName("Puzzle Core");
-            puzzleCoreModInfo.setId("puzzle-loader-core");
-            puzzleCoreModInfo.setDescription("The core mod-loading mechanics of puzzle-loader");
-
-            puzzleCoreModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/puzzle-loader-icon-16.png"));
-            puzzleCoreModInfo.addAuthor("Mr-Zombii", "CrabKing");
-            puzzleCoreModInfo.setVersion(LoaderConstants.PUZZLE_CORE_VERSION);
-            puzzleCoreModInfo.addAccessWriter("puzzle-loader-core.manipulator");
-            puzzleCoreModInfo.addDependency(new ModDependency(Piece.provider.getId(), Piece.provider.getGameVersion().toString(), false));
-
-            puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers");
-            if (Piece.getSide().equals(EnvType.CLIENT))
-                puzzleCoreModInfo.addEntrypoint("transformers", "dev.puzzleshq.puzzleloader.loader.transformers.ClientTransformers");
-
-        }
         if (LoaderConfig.MIXINS_ENABLED) {
             ModInfoBuilder mixinModInfo = new ModInfoBuilder();
             {
@@ -289,18 +293,11 @@ public class ModFinder {
                         "progwml6"
                 );
                 mixinModInfo.setVersion(LoaderConstants.FULL_MIXIN_VERSION);
-                mixinModInfo.addMixinConfig(new MixinConfig("mixinextras.init.mixins.json", "unknown"));
-                puzzleCoreModInfo.addDependency(new ModDependency(
-                        "sponge-mixin-fabric",
-                        LoaderConstants.SHORT_MIXIN_VERSION,
-                        false
-                ));
             }
             ModFinder.addModWithContainer(new ModContainer(mixinModInfo.build()));
         }
-        ModFinder.addModWithContainer(new ModContainer(puzzleCoreModInfo.build()));
 
-        Piece.provider.addBuiltinMods();
+        Piece.gameProvider.addBuiltinMods();
     }
 
 
@@ -332,7 +329,7 @@ public class ModFinder {
     public static IModContainer getMod(String id) {
         Integer dependencyIndex = ModFinder.MODS.get(id);
         if (dependencyIndex == null) {
-            LOGGER.error("Could not find mod \"{}\"", id);
+//            LOGGER.error("Could not find mod \"{}\"", id);
             return null;
         }
         return ModFinder.MODS_ARRAY.get(dependencyIndex);

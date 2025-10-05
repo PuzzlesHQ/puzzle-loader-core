@@ -1,11 +1,10 @@
 package dev.puzzleshq.puzzleloader.loader.launch.pieces;
 
-import dev.puzzleshq.puzzleloader.loader.launch.bootstrap.BootstrapPiece;
-
 public class ServerPiece {
 
     public static void main(String[] args) {
-        BootstrapPiece.launch(args, "SERVER");
+        System.setProperty("puzzle.core.piece.side", "SERVER");
+        NeutralPiece.main(args);
     }
 
 }

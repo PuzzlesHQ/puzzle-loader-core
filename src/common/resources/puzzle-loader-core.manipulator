@@ -1,3 +1,0 @@
-public class org/spongepowered/asm/mixin/transformer/MixinTransformer
-public method org/spongepowered/asm/mixin/transformer/MixinTransformer <init> ()V
-public method org/spongepowered/asm/mixin/MixinEnvironment gotoPhase (Lorg/spongepowered/asm/mixin/MixinEnvironment$Phase;)V

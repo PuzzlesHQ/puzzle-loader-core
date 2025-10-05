@@ -4,20 +4,17 @@ plugins {
 
 group = 'dev.puzzleshq'
 
+java {
+    sourceCompatibility = '8'
+    targetCompatibility = '8'
+}
+
 repositories {
     mavenCentral()
     mavenLocal()
 }
 
 dependencies {
-    implementation "org.ow2.asm:asm:9.8"
-    implementation "org.ow2.asm:asm-tree:9.8"
-    implementation "org.ow2.asm:asm-util:9.8"
-    implementation "org.ow2.asm:asm-analysis:9.8"
-    implementation "org.ow2.asm:asm-commons:9.8"
-
-    implementation "me.lucko:jar-relocator:1.7"
-    implementation "dev.puzzleshq:access-writer:1.0.4+c"
     implementation "org.hjson:hjson:3.1.0"
 }
 
@@ -25,5 +22,3 @@ wrapper {
     gradleVersion = "8.14"
     distributionType = Wrapper.DistributionType.ALL
 }
-
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(24))

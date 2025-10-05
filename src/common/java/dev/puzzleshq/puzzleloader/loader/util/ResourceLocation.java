@@ -42,7 +42,7 @@ public class ResourceLocation {
     public static ResourceLocation of(String id) {
         String[] parts = ID_SPLITTER_PATTERN.split(id);
         if (parts.length < 2)
-            return new ResourceLocation(Piece.provider.getDefaultNamespace(), parts[0]);
+            return new ResourceLocation(Piece.gameProvider.getDefaultNamespace(), parts[0]);
         if (parts.length > 2)
             throw new RuntimeException("Invalid ResourceLocation Format \"" + id + "\", must be formatted like \"namespace:path\"");
 

@@ -22,7 +22,7 @@ public class ProjectZomboidProvider implements IGameProvider {
     private Version cachedVersion = null;
 
     public ProjectZomboidProvider() {
-        Piece.provider = this;
+        Piece.gameProvider = this;
     }
 
     @Override
@@ -129,11 +129,6 @@ public class ProjectZomboidProvider implements IGameProvider {
         } catch (Exception ignore) {
             return false;
         }
-    }
-
-    @Override
-    public boolean isBinaryPatchable() {
-        return false;
     }
 
     private void fetchGameVersion() {

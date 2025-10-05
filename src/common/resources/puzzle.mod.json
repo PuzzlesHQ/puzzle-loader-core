@@ -1,0 +1,23 @@
+{
+  "formatVersion": 3,
+
+  "display-name": "$p_name",
+  "id": "$p_id",
+  "version": "$p_version",
+  "description": "$p_desc",
+  "authors": [ "Mr-Zombii", "CrabKing", "tympanicblock61" ],
+  "entrypoints": {
+    "transformers": "dev.puzzleshq.puzzleloader.loader.transformers.CommonTransformers"
+  },
+  "meta": {
+    "icon": "puzzle-loader-core:icons/puzzle-loader-icon-16.png"
+  },
+  "depends": {
+    "sponge-mixin-fabric": {
+      "ver": "${shortMixinsVersion}", "isOptional": true
+    }
+  },
+  "access-writers": [
+    "puzzle-loader-core.manipulator"
+  ]
+}

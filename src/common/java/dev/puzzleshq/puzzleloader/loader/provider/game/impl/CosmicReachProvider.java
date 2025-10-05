@@ -6,11 +6,11 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
+import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.hjson.JsonObject;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -20,13 +20,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class CosmicReachProvider implements IGameProvider {
+public class CosmicReachProvider implements IGameProvider, IPatchableGameProvider {
 
     public static final String PARADOX_SERVER_ENTRYPOINT = "com.github.puzzle.paradox.loader.launch.PuzzlePiece";
     public static final String PARADOX_SERVER_ENTRYPOINT_CLASS = "com/github/puzzle/paradox/loader/launch/PuzzlePiece.class";
 
     public CosmicReachProvider() {
-        Piece.provider = this;
+        Piece.gameProvider = this;
     }
 
     @Override
@@ -172,7 +172,7 @@ public class CosmicReachProvider implements IGameProvider {
     }
 
     @Override
-    public @Nullable URL getJarLocation() {
+    public URL getGameJarLocation() {
         if (LoaderConfig.PATCH_PAMPHLET_FILE == null) return null;
 
         URL url = RawAssetLoader.getLowLevelClassPathUrl(validClass);

@@ -1,4 +1,5 @@
-package dev.puzzleshq.puzzleloader.loader.provider.mixin;/*
+package dev.puzzleshq.puzzleloader.loader.provider.mixin;
+/*
  * This file is part of Mixin, licensed under the MIT License (MIT).
  *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
@@ -47,17 +48,17 @@ public class PuzzleLoaderMixinServiceBootstrap implements IMixinServiceBootstrap
 
     @Override
     public String getServiceClassName() {
-        return PuzzleLoaderMixinServiceBootstrap.class.getName();
+        return "dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap";
     }
 
     @Override
     public void bootstrap() {
-        try {
-            Piece.classLoader.hashCode();
-        } catch (Throwable th) {
-            th.printStackTrace();
-            throw new ServiceInitialisationException(this.getName() + " is not available");
-        }
+//        try {
+//            Piece.classLoader.hashCode();
+//        } catch (Throwable th) {
+//            th.printStackTrace();
+//            throw new ServiceInitialisationException(this.getName() + " is not available");
+//        }
 
         // Essential ones
 //        Piece.classLoader.addClassLoaderExclusion(PuzzleLoaderMixinServiceBootstrap.SERVICE_PACKAGE);

@@ -2,9 +2,11 @@ package dev.puzzleshq.puzzleloader.loader.provider.game.impl;
 
 import com.github.villadora.semver.Version;
 import dev.puzzleshq.mod.info.ModInfoBuilder;
+import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
+import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
@@ -13,15 +15,19 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.hjson.JsonObject;
 
+import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class MinecraftProvider implements IGameProvider {
+public class MinecraftProvider implements IGameProvider, IPatchableGameProvider {
 
     public MinecraftProvider() {
-        Piece.provider = this;
+        Piece.gameProvider = this;
     }
 
     @Override
@@ -48,34 +54,21 @@ public class MinecraftProvider implements IGameProvider {
 
     @Override
     public String getEntrypoint() {
-        String launcher = "net/minecraft/server/Main.class";
-        if (Piece.getSide() == EnvType.SERVER) {
+        String launcher = null;
+
+        String[] clientClasses = {
+                "net/minecraft/client/MinecraftApplet.class",
+                "net/minecraft/client/main/Main.class",
+                "com/mojang/rubydung/RubyDung.class",
+                "com/mojang/MinecraftApplet.class",
+        };
+
+        for (String clientClass : clientClasses) {
             try {
-                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                return launcher.replaceAll("/", ".").replace(".class", "");
+                RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
+                launcher = clientClass;
             } catch (Exception ignore) {
-                throw new RuntimeException("Minecraft Server Main does not exist.");
-            }
-        }
-        try {
-            launcher = "net/minecraft/client/main/Main.class";
-            RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-        } catch (Exception e) {
-            try {
-                launcher = "net/minecraft/client/MinecraftApplet.class";
-                RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-            } catch (Exception a) {
-                try {
-                    launcher = "com/mojang/MinecraftApplet.class";
-                    RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                } catch (Exception sports) {
-                    try {
-                        launcher = "com/mojang/rubydung/RubyDung.class";
-                        RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
-                    } catch (Exception ignore) {
-                        throw new RuntimeException("Minecraft Client Main does not exist.");
-                    }
-                }
+                throw new RuntimeException("Minecraft Client Main does not exist.");
             }
         }
 
@@ -83,6 +76,15 @@ public class MinecraftProvider implements IGameProvider {
             if (args != null && !args.contains("--puzzleEdition")) {
                 args.add(0, launcher.replaceAll("/", ".").replace(".class", ""));
                 args.add(0, "--puzzleEdition");
+            }
+        }
+
+        if (Piece.getSide().equals(EnvType.SERVER)) {
+            try {
+                launcher = "net/minecraft/server/Main.class";
+                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
+            } catch (Exception ignore) {
+                throw new RuntimeException("Minecraft Server Main does not exist.");
             }
         }
 
@@ -125,52 +127,57 @@ public class MinecraftProvider implements IGameProvider {
 
     }
 
-    @Override // TODO: CHANGE ME
-    public boolean isBinaryPatchable() {
-        return false;
-    }
-
     @Override
     public String getDefaultNamespace() {
         return "minecraft";
     }
 
+    String validClass;
+
     @Override
     public boolean isValid() {
-        try {
-            String launcher = "net/minecraft/server/Main.class";
-            if (Piece.getSide() == EnvType.SERVER) {
-                try {
-                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-                    return true;
-                } catch (Exception ignore) {
-                    throw new RuntimeException("Minecraft Server Main does not exist.");
-                }
-            }
+        String[] clientClasses = {
+                "net/minecraft/client/MinecraftApplet.class",
+                "net/minecraft/client/main/Main.class",
+                "com/mojang/rubydung/RubyDung.class",
+                "com/mojang/MinecraftApplet.class",
+        };
+
+        for (String clientClass : clientClasses) {
             try {
-                launcher = "net/minecraft/client/main/Main.class";
-                RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-            } catch (Exception e) {
-                try {
-                    launcher = "net/minecraft/client/MinecraftApplet.class";
-                    RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-                } catch (Exception a) {
-                    try {
-                        launcher = "com/mojang/MinecraftApplet.class";
-                        RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-                    } catch (Exception sports) {
-                        try {
-                            launcher = "com/mojang/rubydung/RubyDung.class";
-                            RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
-                        } catch (Exception ignore) {
-                            throw new RuntimeException("Minecraft Client Main does not exist.");
-                        }
-                    }
-                }
+                validClass = clientClass;
+                RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
+                return true;
+            } catch (Exception ignore) {
+                throw new RuntimeException("Minecraft Client Main does not exist.");
             }
+        }
+
+        if (!Piece.getSide().equals(EnvType.SERVER)) return false;
+
+        try {
+            validClass = "net/minecraft/server/Main.class";
+            RawAssetLoader.getLowLevelClassPathAsset(validClass).dispose();
             return true;
         } catch (Exception ignore) {
-            return false;
+            throw new RuntimeException("Minecraft Server Main does not exist.");
+        }
+    }
+
+    @Override
+    public URL getGameJarLocation() {
+        if (LoaderConfig.PATCH_PAMPHLET_FILE == null) return null;
+
+        URL url = RawAssetLoader.getLowLevelClassPathUrl(validClass);
+        try {
+            URLConnection connection = url.openConnection();
+            if (connection instanceof JarURLConnection) {
+                JarURLConnection jarURLConnection = ((JarURLConnection) connection);
+
+                return jarURLConnection.getJarFileURL();
+            } else throw new RuntimeException("HoW?!");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

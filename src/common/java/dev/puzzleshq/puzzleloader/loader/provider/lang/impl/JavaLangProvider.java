@@ -30,14 +30,11 @@ public class JavaLangProvider implements ILangProvider {
         }
 
         if (split.length == 1) {
-            if (type.isAssignableFrom(clazz)) {
-                try {
-                    return (T) clazz.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new ProviderException(e);
-                }
+            try {
+                return (T) clazz.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new ProviderException("Class " + clazz.getSimpleName() + " is not able to be cast to " + type.getName() + "!", e);
             }
-            throw new ProviderException("Class " + clazz.getSimpleName() + " is not able to be cast to " + type.getName() + "!");
         }
 
         String name = split[1];

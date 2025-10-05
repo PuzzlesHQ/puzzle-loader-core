@@ -1,4 +1,4 @@
-package dev.puzzleshq.puzzleloader.loader.launch.fix;
+package net.minecraft.launchwrapper;
 
 import org.spongepowered.asm.service.IClassProvider;
 import org.spongepowered.asm.service.ILegacyClassTransformer;

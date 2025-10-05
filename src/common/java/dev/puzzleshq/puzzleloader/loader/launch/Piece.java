@@ -5,7 +5,6 @@ import dev.puzzleshq.accesswriter.api.IWriterFormat;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
-import dev.puzzleshq.mod.util.MixinConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
@@ -13,6 +12,7 @@ import dev.puzzleshq.puzzleloader.loader.patching.PatchLoader;
 import dev.puzzleshq.puzzleloader.loader.patching.PatchPage;
 import dev.puzzleshq.puzzleloader.loader.patching.PatchPamphlet;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
+import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
@@ -20,10 +20,6 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.FabricUtil;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.transformer.Config;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,13 +31,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Piece {
-    private static String[] BUILT_IN_PROVIDERS = {
-        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.CosmicReachProvider",
-        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.MinecraftProvider",
-        "dev.puzzleshq.puzzleloader.loader.provider.game.impl.ProjectZomboidProvider"
-    };
 
-    public static IGameProvider provider;
+    public static IGameProvider gameProvider;
 
     public static Map<String, Object> blackboard;
     public static PieceClassLoader classLoader;
@@ -63,12 +54,11 @@ public class Piece {
 
         if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
 
+        blackboard = new HashMap<>();
         classLoader = new PieceClassLoader();
 
         classLoader.addURL(ClassPathUtil.getJVMClassPathUrls());
         Thread.currentThread().setContextClassLoader(classLoader);
-
-        blackboard = new HashMap<>();
     }
 
     public static EnvType getSide() {
@@ -82,9 +72,6 @@ public class Piece {
         parser.allowsUnrecognizedOptions();
 
         try {
-            OptionSpec<String> game_provider = parser.accepts("game-provider")
-                    .withOptionalArg().ofType(String.class);
-
             OptionSpec<String> mod_folder = parser.accepts("mod-folder")
                     .withOptionalArg().ofType(String.class).defaultsTo(new File("pmods").getAbsolutePath());
 
@@ -96,9 +83,6 @@ public class Piece {
 
             OptionSpec<String> custom_title_format = parser.accepts("custom-title-formatter")
                     .withOptionalArg().ofType(String.class).defaultsTo("Puzzle Loader: %s");
-
-            OptionSpec<Boolean> mixins_enabled = parser.accepts("mixins-enabled")
-                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
 
             OptionSpec<Boolean> transformers_enabled = parser.accepts("transformers-enabled")
                     .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
@@ -115,9 +99,7 @@ public class Piece {
 
             LoaderConfig.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
             LoaderConfig.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
-            LoaderConfig.MIXINS_ENABLED = mixins_enabled.value(options);
-            LoaderConfig.DUMP_TRANSFORMED_CLASSES = PieceClassLoader.dumpClasses;
-            LoaderConfig.ALLOWS_CLASS_OVERRIDES = PieceClassLoader.overrides;
+
             LoaderConfig.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
             LoaderConfig.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
 
@@ -132,25 +114,18 @@ public class Piece {
             }
 
             ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
-            {
-                AtomicReference<String> atomicGameProvider = new AtomicReference<>();
-                AtomicReference<URL> gameJar = new AtomicReference<>();
-                if (options.has(game_provider)) atomicGameProvider.set(options.valueOf(game_provider));
-                URL url = setup(atomicGameProvider, gameJar, true);
-                if (gameJar.get() != null) {
-                    classLoader = new PieceClassLoader();
-                    Thread.currentThread().setContextClassLoader(classLoader);
-                    classLoader.addURL(url);
+            ModFinder.crawlModsFolder();
 
-                    for (URL jvmClassPathUrl : ClassPathUtil.getJVMClassPathUrls()) {
-                        if (!jvmClassPathUrl.equals(gameJar.get())) {
-                            classLoader.addURL(jvmClassPathUrl);
-                        }
-                    }
+            gameProvider = IGameProvider.findValidProvider();
 
-                    setup(atomicGameProvider, new AtomicReference<>(), false);
-                }
-            }
+            // allow the game provider to control mixins, class dumping
+            String mixinProperty = System.getProperty("puzzle.core.mixin.enabled");
+            LoaderConfig.MIXINS_ENABLED = mixinProperty == null || mixinProperty.isEmpty() || "true".equals(mixinProperty);
+
+            PieceClassLoader.loadSystemProperties();
+
+            IPatchableGameProvider.patchAndReload(gameProvider);
+            ModFinder.crawlModsFolder();
 
             ModFormats.register(ModFinder::getMod);
             ModFinder.findMods();
@@ -160,34 +135,42 @@ public class Piece {
             if (LoaderConfig.USER_TRANSFORMERS_ENABLED)
                 TransformerInit.invokeTransformers(classLoader);
 
-            provider.initArgs(args);
+            gameProvider.initArgs(args);
 
             if (LoaderConfig.TRANSFORMERS_ENABLED)
-                provider.registerTransformers(classLoader);
-            provider.inject(classLoader);
+                gameProvider.registerTransformers(classLoader);
+            gameProvider.inject(classLoader);
 
             if (LoaderConfig.MIXINS_ENABLED) {
-                MixinUtil.start();
-                MixinUtil.doInit(new ArrayList<>());
-                Piece.setupModMixins();
-                MixinUtil.inject();
-                MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
+                gameProvider.startMixins();
             }
 
-            String entryPoint = provider.getEntrypoint();
+            String entryPoint = gameProvider.getEntrypoint();
             String ranEntrypoint = entryPoint;
             if (entryPoint.contains("MinecraftApplet")) {
                 ranEntrypoint = "dev.puzzleshq.puzzleloader.minecraft.launch.MinecraftAppletLauncher";
             }
 
             Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
-            String[] providerArgs = provider.getArgs().toArray(new String[0]);
+            String[] providerArgs = gameProvider.getArgs().toArray(new String[0]);
 
             Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
 
-            PreLaunchInit.invoke();
+            Class<?> entrypointClazz = Class.forName(
+                    "dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit",
+                    true,
+                    classLoader
+            );
+
+            Method invoker = entrypointClazz.getDeclaredMethod("onPreLaunch");
+
+            for (PuzzleEntrypointUtil.Entrypoint<?> preLaunch : PuzzleEntrypointUtil.getEntrypoints("preLaunch", entrypointClazz)) {
+                try {
+                    invoker.invoke(preLaunch.createInstance());
+                } catch (Exception ignore) {}
+            }
             OffThreadExecutor.start();
-            LOGGER.info("Launching {} version {}", provider.getName(), provider.getVisibleVersion());
+            LOGGER.info("Launching {} version {}", gameProvider.getName(), gameProvider.getVisibleVersion());
             main.invoke(null, (Object) providerArgs);
         } catch (Exception e) {
             LOGGER.error("Unable To Launch", e);
@@ -195,58 +178,8 @@ public class Piece {
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private URL setup(AtomicReference<String> game_provider, AtomicReference<URL> gameJar, boolean firstInit) throws Exception {
-        ModFinder.crawlModsFolder();
 
-        if (firstInit) {
-            if (game_provider.get() != null)
-                provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
-            else {
-                for (String builtInProvider : BUILT_IN_PROVIDERS) {
-                    provider = (IGameProvider) Class.forName(builtInProvider, true, classLoader).newInstance();
-                    if (provider.isValid()) break;
-                }
-            }
-            if (!provider.isValid())
-                throw new RuntimeException("Couldn't load any game provider for this particular application.");
-
-            game_provider.set(provider.getClass().getName());
-
-            URL jarURL = provider.getJarLocation();
-            if (provider.isBinaryPatchable() && jarURL != null && !LoaderConfig.PATCH_PAMPHLET_FILE.isEmpty()) {
-                PatchPamphlet pamphlet = PatchLoader.readPamphlet(new File(LoaderConfig.PATCH_PAMPHLET_FILE));
-                if (!pamphlet.isRipped()) {
-                    System.out.println("Read Pamphlet(patches) (Name: \"" + pamphlet.getDisplayName() + "\", \"Version\": " + pamphlet.getVersion() + ")");
-
-                    PatchPage patchPage = pamphlet.getClientPatches();
-                    if (Piece.getSide() == EnvType.SERVER) patchPage = pamphlet.getServerPatches();
-                    if (patchPage != null) {
-                        gameJar.set(jarURL);
-
-                        File file = new File("./.puzzle/patched/" + patchPage.getChecksum().substring(0, 2) + "/" + patchPage.getChecksum() + ".jar");
-                        if (!file.exists()) {
-                            InputStream inputStream = jarURL.openStream();
-                            byte[] bytes = JavaUtils.readAllBytes(inputStream);
-                            inputStream.close();
-
-                            file.getParentFile().mkdirs();
-
-                            FileOutputStream out = new FileOutputStream(file);
-                            patchPage.apply(bytes, out);
-                            out.close();
-                        }
-                        return file.toURI().toURL();
-                    }
-                }
-            }
-            return null;
-        }
-        provider = (IGameProvider) Class.forName(game_provider.get(), true, classLoader).newInstance();
-
-        return null;
-    }
-
+    // This is for puzzle paradox
     private static void addURL(URL url) {
         classLoader.addURL(url);
     }
@@ -282,28 +215,6 @@ public class Piece {
                     LOGGER.error("Error on File: {}", handle.getFile(), e);
                 }
             }
-        }
-    }
-
-    public static void setupModMixins() {
-        List<MixinConfig> mixinConfigs = new ArrayList<>();
-        Map<String, String> configToMod = new HashMap<>();
-        for (IModContainer mod : ModFinder.getModsArray()) {
-            for (MixinConfig mixinConfig : mod.getInfo().getMixinConfigs()) {
-                mixinConfigs.add(mixinConfig);
-                configToMod.put(mixinConfig.path(), "(" + mod.getID() + ")");
-            }
-        }
-
-        EnvType envType = Piece.getSide();
-        mixinConfigs.forEach((e) -> {
-            if (Objects.equals(envType.name, e.environment()) || Objects.equals(e.environment(), EnvType.UNKNOWN.name)) {
-                Mixins.addConfiguration(e.path());
-            }
-        });
-
-        for (Config config : Mixins.getConfigs()) {
-            config.getConfig().decorate(FabricUtil.KEY_MOD_ID, configToMod.getOrDefault(config.getName(), "(unknown)"));
         }
     }
 
