@@ -21,8 +21,14 @@ String envRepo = System.getenv("MAVEN_REPO")
 String mavenRepo = envRepo != null ? envRepo : "releases"
 
 repositories {
-    maven { url "https://jitpack.io" }
-    maven { url "https://maven.bawnorton.com/releases" }
+    maven {
+        name = 'Jitpack'
+        url "https://jitpack.io" 
+    }
+    maven {
+        name = 'MixinSquared'
+        url "https://maven.bawnorton.com/releases" 
+    }
     mavenCentral()
 }
 
