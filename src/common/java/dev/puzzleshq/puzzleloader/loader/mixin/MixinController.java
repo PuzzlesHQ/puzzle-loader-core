@@ -20,8 +20,26 @@ import org.spongepowered.asm.mixin.transformer.Config;
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * Controller for managing mixins for mods loaded through PuzzleLoader.
+ * <p>
+ * Handles initialization of mixin frameworks and the registration,
+ * decoration, constraint application, and injection of mixins.
+ * </p>
+ * <p>
+ * Integrates with MixinExtras, MixinSquared, and MixinConstraints,
+ * ensuring mixins are applied according to the current environment
+ * (client, server, or unknown).
+ * </p>
+ *
+ */
+
 public class MixinController {
 
+    /**
+     * Initializes all relevant mixin frameworks including MixinBootstrap,
+     * MixinExtras, MixinSquared, and loads the MixinSquared API.
+     */
     public static void initializeMixins() {
         MixinBootstrap.init();
         MixinExtrasBootstrap.init();
@@ -29,6 +47,12 @@ public class MixinController {
         MixinSquaredApiImplLoader.load();
     }
 
+    /**
+     * Registers mixins for all loaded mods and adds them to the Mixin
+     * framework configuration, filtered by the current environment.
+     *
+     * @return a mapping of mixin configuration paths to their corresponding mod IDs.
+     */
     public static Map<String, String> registerModMixins() {
         List<MixinConfig> mixinConfigs = new ArrayList<>();
         Map<String, String> configToMod = new HashMap<>();
@@ -50,6 +74,13 @@ public class MixinController {
         return configToMod;
     }
 
+    /**
+     * Applies mod-specific decorations to mixin configurations,
+     * including setting the Fabric mod ID key and initializing
+     * MixinConstraints for each mixin package.
+     *
+     * @param configToMod mapping of mixin configuration paths to their corresponding mod IDs.
+     */
     public static void applyMixinDecorations(Map<String, String> configToMod) {
         for (Config config : Mixins.getConfigs()) {
             IMixinConfig mixinConfig = config.getConfig();
@@ -58,6 +89,11 @@ public class MixinController {
         }
     }
 
+    /**
+     * Applies constraints to all loaded mixins by removing mixin classes
+     * that should not be applied according to MixinConstraints rules.
+     * Uses reflection to access internal MixinConfig fields.
+     */
     @SuppressWarnings("unchecked")
     public static void applyMixinConstraints() {
         Class<?> mixinConfigClass;
@@ -94,6 +130,13 @@ public class MixinController {
         }
     }
 
+    /**
+     * Removes mixin classes from the provided list that should not be
+     * applied according to the rules defined in MixinConstraints.
+     *
+     * @param mixinPackage the package of the mixins to check.
+     * @param mixinClassesA the list of mixin class names to potentially remove.
+     */
     public static void constrainMixinClass(String mixinPackage, List<String> mixinClassesA) {
         if (mixinClassesA == null) return;
         List<String> toRemove = new ArrayList<>();
@@ -106,6 +149,10 @@ public class MixinController {
         }
     }
 
+    /**
+     * Injects mixins into the environment and sets the
+     * mixin phase to the default phase.
+     */
     public static void injectMixins() {
         MixinUtil.inject();
         MixinUtil.goToPhase(MixinEnvironment.Phase.DEFAULT);
