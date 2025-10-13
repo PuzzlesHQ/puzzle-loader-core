@@ -26,35 +26,64 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * Custom class loader responsible for managing modded or patched classes within the Puzzle Loader framework.
+ * <p>
+ * The {@code PieceClassLoader} extends {@link URLClassLoader} and integrates class transformation, caching,
+ * exclusion management, and code source verification. It provides fine-grained control over how classes
+ * and resources are discovered, transformed, and loaded into the runtime.
+ * </p>
+ */
 public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
+    /** The parent class loader used for delegation. */
     public final ClassLoader parent = getClass().getClassLoader();
 
+    /** Registered source URLs used for class lookup. */
     public final Set<URL> sources = new HashSet<>();
 
+    /** Names of classes that could not be found during loading. */
     public final Set<String> missingClasses = new HashSet<>();
+
+    /** Cache of already loaded classes. */
     public final Map<String, Class<?>> classCache = new HashMap<>();
 
+    /** Cache of missing resources. */
     public final Set<String> missingResourceCache = new HashSet<>();
+
+    /** Cache of loaded resource byte arrays. */
     public final Map<String, byte[]> resourceCache = new HashMap<>();
 
+    /** Class name prefixes excluded from this class loader’s control. */
     public final Set<String> excludedClasses = new HashSet<>();
+
+    /** Class name prefixes excluded from bytecode transformation. */
     public final Set<String> transformerExcludedClasses = new HashSet<>();
 
+    /** Registered class transformers. */
     public final List<ILegacyClassTransformer> transformers = new ArrayList<>();
 
+    /** Default constructor using the system class loader as parent. */
     public PieceClassLoader() {
         this(new URL[0], PieceClassLoader.class.getClassLoader());
     }
 
+    /** Constructs a new loader with a specific parent. */
     public PieceClassLoader(ClassLoader parent) {
         this(new URL[0], parent);
     }
 
+    /** Constructs a new loader from a list of URLs. */
     public PieceClassLoader(Collection<URL> urls) {
         this(urls.toArray(new URL[0]), PieceClassLoader.class.getClassLoader());
     }
 
+    /**
+     * Main constructor initializing sources, exclusions, and transformer exclusions.
+     *
+     * @param sources array of initial source URLs
+     * @param parent  parent class loader
+     */
     public PieceClassLoader(URL[] sources, ClassLoader parent) {
         super(sources, parent);
         this.sources.addAll(Arrays.asList(sources));
@@ -90,29 +119,35 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         addTransformerExclusion("org.bouncycastle.");
     }
 
+    /** Constructs a new loader from a list of URLs and a specific parent. */
     public PieceClassLoader(List<URL> sources, ClassLoader parent) {
         this(sources.toArray(new URL[0]), parent);
     }
 
+    /** Loads system properties affecting class loader behavior. */
     public static void loadSystemProperties() {
         LoaderConfig.ALLOWS_CLASS_OVERRIDES = overrides = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classOverrides"));
         LoaderConfig.DUMP_TRANSFORMED_CLASSES = dumpClasses = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classDump"));
     }
 
+    /** Adds a single URL source. */
     @Override
     public void addURL(URL url) {
         super.addURL(url);
         this.sources.add(url);
     }
 
+    /** Adds multiple URL sources. */
     public void addURL(URL... urls) {
         for (URL u : urls) addURL(u);
     }
 
+    /** Registers a transformer instance. */
     public void registerTransformer(ILegacyClassTransformer transformer) {
         transformers.add(transformer);
     }
 
+    /** Instantiates and registers a transformer by class name. */
     public void registerTransformer(String s) {
         try {
             registerTransformer((ILegacyClassTransformer) loadClass(s).newInstance());
@@ -121,21 +156,25 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         }
     }
 
+    /** Registers multiple transformer classes by name. */
     public void registerTransformers(String @NotNull ... transformerClassNames) {
         for (String transformerClassName : transformerClassNames) {
             registerTransformer(transformerClassName);
         }
     }
 
+    /** Defines a class from raw bytecode. */
     public Class<?> defineClass(String clazzName, byte[] bytes) {
         return super.defineClass(clazzName, bytes, 0, bytes.length);
     }
 
+    /** Overrides default class loading behavior to use custom lookup logic. */
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         return findClass(name);
     }
 
+    /** Reflection handle to bypass internal loader restrictions. */
     private static Method I_HATE_YOU_JAVA_CLASSLOADERS;
     private static boolean aboveJava8;
 
@@ -148,6 +187,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         }
     }
 
+    /** Core class lookup, caching, transformation, and code source validation routine. */
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         if (missingClasses.contains(name)) throw new ClassNotFoundException(name);
@@ -251,9 +291,11 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         }
     }
 
+    /** Whether class overrides and dumps are enabled. */
     public static boolean overrides = false;
     public static boolean dumpClasses;
 
+    /** Applies all registered class transformers to a class byte array. */
     private byte[] transform(String name, String fileName, byte[] bytes) {
         if (!LoaderConfig.TRANSFORMERS_ENABLED) return bytes;
 
@@ -267,9 +309,11 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return transformed;
     }
 
+    /** Directories for overridden and dumped classes. */
     public static final File classOverridesDir = new File(".class-overrides");
     public static final File classDumpDir = new File(".class-transform-dump");
 
+    /** Writes transformed class bytecode to disk if dumping is enabled. */
     public static void outputClass(String name, byte[] transformed) {
         if (!dumpClasses) return;
         try {
@@ -283,6 +327,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         } catch (IOException ignore) {}
     }
 
+    /** Opens a URL connection for a resource path. */
     private URLConnection getConnection(String name) {
         final URL resource = findResource(name);
         if (resource != null) {
@@ -292,10 +337,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
                 throw new RuntimeException(e);
             }
         }
-
         return null;
     }
 
+    /** Loads class resource bytes from file overrides or classpath. */
     public byte[] getResourceBytes(String name) {
         if (PieceClassLoader.overrides) {
             if (!PieceClassLoader.classOverridesDir.exists()) PieceClassLoader.classOverridesDir.mkdirs();
@@ -310,7 +355,6 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
         if (missingResourceCache.contains(name)) return null;
         RawAssetLoader.RawFileHandle handle = RawAssetLoader.getLowLevelClassPathAssetErrors("/".concat(toFileName(name)), false);
-
         if (handle == null) {
             missingResourceCache.add(name);
             return null;
@@ -322,27 +366,33 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return bytes;
     }
 
+    /** Converts a class name into its corresponding file path. */
     private String toFileName(String name) {
         return name.replace('.', '/').concat(".class");
     }
 
+    /** Adds a prefix to the class loader exclusion list. */
     public void addClassLoaderExclusion(String s) {
         excludedClasses.add(s);
     }
 
+    /** Adds a prefix to the transformer exclusion list. */
     public void addTransformerExclusion(String s) {
         transformerExcludedClasses.add(s);
     }
 
+    /** Returns a read-only list of registered transformers. */
     public List<ITransformer> getTransformers() {
         return Collections.unmodifiableList(transformers);
     }
 
+    /** Returns whether a class is already loaded and cached. */
     @Override
     public boolean isClassLoaded(String name) {
         return this.classCache.containsKey(name);
     }
 
+    /** Describes class restrictions based on exclusion categories. */
     @Override
     public String getClassRestrictions(String className) {
         String restrictions = "";
@@ -355,41 +405,44 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         return restrictions;
     }
 
+    /** Determines if a class is excluded from both loading and transformation. */
     public boolean isClassExcluded(String name, String transformedName) {
         return this.isClassClassLoaderExcluded(name, transformedName) || this.isClassTransformerExcluded(name, transformedName);
     }
 
+    /** Checks if a class is excluded from this loader. */
     boolean isClassClassLoaderExcluded(String name, String transformedName) {
         for (final String exception : this.getClassLoaderExceptions()) {
             if ((transformedName != null && transformedName.startsWith(exception)) || name.startsWith(exception)) {
                 return true;
             }
         }
-
         return false;
     }
 
+    /** Checks if a class is excluded from transformation. */
     boolean isClassTransformerExcluded(String name, String transformedName) {
         for (final String exception : this.getTransformerExceptions()) {
             if ((transformedName != null && transformedName.startsWith(exception)) || name.startsWith(exception)) {
                 return true;
             }
         }
-
         return false;
     }
 
+    /** Registers a class as invalid or unloadable. */
     @Override
     public void registerInvalidClass(String name) {
         this.missingClasses.add(name);
     }
 
+    /** Returns the current class loader exclusion set. */
     Set<String> getClassLoaderExceptions() {
         return this.excludedClasses;
     }
 
+    /** Returns the current transformer exclusion set. */
     Set<String> getTransformerExceptions() {
         return this.transformerExcludedClasses;
     }
-
 }
