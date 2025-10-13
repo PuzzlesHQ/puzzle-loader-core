@@ -30,25 +30,53 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * The {@code Piece} class is the main launcher and core manager for the Puzzle Loader.
+ * <p>
+ * It handles environment setup, argument parsing, mod discovery, class loading,
+ * and the initialization of the selected {@link IGameProvider}.
+ * This class is designed to exist as a single instance during runtime.
+ */
 public class Piece {
 
+    /** The active game provider instance that manages the game runtime. */
     public static IGameProvider gameProvider;
 
+    /** A shared key-value store used for inter-component communication. */
     public static Map<String, Object> blackboard;
+
+    /** The custom class loader responsible for loading mods and game classes. */
     public static PieceClassLoader classLoader;
 
+    /** The current environment type (client, server, or other). */
     static AtomicReference<EnvType> env = new AtomicReference<>();
 
+    /** The logger used by the Piece system for output and diagnostics. */
     private static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
 
+    /** The singleton instance of {@code Piece}. */
     public static Piece INSTANCE;
 
+    /**
+     * Launches the Puzzle Loader with the provided arguments and environment type.
+     *
+     * @param args the command-line arguments passed to the game
+     * @param type the environment type (client or server)
+     */
     public static void launch(String[] args, EnvType type) {
         Piece piece = new Piece();
         env.set(type);
         piece.privateLaunch(args);
     }
 
+    /**
+     * Constructs a new {@code Piece} instance.
+     * <p>
+     * Ensures that only one instance exists at a time, initializes the
+     * blackboard, and sets up the {@link PieceClassLoader}.
+     *
+     * @throws RuntimeException if another instance already exists
+     */
     private Piece() {
         Piece.INSTANCE = this;
 
@@ -61,10 +89,23 @@ public class Piece {
         Thread.currentThread().setContextClassLoader(classLoader);
     }
 
+    /**
+     * Returns the current environment type (client, server, etc.).
+     *
+     * @return the active {@link EnvType}
+     */
     public static EnvType getSide() {
         return env.get();
     }
 
+    /**
+     * Performs the internal launch sequence for Puzzle Loader.
+     * <p>
+     * Parses arguments, initializes mods, applies patches and transformers,
+     * and executes the game provider’s main entry point.
+     *
+     * @param args the command-line arguments for the game
+     */
     private void privateLaunch(String[] args) {
         LoaderConfig.COMMAND_LINE_ARGUMENTS = args;
 
@@ -178,12 +219,23 @@ public class Piece {
         }
     }
 
-
-    // This is for puzzle paradox
+    /**
+     * Adds a URL to the {@link PieceClassLoader}.
+     * <p>
+     * This method is used internally by Puzzle Paradox.
+     *
+     * @param url the URL to be added to the classpath
+     */
     private static void addURL(URL url) {
         classLoader.addURL(url);
     }
 
+    /**
+     * Adds a file to the {@link PieceClassLoader} as a classpath entry.
+     *
+     * @param file the file to add
+     * @throws RuntimeException if the file’s URL is malformed
+     */
     private void addFile(File file) {
         try {
             classLoader.addURL(file.getAbsoluteFile().toURI().toURL());
@@ -192,6 +244,13 @@ public class Piece {
         }
     }
 
+    /**
+     * Discovers and loads access transformers (AccessWriters) from the provided mods.
+     * <p>
+     * Each transformer file is validated, parsed, and merged into the runtime access writer set.
+     *
+     * @param modsArray the list of mod containers to inspect
+     */
     private void discoverAccessWriters(List<IModContainer> modsArray) {
         for (IModContainer container : modsArray) {
             ModInfo info = container.getInfo();
