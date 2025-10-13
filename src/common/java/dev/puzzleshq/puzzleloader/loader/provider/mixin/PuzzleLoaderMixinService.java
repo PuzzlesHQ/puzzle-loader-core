@@ -542,8 +542,14 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      */
     private @NotNull ClassNode getClassNode(String className, byte[] classBytes, int flags) {
         ClassNode classNode = new ClassNode();
-        ClassReader classReader = new MixinClassReader(classBytes, className);
-        classReader.accept(classNode, flags);
+        if (Piece.classLoader.isClassExcluded(className, className)) {
+            ClassReader reader = new ClassReader(classBytes);
+            reader.accept(classNode, flags);
+        } else {
+            ClassReader classReader = new MixinClassReader(classBytes, className);
+            classReader.accept(classNode, flags);
+        }
+
         return classNode;
     }
 }

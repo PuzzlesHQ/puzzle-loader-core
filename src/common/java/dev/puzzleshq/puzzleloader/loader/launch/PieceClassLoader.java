@@ -30,7 +30,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
     public final ClassLoader parent = getClass().getClassLoader();
 
-    public final List<URL> sources = new ArrayList<>();
+    public final Set<URL> sources = new HashSet<>();
 
     public final Set<String> missingClasses = new HashSet<>();
     public final Map<String, Class<?>> classCache = new HashMap<>();

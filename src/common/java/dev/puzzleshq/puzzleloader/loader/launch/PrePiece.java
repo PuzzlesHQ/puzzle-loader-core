@@ -22,7 +22,7 @@ public class PrePiece {
         System.setProperty("mixin.bootstrapService", "dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinServiceBootstrap");
         System.setProperty("mixin.service", "dev.puzzleshq.puzzleloader.loader.provider.mixin.PuzzleLoaderMixinService");
         System.setProperty("mixinconstraints.abstraction", "dev.puzzleshq.puzzleloader.loader.mixin.PuzzleAbstractionsImpl");
-        System.setProperty("mixinconstraints.verbose", "true");
+//        System.setProperty("mixinconstraints.verbose", "true");
 
         try {
             System.getProperties().setProperty(

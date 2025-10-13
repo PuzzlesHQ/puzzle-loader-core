@@ -109,30 +109,20 @@ public class ModFinder {
             if (url.getFile().endsWith(".jar")) {
                 try {
                     URLConnection connection = url.openConnection();
-                    if (connection instanceof JarURLConnection) {
-                        JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
-                        JarFile jar = jarConnection.getJarFile();
-                        JarEntry entry = jar.getJarEntry(LoaderConfig.MOD_JSON_NAME);
-                        if (entry != null) {
-                            InputStream jsonInputStream = jar.getInputStream(entry);
-                            byte[] bytes = JavaUtils.readAllBytes(jsonInputStream);
-                            jsonInputStream.close();
-
-                            addModToArray(ModInfo.readFromString(new String(bytes)), jar);
-                        }
-                        continue;
-                    }
-
-                    ZipInputStream stream = new ZipInputStream(connection.getInputStream());
+                    InputStream inputStream = connection.getInputStream();
+                    ZipInputStream stream = new ZipInputStream(inputStream);
                     ZipEntry entry;
                     while ((entry = stream.getNextEntry()) != null) {
                         if (!entry.getName().equals(LoaderConfig.MOD_JSON_NAME)) continue;
 
                         byte[] bytes = JavaUtils.readAllBytes(stream);
 
+                        System.out.println(url.getFile());
                         addModToArray(ModInfo.readFromString(new String(bytes)), null);
                         break;
                     }
+                    stream.close();
+                    inputStream.close();
                 } catch (IOException e) {
                     LOGGER.error("File \"{}\" may be corrupted or location could not be accessed.", url.getFile(), e);
                 }
