@@ -22,37 +22,68 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Core launcher class for the Puzzle Loader system.
+ * <p>
+ * Initializes the environment, class loader, mods, game provider, transformers,
+ * access writers, and other essential subsystems before launching the target game entrypoint.
+ * </p>
+ * <p>
+ * Handles command-line arguments, pre-launch hooks, and mixins integration.
+ * Provides controlled loading of mods and transformers.
+ * </p>
+ * <p>
+ * Typical usage involves calling {@link #launch(String[], EnvType)} with
+ * command-line arguments and the environment type.
+ * </p>
+ */
 public class Piece {
 
+    /** Current game provider */
     public static IGameProvider gameProvider;
 
+    /** Shared blackboard map for global state */
     public static Map<String, Object> blackboard;
+
+    /** Custom class loader for the piece */
     public static PieceClassLoader classLoader;
 
+    /** Environment type (client/server) */
     static AtomicReference<EnvType> env = new AtomicReference<>();
 
+    /** Logger instance */
     private static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
 
+    /** Singleton instance of the piece */
     public static Piece INSTANCE;
 
+    /**
+     * Launches the Puzzle Loader environment for the given side.
+     *
+     * @param args command-line arguments
+     * @param type environment type (client or server)
+     */
     public static void launch(String[] args, EnvType type) {
         Piece piece = new Piece();
         env.set(type);
         piece.privateLaunch(args);
     }
 
+    /**
+     * Private constructor to initialize class loader and blackboard.
+     * Ensures only one piece exists at a time.
+     */
     private Piece() {
         Piece.INSTANCE = this;
 
-        if (classLoader != null) throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
+        if (classLoader != null)
+            throw new RuntimeException("MORE THAN ONE PIECE CANNOT EXIST AT THE SAME TIME.");
 
         blackboard = new HashMap<>();
         classLoader = new PieceClassLoader();
@@ -61,10 +92,24 @@ public class Piece {
         Thread.currentThread().setContextClassLoader(classLoader);
     }
 
+    /**
+     * Returns the current environment type.
+     *
+     * @return the environment type (client or server)
+     */
     public static EnvType getSide() {
         return env.get();
     }
 
+    /**
+     * Core internal launch logic.
+     * <p>
+     * Parses command-line arguments, initializes mods, transformers,
+     * access writers, mixins, and invokes the main entrypoint of the target game.
+     * </p>
+     *
+     * @param args command-line arguments
+     */
     private void privateLaunch(String[] args) {
         LoaderConfig.COMMAND_LINE_ARGUMENTS = args;
 
@@ -96,10 +141,8 @@ public class Piece {
             final OptionSet options = parser.parse(args);
 
             LoaderConfig.PATCH_PAMPHLET_FILE = patch_file.value(options);
-
             LoaderConfig.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
             LoaderConfig.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
-
             LoaderConfig.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
             LoaderConfig.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
 
@@ -118,12 +161,10 @@ public class Piece {
 
             gameProvider = IGameProvider.findValidProvider();
 
-            // allow the game provider to control mixins, class dumping
             String mixinProperty = System.getProperty("puzzle.core.mixin.enabled");
             LoaderConfig.MIXINS_ENABLED = mixinProperty == null || mixinProperty.isEmpty() || "true".equals(mixinProperty);
 
             PieceClassLoader.loadSystemProperties();
-
             IPatchableGameProvider.patchAndReload(gameProvider);
             ModFinder.crawlModsFolder();
 
@@ -153,7 +194,6 @@ public class Piece {
 
             Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
             String[] providerArgs = gameProvider.getArgs().toArray(new String[0]);
-
             Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
 
             Class<?> entrypointClazz = Class.forName(
@@ -161,7 +201,6 @@ public class Piece {
                     true,
                     classLoader
             );
-
             Method invoker = entrypointClazz.getDeclaredMethod("onPreLaunch");
 
             for (PuzzleEntrypointUtil.Entrypoint<?> preLaunch : PuzzleEntrypointUtil.getEntrypoints("preLaunch", entrypointClazz)) {
@@ -169,21 +208,23 @@ public class Piece {
                     invoker.invoke(preLaunch.createInstance());
                 } catch (Exception ignore) {}
             }
+
             OffThreadExecutor.start();
             LOGGER.info("Launching {} version {}", gameProvider.getName(), gameProvider.getVisibleVersion());
             main.invoke(null, (Object) providerArgs);
+
         } catch (Exception e) {
             LOGGER.error("Unable To Launch", e);
             System.exit(1);
         }
     }
 
-
-    // This is for puzzle paradox
+    /** Adds a URL to the class loader */
     private static void addURL(URL url) {
         classLoader.addURL(url);
     }
 
+    /** Adds a file to the class loader */
     private void addFile(File file) {
         try {
             classLoader.addURL(file.getAbsoluteFile().toURI().toURL());
@@ -192,10 +233,14 @@ public class Piece {
         }
     }
 
+    /**
+     * Initializes access writers from mods, merging them into the global registry.
+     *
+     * @param modsArray list of mod containers
+     */
     private void discoverAccessWriters(List<IModContainer> modsArray) {
         for (IModContainer container : modsArray) {
             ModInfo info = container.getInfo();
-
             String[] transformers = info.getAccessTransformers();
 
             for (String transformerPath : transformers) {
@@ -207,7 +252,7 @@ public class Piece {
 
                 IWriterFormat format = AccessWriters.getFormat(transformerPath);
                 if (format == null)
-                    throw new RuntimeException("Unsupported AccessWriter format found in file \"" + transformerPath + "\", please remove this file or fix the format or the crash will persist.");
+                    throw new RuntimeException("Unsupported AccessWriter format found in file \"" + transformerPath + "\".");
 
                 try {
                     AccessWriters.MERGED.add(format.parse(handle.getString()));
@@ -217,5 +262,4 @@ public class Piece {
             }
         }
     }
-
 }
