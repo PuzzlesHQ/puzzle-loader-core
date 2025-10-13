@@ -12,8 +12,6 @@ import sun.misc.Unsafe;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
@@ -26,23 +24,47 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * Custom class loader for Puzzle Loader that handles class and resource loading,
+ * class transformers, overrides, exclusions, and caching mechanisms.
+ * <p>
+ * Supports loading classes from URLs, applying legacy and custom transformers,
+ * and dumping or overriding classes for debugging or runtime modifications.
+ * </p>
+ * <p>
+ * Integrates with the Puzzle Loader environment and provides hooks for
+ * mixins, mods, and game providers.
+ * </p>
+ */
 public class PieceClassLoader extends URLClassLoader implements IClassTracker {
 
+    /** Parent class loader */
     public final ClassLoader parent = getClass().getClassLoader();
 
+    /** URLs of loaded sources */
     public final List<URL> sources = new ArrayList<>();
 
+    /** Cache of classes that could not be found */
     public final Set<String> missingClasses = new HashSet<>();
+    /** Cache of loaded classes */
     public final Map<String, Class<?>> classCache = new HashMap<>();
 
+    /** Cache of missing resources */
     public final Set<String> missingResourceCache = new HashSet<>();
+    /** Cache of loaded resources */
     public final Map<String, byte[]> resourceCache = new HashMap<>();
 
+    /** Classes excluded from loading */
     public final Set<String> excludedClasses = new HashSet<>();
+    /** Classes excluded from transformation */
     public final Set<String> transformerExcludedClasses = new HashSet<>();
 
+    /** Registered class transformers */
     public final List<ILegacyClassTransformer> transformers = new ArrayList<>();
 
+    /**
+     * Creates a new PieceClassLoader with default parent.
+     */
     public PieceClassLoader() {
         this(new URL[0], PieceClassLoader.class.getClassLoader());
     }
@@ -94,6 +116,9 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         this(sources.toArray(new URL[0]), parent);
     }
 
+    /**
+     * Loads system properties for class overrides and class dump options.
+     */
     public static void loadSystemProperties() {
         LoaderConfig.ALLOWS_CLASS_OVERRIDES = overrides = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classOverrides"));
         LoaderConfig.DUMP_TRANSFORMED_CLASSES = dumpClasses = Boolean.parseBoolean(System.getProperty("puzzle.core.classloader.classDump"));
@@ -109,10 +134,12 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         for (URL u : urls) addURL(u);
     }
 
+    /** Registers a legacy transformer instance */
     public void registerTransformer(ILegacyClassTransformer transformer) {
         transformers.add(transformer);
     }
 
+    /** Registers a transformer by class name */
     public void registerTransformer(String s) {
         try {
             registerTransformer((ILegacyClassTransformer) loadClass(s).newInstance());
@@ -121,12 +148,14 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         }
     }
 
+    /** Registers multiple transformers by class names */
     public void registerTransformers(String @NotNull ... transformerClassNames) {
         for (String transformerClassName : transformerClassNames) {
             registerTransformer(transformerClassName);
         }
     }
 
+    /** Defines a class from byte array */
     public Class<?> defineClass(String clazzName, byte[] bytes) {
         return super.defineClass(clazzName, bytes, 0, bytes.length);
     }
@@ -158,16 +187,13 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
             if (name.startsWith(exclusion)) return parent.loadClass(name);
         }
 
-        if (aboveJava8){
-
-        } else {
-            Class<?> parentTest;
+        if (!aboveJava8) {
             try {
-                parentTest = (Class<?>) I_HATE_YOU_JAVA_CLASSLOADERS.invoke(parent, name);
+                Class<?> parentTest = (Class<?>) I_HATE_YOU_JAVA_CLASSLOADERS.invoke(parent, name);
+                if (parentTest != null) return parentTest;
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
-            if (parentTest != null) return parentTest;
         }
 
         if (isClassLoaded(name))
@@ -189,51 +215,39 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         try {
             int lastDot = name.lastIndexOf('.');
             String pkgName = lastDot == -1 ? "" : name.substring(0, lastDot);
-
             String classFileNameSoft = name.replaceAll("\\.", "/") + ".class";
             String fileName = toFileName(name);
 
             URLConnection connection = getConnection(classFileNameSoft);
             CodeSigner[] signers = null;
-
             CodeSource source = null;
 
             if (connection instanceof JarURLConnection) {
-                JarURLConnection  jarConnection = (JarURLConnection) connection;
-
+                JarURLConnection jarConnection = (JarURLConnection) connection;
                 JarFile jar = jarConnection.getJarFile();
 
                 if (jar != null && jar.getManifest() != null) {
                     JarEntry entry = jar.getJarEntry(fileName);
-
                     getResourceBytes(name);
                     signers = entry.getCodeSigners();
                     source = new CodeSource(jarConnection.getJarFileURL(), signers);
                 }
-                if (lastDot > -1) {
-                    if (getPackage(pkgName) == null)
-                        definePackage(pkgName, jarConnection.getManifest(), jarConnection.getJarFileURL());
-                }
-            } else {
-                if (lastDot > -1) {
-                    Package pkg = getPackage(pkgName);
-                    if (pkg == null)
-                        definePackage(pkgName, null, null, null, null, null, null, null);
-                }
+                if (lastDot > -1 && getPackage(pkgName) == null)
+                    definePackage(pkgName, jarConnection.getManifest(), jarConnection.getJarFileURL());
+            } else if (lastDot > -1 && getPackage(pkgName) == null) {
+                definePackage(pkgName, null, null, null, null, null, null, null);
             }
 
             if (connection == null) {
-                try {
-                    return parent.loadClass(name);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                return parent.loadClass(name);
             }
+
             byte[] bytes = transform(name, name, getResourceBytes(name));
             if (bytes == null) {
                 missingClasses.add(name);
                 throw new ClassNotFoundException(name);
             }
+
             Class<?> clazz;
             try {
                 clazz = defineClass(name, bytes, 0, bytes.length, source);
@@ -254,6 +268,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public static boolean overrides = false;
     public static boolean dumpClasses;
 
+    /** Transforms class bytes using registered transformers */
     private byte[] transform(String name, String fileName, byte[] bytes) {
         if (!LoaderConfig.TRANSFORMERS_ENABLED) return bytes;
 
@@ -270,19 +285,20 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     public static final File classOverridesDir = new File(".class-overrides");
     public static final File classDumpDir = new File(".class-transform-dump");
 
+    /** Outputs transformed class to disk if dumping is enabled */
     public static void outputClass(String name, byte[] transformed) {
         if (!dumpClasses) return;
         try {
             File output = new File(classDumpDir, name.replaceAll("\\.", "/") + ".class");
             if (!output.getParentFile().exists()) output.getParentFile().mkdirs();
             if (!output.exists()) output.createNewFile();
-
-            FileOutputStream stream = new FileOutputStream(output);
-            stream.write(transformed);
-            stream.close();
+            try (FileOutputStream stream = new FileOutputStream(output)) {
+                stream.write(transformed);
+            }
         } catch (IOException ignore) {}
     }
 
+    /** Returns the URL connection for a resource */
     private URLConnection getConnection(String name) {
         final URL resource = findResource(name);
         if (resource != null) {
@@ -292,10 +308,10 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
                 throw new RuntimeException(e);
             }
         }
-
         return null;
     }
 
+    /** Loads resource bytes from classpath or overrides */
     public byte[] getResourceBytes(String name) {
         if (PieceClassLoader.overrides) {
             if (!PieceClassLoader.classOverridesDir.exists()) PieceClassLoader.classOverridesDir.mkdirs();
@@ -365,7 +381,6 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -375,7 +390,6 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -391,5 +405,4 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
     Set<String> getTransformerExceptions() {
         return this.transformerExcludedClasses;
     }
-
 }
