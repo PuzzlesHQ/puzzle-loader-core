@@ -149,7 +149,7 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
                 RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
                 return true;
             } catch (Exception ignore) {
-                throw new RuntimeException("Minecraft Client Main does not exist.");
+                return false;
             }
         }
 
@@ -160,7 +160,7 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
             RawAssetLoader.getLowLevelClassPathAsset(validClass).dispose();
             return true;
         } catch (Exception ignore) {
-            throw new RuntimeException("Minecraft Server Main does not exist.");
+            return false;
         }
     }
 

@@ -116,14 +116,14 @@ public class ProjectZomboidProvider implements IGameProvider {
                     RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
                     return true;
                 } catch (Exception ignore) {
-                    throw new RuntimeException("Project Zomboid Server Main does not exist.");
+                    return false;
                 }
             }
             try {
                 launcher = "zombie/gameStates/MainScreenState.class";
                 RawAssetLoader.getLowLevelClassPathAssetErrors(launcher, false).dispose();
             } catch (Exception e) {
-                throw new RuntimeException("Project Zomboid Client Main does not exist.");
+                return false;
             }
             return true;
         } catch (Exception ignore) {
