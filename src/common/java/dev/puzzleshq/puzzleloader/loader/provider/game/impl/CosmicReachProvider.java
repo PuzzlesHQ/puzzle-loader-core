@@ -182,7 +182,7 @@ public class CosmicReachProvider implements IGameProvider, IPatchableGameProvide
                 JarURLConnection jarURLConnection = ((JarURLConnection) connection);
 
                 return jarURLConnection.getJarFileURL();
-            } else throw new RuntimeException("HoW?!");
+            } else throw new RuntimeException("HoW?! (Achievement: Ran game from just class and resources files)");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

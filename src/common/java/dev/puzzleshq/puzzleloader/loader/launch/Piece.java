@@ -124,25 +124,33 @@ public class Piece {
 
             PieceClassLoader.loadSystemProperties();
 
-            IPatchableGameProvider.patchAndReload(gameProvider);
-            ModFinder.crawlModsFolder();
+            if ("true".equals(System.getProperty("puzzle.core.disable-patching"))) {
+                IPatchableGameProvider.patchAndReload(gameProvider);
+            }
 
-            ModFormats.register(ModFinder::getMod);
-            ModFinder.findMods();
+            if ("true".equals(System.getProperty("puzzle.core.disable-mod-search"))) {
+                ModFinder.crawlModsFolder();
+                ModFormats.register(ModFinder::getMod);
+                ModFinder.findMods();
+            }
 
-            AccessWriters.init(classLoader);
-            discoverAccessWriters(ModFinder.getModsArray());
-            if (LoaderConfig.USER_TRANSFORMERS_ENABLED)
-                TransformerInit.invokeTransformers(classLoader);
+            if ("true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
+                AccessWriters.init(classLoader);
+                discoverAccessWriters(ModFinder.getModsArray());
+                if (LoaderConfig.USER_TRANSFORMERS_ENABLED)
+                    TransformerInit.invokeTransformers(classLoader);
+            }
 
             gameProvider.initArgs(args);
 
-            if (LoaderConfig.TRANSFORMERS_ENABLED)
-                gameProvider.registerTransformers(classLoader);
-            gameProvider.inject(classLoader);
+            if ("true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
+                if (LoaderConfig.TRANSFORMERS_ENABLED)
+                    gameProvider.registerTransformers(classLoader);
+                gameProvider.inject(classLoader);
 
-            if (LoaderConfig.MIXINS_ENABLED) {
-                gameProvider.startMixins();
+                if (LoaderConfig.MIXINS_ENABLED) {
+                    gameProvider.startMixins();
+                }
             }
 
             String entryPoint = gameProvider.getEntrypoint();
