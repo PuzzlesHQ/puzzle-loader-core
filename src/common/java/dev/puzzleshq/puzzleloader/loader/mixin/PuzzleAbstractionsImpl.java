@@ -5,6 +5,14 @@ import com.moulberry.mixinconstraints.util.Abstractions;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 
+/**
+ * Implementation of {@link Abstractions} for the Puzzle Loader environment.
+ * <p>
+ * Provides methods to determine the development environment, retrieve mod versions,
+ * check version ranges, and identify the platform name.
+ * </p>
+ *
+ */
 public class PuzzleAbstractionsImpl extends Abstractions {
 
     @Override

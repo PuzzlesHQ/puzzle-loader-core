@@ -13,7 +13,7 @@ import java.util.Objects;
  * @author Mr_Zombii
  * @since 1.0.0
  *
-*/
+ */
 public class PrePiece {
 
     private static Logger LOGGER;

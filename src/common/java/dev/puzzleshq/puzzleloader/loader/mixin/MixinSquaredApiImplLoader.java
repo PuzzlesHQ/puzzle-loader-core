@@ -9,6 +9,19 @@ import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Loader for Mixin Squared API implementations.
+ * <p>
+ * Handles discovery and registration of {@link MixinCanceller} and
+ * {@link MixinAnnotationAdjuster} implementations provided by mods.
+ * </p>
+ * <p>
+ * Uses {@link PuzzleEntrypointUtil} to retrieve entrypoints and registers
+ * them with {@link MixinCancellerRegistrar} and
+ * {@link MixinAnnotationAdjusterRegistrar}.
+ * </p>
+ *
+ */
 public class MixinSquaredApiImplLoader {
 
     private static final Logger LOGGER = LogManager.getLogger("Mixin Squared");
