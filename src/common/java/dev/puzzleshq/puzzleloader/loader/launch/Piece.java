@@ -124,17 +124,17 @@ public class Piece {
 
             PieceClassLoader.loadSystemProperties();
 
-            if ("true".equals(System.getProperty("puzzle.core.disable-patching"))) {
+            if (!"true".equals(System.getProperty("puzzle.core.disable-patching"))) {
                 IPatchableGameProvider.patchAndReload(gameProvider);
             }
 
-            if ("true".equals(System.getProperty("puzzle.core.disable-mod-search"))) {
+            if (!"true".equals(System.getProperty("puzzle.core.disable-mod-search"))) {
                 ModFinder.crawlModsFolder();
                 ModFormats.register(ModFinder::getMod);
                 ModFinder.findMods();
             }
 
-            if ("true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
+            if (!"true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
                 AccessWriters.init(classLoader);
                 discoverAccessWriters(ModFinder.getModsArray());
                 if (LoaderConfig.USER_TRANSFORMERS_ENABLED)
@@ -143,7 +143,7 @@ public class Piece {
 
             gameProvider.initArgs(args);
 
-            if ("true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
+            if (!"true".equals(System.getProperty("puzzle.core.disable-all-transform"))) {
                 if (LoaderConfig.TRANSFORMERS_ENABLED)
                     gameProvider.registerTransformers(classLoader);
                 gameProvider.inject(classLoader);
