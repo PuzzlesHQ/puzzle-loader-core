@@ -78,52 +78,30 @@ public class ProxyClassUtil {
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             super.visit(version, access, name, signature, superName, interfaces);
 
-            visitMethod(
+            MethodVisitor mw = visitMethod(
                     Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC,
                     MAIN_METHOD_NAME, MAIN_METHOD_DESC,
                     null, exceptions
             );
-        }
-
-        @Override
-        public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-            MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-            if (name.equals(MAIN_METHOD_NAME) && descriptor.equals(MAIN_METHOD_DESC)) {
-                return new ProxyMethodWriter(visitor, isInterface, proxiedClass);
-            }
-            return visitor;
-        }
-    }
-
-    private static class ProxyMethodWriter extends MethodVisitor {
-        private final boolean isInterface;
-        private final String proxiedClass;
-
-        protected ProxyMethodWriter(MethodVisitor visitor, boolean isInterface, String proxiedClass) {
-            super(Opcodes.ASM9, visitor);
-            this.isInterface = isInterface;
-            this.proxiedClass = proxiedClass;
-        }
-
-        @Override
-        public void visitEnd() {
-            visitCode();
-            visitMethodInsn(
+            mw.visitCode();
+            mw.visitMethodInsn(
                     Opcodes.INVOKESTATIC,
                     "dev/puzzleshq/puzzleloader/loader/util/PuzzleEntrypointInstantiator",
                     "createAllModEntryPointInstances",
                     "()V",
-                     false
+                    false
             );
-            visitVarInsn(Opcodes.ALOAD, 0);
-            visitMethodInsn(
+            mw.visitVarInsn(Opcodes.ALOAD, 0);
+            mw.visitMethodInsn(
                     isInterface ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKESTATIC,
                     proxiedClass,
                     MAIN_METHOD_NAME, MAIN_METHOD_DESC,
                     isInterface
             );
-            super.visitEnd();
+            mw.visitMaxs(1, 1);
+            mw.visitEnd();
         }
+
     }
 
 }
