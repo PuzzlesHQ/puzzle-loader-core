@@ -98,6 +98,7 @@ public class ProxyClassUtil {
                     MAIN_METHOD_NAME, MAIN_METHOD_DESC,
                     isInterface
             );
+            mw.visitInsn(Opcodes.RETURN);
             mw.visitMaxs(1, 1);
             mw.visitEnd();
         }
