@@ -20,7 +20,7 @@ public class ProxyClassUtil {
         String proxyClassName = "dev.puzzleshq.loader.proxyclass.GameLoaderProxy";
 
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        ProxyClassWriter proxyClassWriter = new ProxyClassWriter(writer, isInterface(node), clazz, exceptions);
+        ProxyClassWriter proxyClassWriter = new ProxyClassWriter(writer, isInterface(node), clazz.replaceAll("\\.", "/"), exceptions);
 
         proxyClassWriter.visit(
                 Opcodes.V1_8, Opcodes.ACC_PUBLIC,
