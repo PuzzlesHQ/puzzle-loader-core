@@ -20,7 +20,6 @@ public class EntrypointContainer implements IEntrypointContainer {
         this.entrypointMap = container.getInfo().getEntrypointMap();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> void invoke(String key, Class<T> type, Consumer<? super T> invoker) {
         ILangProvider.init();
@@ -31,8 +30,7 @@ public class EntrypointContainer implements IEntrypointContainer {
             Class<?> objectClass = object.getClass();
             if (!type.isAssignableFrom(objectClass)) continue;
 
-            T invokableInstance = (T) object;
-            invoker.accept(invokableInstance);
+            PuzzleEntrypointInstantiator.tryInvoke(object, type, invoker);
         }
     }
 

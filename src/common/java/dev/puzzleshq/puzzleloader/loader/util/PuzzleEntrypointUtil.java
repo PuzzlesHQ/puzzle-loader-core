@@ -23,21 +23,22 @@ public class PuzzleEntrypointUtil {
     }
 
     public static <T> Collection<Entrypoint<T>> getEntrypoints(String key, Class<T> entrypointType) {
-        Collection<Entrypoint<T>> entrypoints = new ArrayList<>();
+        Collection<Entrypoint<T>> entrypointList = new ArrayList<>();
 
         for (IModContainer c : ModFinder.getModsArray()) {
             IEntrypointContainer container = c.getEntrypointContainer();
             EntrypointPair[] pairs = container.getEntrypoints(key);
             if (pairs == null) continue;
 
-            for (EntrypointPair pair : pairs) entrypoints.add(new Entrypoint<>(c, key, entrypointType, pair));
+            for (EntrypointPair pair : pairs) entrypointList.add(new Entrypoint<>(c, key, entrypointType, pair));
         }
 
-        return entrypoints;
+        return entrypointList;
     }
 
-    public static <T> Collection<T> getEntrypointInstances(String key, Class<T> entrypointType) throws ProviderException {
-        Collection<T> entrypoints = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public static <T> Collection<T> getEntrypointInstances(String key, Class<T> entrypointType) {
+        Collection<T> entrypointList = new ArrayList<>();
 
         for (IModContainer c : ModFinder.getModsArray()) {
             IEntrypointContainer container = c.getEntrypointContainer();
@@ -45,12 +46,14 @@ public class PuzzleEntrypointUtil {
             if (pairs == null) continue;
 
             for (EntrypointPair pair : pairs) {
-                ILangProvider provider = ILangProvider.PROVDERS.get(pair.adapter());
-                entrypoints.add(provider.create(c.getInfo(), pair.entrypoint(), entrypointType));
+                Object o = PuzzleEntrypointInstantiator.getOrCreate(c.getInfo(), pair);
+                if (o == null) continue;
+                if (!entrypointType.isAssignableFrom(o.getClass())) continue;
+                entrypointList.add((T) o);
             }
         }
 
-        return entrypoints;
+        return entrypointList;
     }
 
     public static class Entrypoint<T> {
@@ -67,9 +70,11 @@ public class PuzzleEntrypointUtil {
             this.key = key;
         }
 
+        @SuppressWarnings("unchecked")
         public T createInstance() throws ProviderException {
-            ILangProvider provider = ILangProvider.PROVDERS.get(pair.adapter());
-            return provider.create(this.provider.getInfo(), pair.entrypoint(), assumedType);
+            Object o = PuzzleEntrypointInstantiator.getOrCreate(provider.getInfo(), pair);
+            if (o == null || !assumedType.isAssignableFrom(o.getClass())) return null;
+            return (T) o;
         }
 
         public String getKey() {

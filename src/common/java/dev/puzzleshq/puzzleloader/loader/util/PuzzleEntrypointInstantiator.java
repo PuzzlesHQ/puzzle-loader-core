@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class PuzzleEntrypointInstantiator {
 
@@ -105,4 +106,33 @@ public class PuzzleEntrypointInstantiator {
         }
     }
 
+    public static Object getOrCreate(ModInfo container, EntrypointPair pair) {
+        String adapter = pair.adapter();
+        String className = pair.entrypoint();
+
+        Object instance = ENTRYPOINT_OBJECT_INSTANCES.get(className);
+        if (instance != null) return instance;
+
+        ILangProvider provider = ILangProvider.PROVDERS.get(adapter);
+
+        try {
+            Object newInstance = provider.create(container, className, AnyObject.class);
+
+            ENTRYPOINT_OBJECT_INSTANCES.put(className, newInstance);
+            return newInstance;
+        } catch (RuntimeException | ProviderException ignored) {
+            // this prevents a giant crash, print error for skipped entry points
+            error(className, adapter);
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> boolean tryInvoke(Object o, Class<T> type, Consumer<? super T> consumer) {
+        if (type.isAssignableFrom(o.getClass())) {
+            consumer.accept((T) o);
+            return true;
+        }
+        return false;
+    }
 }
