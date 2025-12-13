@@ -1,6 +1,7 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
 import com.github.villadora.semver.SemVer;
+import dev.puzzleshq.annotation.Internal;
 import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
@@ -27,7 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Finders mod jars.
+ * The Mod Searching & Managing Utility
  *
  * @author Mr_Zombii
  * @since 1.0.0
@@ -87,8 +88,8 @@ public class ModFinder {
     }
 
     public static final String modOutputFormatter = "\t\u001B[34mname\u001B[37m: %s, \u001B[34mid\u001B[37m: %s, \u001B[34mversion\u001B[37m: %s\u001b[0m";
-    public static final String dependencyOutputFormatter = "\t\t > \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
-    public static final String missingDependencyOutputFormatter = "\t\t \u001b[9m> \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
+    public static final String dependencyOutputFormatter = "\t\t |-> \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
+    public static final String missingDependencyOutputFormatter = "\t\t \u001b[9m|-> \u001B[35mid\u001B[37m: %s, \u001B[35mconstraint\u001B[37m: %s, \u001B[35moptional\u001B[37m: %s\u001b[0m";
 
     /**
      * Finds the puzzle.mod.json in all the mod jars and adds it.
@@ -138,14 +139,22 @@ public class ModFinder {
             }
         }
         verify();
+        printModList();
+    }
 
-        System.out.println("\nPuzzle Mods:");
+    @Internal
+    private static void printModList() {
+//        for (ModDependency dependency : info.getDependencies()) {
+//            LOGGER.info("\t↪ Dependency: { id: {}, version-constraint: {} }", dependency.getModID(), dependency.getConstraintStr());
+//        }
+
+        System.out.println("\nDiscovered Mods:");
         for (int i = 0; i < MODS_ARRAY.size(); i++) {
             IModContainer container = MODS_ARRAY.get(i);
             System.out.printf(modOutputFormatter + "\n", container.getDisplayName(), container.getID(), container.getVersion());
             for (ModDependency dependency : container.getInfo().getDependencies()) {
                 IModContainer dependencyContainer = dependency.getContainer();
-                if (!(dependencyContainer instanceof IModContainer)) {
+                if (dependencyContainer == null) {
                     System.out.printf(missingDependencyOutputFormatter + "\n", dependency.getModID(), dependency.getConstraintStr(), dependency.isOptional());
                 } else {
                     System.out.printf(dependencyOutputFormatter + "\n", dependency.getModID(), dependency.getConstraintStr(), dependency.isOptional());
@@ -159,6 +168,7 @@ public class ModFinder {
      * Walks the directory non-recursive.
      * @param file the directory to walk.
      */
+    @Internal
     private static void walk(File file) {
         Queue<File> fileQueue = new ConcurrentLinkedQueue<>();
         fileQueue.add(file);
@@ -193,6 +203,7 @@ public class ModFinder {
      * @param info the mod-json for the mod.
      * @param jar the jar of the mod.
      */
+    @Internal
     private static void addModToArray(@Nonnull ModInfo info, @Nullable JarFile jar) {
         if (!info.getLoadableSides().get(Piece.getSide().name)) {
             LOGGER.warn("Found Mod \"{}\" that cannot be launched on the \"{}\", skipping.", info.getId(), Piece.getSide().name);
@@ -201,15 +212,6 @@ public class ModFinder {
 
         if (MODS.containsKey(info.getId()))
             throw new RuntimeException("Found Duplicate Mod \"{" + info.getId() + "}\", Version: \"" + info.getVersion());
-
-//        LOGGER.info(
-//                "Discovered Mod {DisplayName: \"{}\", ID: \"{}\", Version: \"{}\"}",
-//                info.getDisplayName(), info.getId(), info.getVersion()
-//        );
-
-//        for (ModDependency dependency : info.getDependencies()) {
-//            LOGGER.info("\t↪ Dependency: { id: {}, version-constraint: {} }", dependency.getModID(), dependency.getConstraintStr());
-//        }
 
         IModContainer container = new ModContainer(info);
         MODS.put(container.getID(), MODS_ARRAY.size());
@@ -243,6 +245,7 @@ public class ModFinder {
      * Sorts the mods.
      * @see IModContainer
      */
+    @Internal
     private static void sort() {
         for (IModContainer container : ModFinder.MODS_ARRAY) {
             ModDependency[] dependencies = container.getInfo().getDependencies();
@@ -263,6 +266,7 @@ public class ModFinder {
     /**
      * Adds puzzle-Core as a mod.
      */
+    @Internal
     private static void addPuzzleCoreBuiltin() {
         if (LoaderConfig.MIXINS_ENABLED) {
             ModInfoBuilder mixinModInfo = new ModInfoBuilder();

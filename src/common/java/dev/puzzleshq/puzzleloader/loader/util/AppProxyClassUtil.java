@@ -1,19 +1,20 @@
-package dev.puzzleshq.puzzleloader.loader.util.proxy;
+package dev.puzzleshq.puzzleloader.loader.util;
 
+import dev.puzzleshq.annotation.Internal;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
-import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.util.List;
 
-public class ProxyClassUtil {
+@Internal
+public class AppProxyClassUtil {
 
     private static final String MAIN_METHOD_NAME = "main";
     private static final String MAIN_METHOD_DESC = "([Ljava/lang/String;)V";
 
-    public static Class<?> createAndLoadProxyInvoker(String clazz) {
+    public static Class<?> createAndLoadProxyFromMainClass(String clazz) {
         ClassNode node = getNode(clazz);
         String[] exceptions = getExceptions(node).toArray(new String[0]);
 

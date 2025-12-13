@@ -9,7 +9,7 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
-import dev.puzzleshq.puzzleloader.loader.util.proxy.ProxyClassUtil;
+import dev.puzzleshq.puzzleloader.loader.util.AppProxyClassUtil;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
@@ -151,7 +151,7 @@ public class Piece {
             String entryPoint = gameProvider.getEntrypoint();
 
 
-            Class<?> entryClass = ProxyClassUtil.createAndLoadProxyInvoker(entryPoint);
+            Class<?> entryClass = AppProxyClassUtil.createAndLoadProxyFromMainClass(entryPoint);
 //            Class<?> clazz = Class.forName(entryPoint, false, classLoader);
             String[] providerArgs = gameProvider.getArgs().toArray(new String[0]);
 
