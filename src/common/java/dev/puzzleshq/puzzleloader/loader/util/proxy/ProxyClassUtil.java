@@ -20,12 +20,13 @@ public class ProxyClassUtil {
         String proxyClassName = "dev.puzzleshq.loader.proxyclass.GameLoaderProxy";
 
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        ProxyClassWriter proxyClassWriter = new ProxyClassWriter(writer, isInterface(node), clazz);
+        ProxyClassWriter proxyClassWriter = new ProxyClassWriter(writer, isInterface(node), clazz, exceptions);
 
-        proxyClassWriter.visitMethod(
-                Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC,
-                MAIN_METHOD_NAME, MAIN_METHOD_DESC,
-                null, exceptions
+        proxyClassWriter.visit(
+                Opcodes.V1_8, Opcodes.ACC_PUBLIC,
+                proxyClassName, null,
+                Object.class.getName().replaceAll("\\.", "/"),
+                new String[0]
         );
 
         byte[] proxyClassBytes = writer.toByteArray();
@@ -64,16 +65,24 @@ public class ProxyClassUtil {
     private static class ProxyClassWriter extends ClassVisitor {
         private final boolean isInterface;
         private final String proxiedClass;
+        private final String[] exceptions;
 
-        protected ProxyClassWriter(ClassVisitor visitor, boolean isInterface, String proxiedClass) {
+        protected ProxyClassWriter(ClassVisitor visitor, boolean isInterface, String proxiedClass, String[] exceptions) {
             super(Opcodes.ASM9, visitor);
             this.isInterface = isInterface;
             this.proxiedClass = proxiedClass;
+            this.exceptions = exceptions;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            super.visit(Opcodes.V1_8, access, name, signature, superName, interfaces);
+            super.visit(version, access, name, signature, superName, interfaces);
+
+            visitMethod(
+                    Opcodes.ACC_STATIC | Opcodes.ACC_PUBLIC,
+                    MAIN_METHOD_NAME, MAIN_METHOD_DESC,
+                    null, exceptions
+            );
         }
 
         @Override
