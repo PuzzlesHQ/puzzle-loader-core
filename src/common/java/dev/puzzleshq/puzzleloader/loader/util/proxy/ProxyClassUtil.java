@@ -17,7 +17,7 @@ public class ProxyClassUtil {
         ClassNode node = getNode(clazz);
         String[] exceptions = getExceptions(node).toArray(new String[0]);
 
-        String proxyClassName = "dev.puzzleshq.loader.proxyclass.GameLoaderProxy";
+        String proxyClassName = "dev/puzzleshq/loader/proxyclass/GameLoaderProxy";
 
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         ProxyClassWriter proxyClassWriter = new ProxyClassWriter(writer, isInterface(node), clazz, exceptions);
