@@ -6,13 +6,10 @@ import dev.puzzleshq.mod.ModFormats;
 import dev.puzzleshq.mod.api.IModContainer;
 import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
-import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
-import dev.puzzleshq.puzzleloader.loader.patching.PatchLoader;
-import dev.puzzleshq.puzzleloader.loader.patching.PatchPage;
-import dev.puzzleshq.puzzleloader.loader.patching.PatchPamphlet;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
+import dev.puzzleshq.puzzleloader.loader.util.proxy.ProxyClassUtil;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
@@ -22,8 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,7 +34,7 @@ public class Piece {
 
     static AtomicReference<EnvType> env = new AtomicReference<>();
 
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
+    public static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
 
     public static Piece INSTANCE;
 
@@ -154,15 +149,13 @@ public class Piece {
             }
 
             String entryPoint = gameProvider.getEntrypoint();
-            String ranEntrypoint = entryPoint;
-            if (entryPoint.contains("MinecraftApplet")) {
-                ranEntrypoint = "dev.puzzleshq.puzzleloader.minecraft.launch.MinecraftAppletLauncher";
-            }
 
-            Class<?> clazz = Class.forName(ranEntrypoint, false, classLoader);
+
+            Class<?> entryClass = ProxyClassUtil.createAndLoadProxyInvoker(entryPoint);
+//            Class<?> clazz = Class.forName(entryPoint, false, classLoader);
             String[] providerArgs = gameProvider.getArgs().toArray(new String[0]);
 
-            Method main = ReflectionUtil.getMethod(clazz, "main", String[].class);
+            Method main = ReflectionUtil.getMethod(entryClass, "main", String[].class);
 
             Class<?> entrypointClazz = Class.forName(
                     "dev.puzzleshq.puzzleloader.loader.mod.entrypoint.PreLaunchInit",

@@ -87,8 +87,13 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
                 throw new RuntimeException("Minecraft Server Main does not exist.");
             }
         }
+        String entryPoint = launcher.replaceAll("/", ".").replace(".class", "");
 
-        return launcher.replaceAll("/", ".").replace(".class", "");
+        if (entryPoint.contains("MinecraftApplet")) {
+            entryPoint = "dev.puzzleshq.puzzleloader.minecraft.launch.MinecraftAppletLauncher";
+        }
+
+        return entryPoint;
     }
 
     String version = "";
