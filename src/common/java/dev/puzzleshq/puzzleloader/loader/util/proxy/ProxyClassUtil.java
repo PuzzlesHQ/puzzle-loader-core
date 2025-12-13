@@ -107,6 +107,7 @@ public class ProxyClassUtil {
 
         @Override
         public void visitEnd() {
+            visitCode();
             visitMethodInsn(
                     Opcodes.INVOKESTATIC,
                     "dev/puzzleshq/puzzleloader/loader/util/PuzzleEntrypointInstantiator",
