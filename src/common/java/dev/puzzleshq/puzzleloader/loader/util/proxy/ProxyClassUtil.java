@@ -24,14 +24,14 @@ public class ProxyClassUtil {
 
         proxyClassWriter.visit(
                 Opcodes.V1_8, Opcodes.ACC_PUBLIC,
-                proxyClassName, null,
+                proxyClassName.replaceAll("\\.", "/"), null,
                 Object.class.getName().replaceAll("\\.", "/"),
                 new String[0]
         );
 
         byte[] proxyClassBytes = writer.toByteArray();
 
-        return Piece.classLoader.defineClass(proxyClassName.replaceAll("\\.", "/"), proxyClassBytes);
+        return Piece.classLoader.defineClass(proxyClassName, proxyClassBytes);
     }
 
     private static ClassNode getNode(String clazz) {
