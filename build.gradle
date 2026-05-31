@@ -13,7 +13,7 @@ plugins {
 }
 
 def ref = System.getenv("GITHUB_REF")
-version = ((ref == null) ? "refs/tags/0.0.0-alpha" : ref).replaceAll("refs/tags/", "")
+version = ((ref == null) ? "refs/tags/" + p_version : ref).replaceAll("refs/tags/", "")
 
 String mavenUrl = System.getenv("MAVEN_URL")
 
