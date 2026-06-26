@@ -72,7 +72,7 @@
     {
       "groupId": "org.javassist",
       "artifactId": "javassist",
-      "version": "3.30.2-GA",
+      "version": "3.32.0-GA",
       "type": "implementation"
     },
     {
@@ -84,13 +84,13 @@
     {
       "groupId": "org.apache.logging.log4j",
       "artifactId": "log4j-api",
-      "version": "2.19.0",
+      "version": "2.25.4",
       "type": "implementation"
     },
     {
       "groupId": "org.apache.logging.log4j",
       "artifactId": "log4j-core",
-      "version": "2.19.0",
+      "version": "2.25.4",
       "type": "implementation"
     },
     {
@@ -102,31 +102,31 @@
     {
       "groupId": "org.ow2.asm",
       "artifactId": "asm",
-      "version": "9.9",
+      "version": "9.10.1",
       "type": "implementation"
     },
     {
       "groupId": "org.ow2.asm",
       "artifactId": "asm-tree",
-      "version": "9.9",
+      "version": "9.10.1",
       "type": "implementation"
     },
     {
       "groupId": "org.ow2.asm",
       "artifactId": "asm-util",
-      "version": "9.9",
+      "version": "9.10.1",
       "type": "implementation"
     },
     {
       "groupId": "org.ow2.asm",
       "artifactId": "asm-analysis",
-      "version": "9.9",
+      "version": "9.10.1",
       "type": "implementation"
     },
     {
       "groupId": "org.ow2.asm",
       "artifactId": "asm-commons",
-      "version": "9.9",
+      "version": "9.10.1",
       "type": "implementation"
     },
     {
@@ -211,6 +211,18 @@
       "groupId": "org.hjson",
       "artifactId": "hjson",
       "version": "3.1.0",
+      "type": "implementation"
+    },
+    {
+      "groupId": "org.slf4j",
+      "artifactId": "log4j-over-slf4j",
+      "version": "2.0.18",
+      "type": "implementation"
+    },
+    {
+      "groupId": "org.slf4j",
+      "artifactId": "slf4j-api",
+      "version": "2.0.18",
       "type": "implementation"
     }
   ],
