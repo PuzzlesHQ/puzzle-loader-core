@@ -175,6 +175,9 @@ dependencies {
     commonBundle ("commons-io:commons-io:$apache_commons_io_version") { for (HashMap<String, String> map : excludes) exclude map }
 
     commonBundle ("org.hjson:hjson:$hjson_version") {for (HashMap<String, String> map : excludes) exclude map }
+
+    commonBundle ("org.slf4j:log4j-over-slf4j:$slf4j_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonBundle ("org.slf4j:slf4j-api:$slf4j_version") { for (HashMap<String, String> map : excludes) exclude map }
 }
 
 tasks.register("buildMergedTestJar", ShadowJar) {

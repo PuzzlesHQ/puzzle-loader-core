@@ -1,19 +1,15 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
 import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
-import dev.puzzleshq.puzzleloader.loader.util.ModFinder;
 import dev.puzzleshq.puzzleloader.loader.util.RawAssetLoader;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.service.IClassTracker;
 import org.spongepowered.asm.service.ILegacyClassTransformer;
 import org.spongepowered.asm.service.ITransformer;
-import sun.misc.Unsafe;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;

@@ -9,7 +9,6 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.TransformerInit;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IGameProvider;
 import dev.puzzleshq.puzzleloader.loader.provider.game.IPatchableGameProvider;
-import dev.puzzleshq.puzzleloader.loader.util.AppProxyClassUtil;
 import dev.puzzleshq.puzzleloader.loader.threading.OffThreadExecutor;
 import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
@@ -22,7 +21,9 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Piece {

@@ -4,8 +4,6 @@ import com.github.villadora.semver.Version;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.launch.PieceClassLoader;
 import dev.puzzleshq.puzzleloader.loader.mixin.MixinController;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
 
 import java.util.*;
 

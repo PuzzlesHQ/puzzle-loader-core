@@ -24,9 +24,7 @@ package dev.puzzleshq.puzzleloader.loader.provider.mixin;
  * THE SOFTWARE.
  */
 
-import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import org.spongepowered.asm.service.IMixinServiceBootstrap;
-import org.spongepowered.asm.service.ServiceInitialisationException;
 
 /**
  * Bootstrap for LaunchWrapper service

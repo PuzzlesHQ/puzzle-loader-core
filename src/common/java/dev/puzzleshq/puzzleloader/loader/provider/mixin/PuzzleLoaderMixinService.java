@@ -24,7 +24,6 @@
  */
 package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 
-import com.moulberry.mixinconstraints.MixinConstraints;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.util.JavaUtils;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +39,6 @@ import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment.CompatibilityLevel;
 import org.spongepowered.asm.mixin.MixinEnvironment.Phase;
-import org.spongepowered.asm.mixin.throwables.MixinException;
 import org.spongepowered.asm.service.*;
 import org.spongepowered.asm.service.modlauncher.LoggerAdapterLog4j2;
 import org.spongepowered.asm.transformers.MixinClassReader;
@@ -236,6 +234,22 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     @Override
     public IMixinAuditTrail getAuditTrail() {
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.spongepowered.asm.service.IMixinService#getFeatureValidator()
+     */
+    @Override
+    public IFeatureValidator getFeatureValidator() {
+        return IFeatureValidator.ALLOW_ALL;
+    }
+
+    /* (non-Javadoc)
+     * @see org.spongepowered.asm.service.IMixinService#getAdviceProvider()
+     */
+    @Override
+    public IAdviceProvider getAdviceProvider() {
+        return IAdviceProvider.GENERIC;
     }
 
     /* (non-Javadoc)
