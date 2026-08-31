@@ -415,6 +415,20 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         this.delegatedTransformers = null;
     }
 
+    private static final URL[] EMPTY_URLS = new URL[0];
+    private static URLClassLoader appClassLoader;
+
+    public static UrlClassLoader getAppClassLoader() {
+        if (appClassLoader != null) return appClassLoader;
+        ClassLoader parentLoader = Piece.class.getClassLoader();
+        if (parentLoader instanceof URLClassLoader) {
+            appClassLoader = (URLClassLoader) parentLoader;
+        } else {
+            appClassLoader = new URLClassLoader(EMPTY_URLS, parentLoader);
+        }
+        return appClassLoader;
+    }
+
     /**
      * Retrieve class bytes using available classloaders, does not transform the
      * class
@@ -432,26 +446,12 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             return classBytes;
         }
 
-        URLClassLoader appClassLoader;
-        if (Piece.class.getClassLoader() instanceof URLClassLoader) {
-            appClassLoader = (URLClassLoader) Piece.class.getClassLoader();
-        } else {
-            appClassLoader = new URLClassLoader(new URL[]{}, Piece.class.getClassLoader());
-        }
+        URLClassLoader appClassLoader = getAppClassLoader();
 
-        InputStream classStream = null;
-        try {
-            final String resourcePath = transformedName.replace('.', '/').concat(".class");
-            classStream = appClassLoader.getResourceAsStream(resourcePath);
-            assert classStream != null;
-
+        final String resourcePath = transformedName.replace('.', '/').concat(".class");
+        try (InputStream classStream = appClassLoader.getResourceAsStream(resourcePath)) {
+            if (classStream == null) return null;
             return JavaUtils.readAllBytes(classStream);
-        } catch (Exception ex) {
-            return null;
-        } finally {
-            if (classStream != null) {
-                classStream.close();
-            }
         }
     }
 
@@ -474,14 +474,14 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         byte[] classBytes = this.getClassBytes(transformedName, transformedName);
         loadTime.end();
 
+        if (classBytes == null) {
+            throw new ClassNotFoundException(String.format("The specified class '%s' was not found", transformedName));
+        }
+        
         if (runTransformers) {
             Section transformTime = profiler.begin(Profiler.ROOT, "class.transform");
             classBytes = this.applyTransformers(transformedName, transformedName, classBytes, profiler);
             transformTime.end();
-        }
-
-        if (classBytes == null) {
-            throw new ClassNotFoundException(String.format("The specified class '%s' was not found", transformedName));
         }
 
         return classBytes;
