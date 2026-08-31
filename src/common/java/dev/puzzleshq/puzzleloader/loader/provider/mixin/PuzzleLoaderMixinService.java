@@ -418,7 +418,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     private static final URL[] EMPTY_URLS = new URL[0];
     private static URLClassLoader appClassLoader;
 
-    public static UrlClassLoader getAppClassLoader() {
+    public static URLClassLoader getAppClassLoader() {
         if (appClassLoader != null) return appClassLoader;
         ClassLoader parentLoader = Piece.class.getClassLoader();
         if (parentLoader instanceof URLClassLoader) {
