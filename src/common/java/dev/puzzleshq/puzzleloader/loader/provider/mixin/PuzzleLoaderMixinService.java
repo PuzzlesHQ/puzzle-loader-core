@@ -449,7 +449,9 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         } catch (Exception ex) {
             return null;
         } finally {
-            classStream.close();
+            if (classStream != null) {
+                classStream.close();
+            }
         }
     }
 
