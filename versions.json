@@ -1,7 +1,7 @@
 {
 	"latest": {
-		"*": "1.4.3-alpha",
-		"alpha": "1.4.3-alpha"
+		"*": "1.4.4-alpha",
+		"alpha": "1.4.4-alpha"
 	},
 	"existing-phases": [
 		"alpha"
@@ -262,6 +262,16 @@
 			"maven-puzzle": "dev.puzzleshq:puzzle-loader-core:1.4.3-alpha",
 			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:1.4.3-alpha",
 			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/1.4.3-alpha/dependencies.json"
+		},
+		"1.4.4-alpha": {
+			"epoch": 1794641155,
+			"date": "2026/11/14T07:25:55",
+			"id": "1.4.4-alpha",
+			"phase": "alpha",
+			"maven-central": "dev.puzzleshq:puzzle-loader-core:1.4.4-alpha",
+			"maven-puzzle": "dev.puzzleshq:puzzle-loader-core:1.4.4-alpha",
+			"maven-jitpack": "com.github.PuzzlesHQ:puzzle-loader-core:1.4.4-alpha",
+			"dependencies": "https://github.com/PuzzlesHQ/puzzle-loader-core/releases/download/1.4.4-alpha/dependencies.json"
 		}
 	}
 }
