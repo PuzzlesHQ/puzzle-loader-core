@@ -488,9 +488,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         
         if (runTransformers) {
             Section transformTime = profiler.begin(Profiler.ROOT, "class.transform");
-            System.out.println(className + " " + Arrays.toString(classBytes));
             classBytes = this.applyTransformers(transformedName, transformedName, classBytes, profiler);
-            System.out.println(className + " " + Arrays.toString(classBytes));
             transformTime.end();
         }
 
@@ -520,9 +518,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             String simpleName = transformer.getName().substring(pos + 1);
             Section transformTime = profiler.begin(Profiler.FINE, simpleName.toLowerCase(Locale.ROOT));
             transformTime.setInfo(transformer.getName());
-            System.out.println(transformer.getClass() + " " + Arrays.toString(basicClass));
             basicClass = transformer.transformClassBytes(name, transformedName, basicClass);
-            System.out.println(transformer.getClass() + " " + Arrays.toString(basicClass));
             transformTime.end();
 
             if (this.lock.isSet()) {

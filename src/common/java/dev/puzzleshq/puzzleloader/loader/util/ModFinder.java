@@ -120,7 +120,6 @@ public class ModFinder {
 
                         byte[] bytes = JavaUtils.readAllBytes(stream);
 
-                        System.out.println(url.getFile());
                         addModToArray(ModInfo.readFromString(new String(bytes)), null);
                         break;
                     }
