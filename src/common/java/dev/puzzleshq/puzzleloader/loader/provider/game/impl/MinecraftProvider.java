@@ -56,26 +56,29 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
     public String getEntrypoint() {
         String launcher = null;
 
-        String[] clientClasses = {
-                "net/minecraft/client/MinecraftApplet.class",
-                "net/minecraft/client/main/Main.class",
-                "com/mojang/rubydung/RubyDung.class",
-                "com/mojang/MinecraftApplet.class",
-        };
+        if (Piece.getSide().equals(EnvType.CLIENT)) {
+            String[] clientClasses = {
+                    "net/minecraft/client/MinecraftApplet.class",
+                    "net/minecraft/client/main/Main.class",
+                    "com/mojang/rubydung/RubyDung.class",
+                    "com/mojang/MinecraftApplet.class",
+            };
 
-        for (String clientClass : clientClasses) {
-            try {
-                RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
-                launcher = clientClass;
-            } catch (Exception ignore) {
-                throw new RuntimeException("Minecraft Client Main does not exist.");
+            for (String clientClass : clientClasses) {
+                try {
+                    RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
+                    launcher = clientClass;
+                } catch (Exception ignore) {
+                }
             }
-        }
+            if (launcher == null)
+                throw new RuntimeException("Minecraft Client Main does not exist.");
 
-        if (launcher.contains("MinecraftApplet.class")) {
-            if (args != null && !args.contains("--puzzleEdition")) {
-                args.add(0, launcher.replaceAll("/", ".").replace(".class", ""));
-                args.add(0, "--puzzleEdition");
+            if (launcher.contains("MinecraftApplet.class")) {
+                if (args != null && !args.contains("--puzzleEdition")) {
+                    args.add(0, launcher.replaceAll("/", ".").replace(".class", ""));
+                    args.add(0, "--puzzleEdition");
+                }
             }
         }
 
@@ -84,9 +87,12 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
                 launcher = "net/minecraft/server/Main.class";
                 RawAssetLoader.getLowLevelClassPathAsset(launcher).dispose();
             } catch (Exception ignore) {
-                throw new RuntimeException("Minecraft Server Main does not exist.");
             }
         }
+        if (launcher == null) {
+            throw new RuntimeException("Minecraft Server Main does not exist.");
+        }
+
         String entryPoint = launcher.replaceAll("/", ".").replace(".class", "");
 
         if (entryPoint.contains("MinecraftApplet")) {
@@ -95,8 +101,6 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
 
         return entryPoint;
     }
-
-    String version = "";
 
     @Override
     public Collection<String> getArgs() {
@@ -107,13 +111,6 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
 
     @Override
     public void initArgs(String[] args) {
-        OptionParser optionparser = new OptionParser();
-        optionparser.allowsUnrecognizedOptions();
-        OptionSpec<String> versionSpec = optionparser.accepts("version").withRequiredArg().required();
-        OptionSet optionSet = optionparser.parse(args);
-
-        version = versionSpec.value(optionSet);
-
         this.args = new ArrayList<>(Arrays.asList(args));
     }
 
@@ -154,7 +151,6 @@ public class MinecraftProvider implements IGameProvider, IPatchableGameProvider 
                 RawAssetLoader.getLowLevelClassPathAsset(clientClass).dispose();
                 return true;
             } catch (Exception ignore) {
-                return false;
             }
         }
 

@@ -108,6 +108,7 @@ public class MinecraftAppletLauncher {
             // Load icon from disk
             final File smallIcon = MinecraftAssetDictionary.getAsset("icons/icon_16x16.png");
             final File bigIcon = MinecraftAssetDictionary.getAsset("icons/icon_32x32.png");
+            if (smallIcon == null || bigIcon == null) return;
             ReflectionUtil.getMethod(Class.forName("org.lwjgl.opengl.Display"), "setIcon", ByteBuffer[].class)
                     .invoke(null, (Object) new ByteBuffer[]{
                             loadIcon(smallIcon),

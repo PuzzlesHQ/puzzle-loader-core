@@ -5,9 +5,12 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
-public class CommonASMTransformer implements IClassTransformer {
+public class CommonASMTransformer implements IPuzzleClassTransformer {
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        if (basicClass == null) System.out.println(name);
+        if (basicClass == null) {
+            System.out.println(name);
+            return null;
+        }
         // errors with package-info.class
         if (!name.endsWith("package-info")) {
             ClassReader reader = new ClassReader(basicClass);

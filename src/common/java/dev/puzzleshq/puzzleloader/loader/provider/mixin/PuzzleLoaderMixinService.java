@@ -442,16 +442,24 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     @Deprecated
     public byte[] getClassBytes(String name, String transformedName) throws IOException {
         byte[] classBytes = Piece.classLoader.getResourceBytes(name);
-        if (classBytes != null) {
+        if (classBytes != null && classBytes.length > 0) {
             return classBytes;
         }
 
         URLClassLoader appClassLoader = getAppClassLoader();
+        if (appClassLoader == null) {
+            return null;
+        }
 
         final String resourcePath = transformedName.replace('.', '/').concat(".class");
         try (InputStream classStream = appClassLoader.getResourceAsStream(resourcePath)) {
             if (classStream == null) return null;
-            return JavaUtils.readAllBytes(classStream);
+            byte[] bytes = JavaUtils.readAllBytes(classStream);
+            if (bytes.length < 8) {
+                return null;
+            }
+
+            return bytes;
         }
     }
 
@@ -474,13 +482,15 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
         byte[] classBytes = this.getClassBytes(transformedName, transformedName);
         loadTime.end();
 
-        if (classBytes == null) {
+        if (classBytes == null|| classBytes.length < 8) {
             throw new ClassNotFoundException(String.format("The specified class '%s' was not found", transformedName));
         }
         
         if (runTransformers) {
             Section transformTime = profiler.begin(Profiler.ROOT, "class.transform");
+            System.out.println(className + " " + Arrays.toString(classBytes));
             classBytes = this.applyTransformers(transformedName, transformedName, classBytes, profiler);
+            System.out.println(className + " " + Arrays.toString(classBytes));
             transformTime.end();
         }
 
@@ -510,7 +520,9 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
             String simpleName = transformer.getName().substring(pos + 1);
             Section transformTime = profiler.begin(Profiler.FINE, simpleName.toLowerCase(Locale.ROOT));
             transformTime.setInfo(transformer.getName());
+            System.out.println(transformer.getClass() + " " + Arrays.toString(basicClass));
             basicClass = transformer.transformClassBytes(name, transformedName, basicClass);
+            System.out.println(transformer.getClass() + " " + Arrays.toString(basicClass));
             transformTime.end();
 
             if (this.lock.isSet()) {

@@ -17,6 +17,10 @@ public class MinecraftAssetDictionary {
             MinecraftAssetDictionary.gameDir = absoluteFile;
             MinecraftAssetDictionary.dir = dir;
             File index = new File(dir, "indexes/" + indexStr + ".json");
+            if (!index.exists()) {
+                object = new JsonObject();
+                return;
+            }
             FileInputStream stream = new FileInputStream(index);
 
             String s = new String(JavaUtils.readAllBytes(stream));
@@ -35,6 +39,8 @@ public class MinecraftAssetDictionary {
     public static File getAsset(String s) {
         File assetFile = new File(MinecraftAssetDictionary.gameDir, "resources/" + s);
         if (assetFile.exists()) return assetFile;
+        if (assets == null || assets.get(s) == null)
+            return null;
 
         String hash = assets.get(s).asObject().get("hash").asString();
         File hashFile = new File(MinecraftAssetDictionary.dir, "objects/" + hash.substring(0, 2) + "/" + hash);

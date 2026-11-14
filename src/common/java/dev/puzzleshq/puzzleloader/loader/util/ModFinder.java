@@ -278,7 +278,7 @@ public class ModFinder {
                 mixinModInfo.setDescription("Mixin is a trait/mixin framework for Java using ASM.");
 
                 mixinModInfo.addMeta("icon", JsonObject.valueOf("puzzle-loader-core:icons/mixin-icon.png"));
-                mixinModInfo.addAuthor(
+                mixinModInfo.addAuthor(new String[]{
                         "Mumfrey", "skinnyBat", "LlamaLad7",
                         "Aaron1011", "simon816", "shartte",
                         "zml2008", "bloodmc", "SizableShrimp",
@@ -287,7 +287,7 @@ public class ModFinder {
                         "Runemoro", "caseif", "modmuss50",
                         "JBYoshi", "AbrarSyed", "Kobata",
                         "progwml6"
-                );
+                });
                 mixinModInfo.setVersion(LoaderConstants.FULL_MIXIN_VERSION);
             }
             ModFinder.addModWithContainer(new ModContainer(mixinModInfo.build()));

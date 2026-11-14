@@ -79,6 +79,7 @@ public class PieceClassLoader extends URLClassLoader implements IClassTracker {
         addClassLoaderExclusion("net.minecraft.launchwrapper.");
         addClassLoaderExclusion("org.spongepowered.");
         addClassLoaderExclusion("com.llamalad7.");
+        addClassLoaderExclusion("org.lwjgl.");
 
         addTransformerExclusion("javax.");
         addTransformerExclusion("argo.");
