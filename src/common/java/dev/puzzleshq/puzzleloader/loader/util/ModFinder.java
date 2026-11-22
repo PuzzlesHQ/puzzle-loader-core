@@ -11,8 +11,6 @@ import dev.puzzleshq.puzzleloader.loader.LoaderConfig;
 import dev.puzzleshq.puzzleloader.loader.LoaderConstants;
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.mod.ModContainer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hjson.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -26,6 +24,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.jar.JarFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -42,7 +42,7 @@ public class ModFinder {
     private static final Map<String, Integer> MODS = new HashMap<>();
     private static final List<IModContainer> MODS_ARRAY = new ArrayList<>();
 
-    public static final Logger LOGGER = LogManager.getLogger("Puzzle | ModFinder");
+    public static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | ModFinder");
 
     private static Boolean hasModFinderVerified = false;
     private static Boolean hadModSortingFinished = false;
@@ -79,7 +79,8 @@ public class ModFinder {
 
         for (File file : files) {
             if (file.getName().endsWith(".jar")) {
-                LOGGER.debug("Found Jar at \"{}\"", file);
+                if ("true".equals(System.getProperty("puzzle.core.logging.debug")))
+                    LOGGER.info("Found Jar at \"{}\"", file);
                 try {
                     Piece.classLoader.addURL(file.toURI().toURL());
                 } catch (MalformedURLException e) {

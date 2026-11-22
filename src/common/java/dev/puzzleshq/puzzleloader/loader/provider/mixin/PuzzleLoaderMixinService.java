@@ -26,11 +26,11 @@ package dev.puzzleshq.puzzleloader.loader.provider.mixin;
 
 import dev.puzzleshq.puzzleloader.loader.launch.Piece;
 import dev.puzzleshq.puzzleloader.loader.util.JavaUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.launch.platform.IMixinPlatformAgent;
 import org.spongepowered.asm.launch.platform.IMixinPlatformServiceAgent;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleURI;
@@ -72,7 +72,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
     /**
      * Log4j2 logger
      */
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle | MixinService");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | MixinService");
 
     /**
      * Local transformer chain, this consists of all transformers present at the
@@ -375,7 +375,8 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
      * list just once per environment and cache the result.
      */
     private void buildTransformerDelegationList() {
-        PuzzleLoaderMixinService.LOGGER.debug("Rebuilding transformer delegation list:");
+        if ("true".equals(System.getProperty("puzzle.core.logging.debug")))
+            PuzzleLoaderMixinService.LOGGER.info("Rebuilding transformer delegation list:");
         this.delegatedTransformers = new ArrayList<ILegacyClassTransformer>();
         for (ITransformer transformer : this.getTransformers()) {
             if (!(transformer instanceof ILegacyClassTransformer)) {
@@ -392,14 +393,17 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
                 }
             }
             if (include && !legacyTransformer.isDelegationExcluded()) {
-                PuzzleLoaderMixinService.LOGGER.debug("  Adding:    {}", transformerName);
+                if ("true".equals(System.getProperty("puzzle.core.logging.debug")))
+                    PuzzleLoaderMixinService.LOGGER.info("  Adding:    " + transformerName);
                 this.delegatedTransformers.add(legacyTransformer);
             } else {
-                PuzzleLoaderMixinService.LOGGER.debug("  Excluding: {}", transformerName);
+                if ("true".equals(System.getProperty("puzzle.core.logging.debug")))
+                    PuzzleLoaderMixinService.LOGGER.info("  Excluding: " + transformerName);
             }
         }
 
-        PuzzleLoaderMixinService.LOGGER.debug("Transformer delegation list created with {} entries", this.delegatedTransformers.size());
+        if ("true".equals(System.getProperty("puzzle.core.logging.debug")))
+            PuzzleLoaderMixinService.LOGGER.info("Transformer delegation list created with " + this.delegatedTransformers.size() + "entries");
     }
 
     /**
@@ -526,8 +530,7 @@ public class PuzzleLoaderMixinService implements IMixinService, IClassProvider, 
                 this.addTransformerExclusion(transformer.getName());
 
                 this.lock.clear();
-                PuzzleLoaderMixinService.LOGGER.info("A re-entrant transformer '{}' was detected and will no longer process meta class data",
-                        transformer.getName());
+                PuzzleLoaderMixinService.LOGGER.info("A re-entrant transformer '" + transformer.getName() + "' was detected and will no longer process meta class data");
             }
         }
 

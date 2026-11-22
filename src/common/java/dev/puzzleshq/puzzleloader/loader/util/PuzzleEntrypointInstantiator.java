@@ -8,12 +8,12 @@ import dev.puzzleshq.mod.info.ModInfo;
 import dev.puzzleshq.mod.util.EntrypointPair;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.provider.lang.ILangProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This utility class creates or and finds instances of entrypoint classes from mods.
@@ -28,7 +28,7 @@ public class PuzzleEntrypointInstantiator {
     private static final Map<String, Object> ENTRYPOINT_OBJECT_INSTANCES = new HashMap<>();
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle Entrypoint Instantiator");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle Entrypoint Instantiator");
 
     /**
      * Get all instances of an entrypoint named "entryPointKey" from an "entrypointContainer".

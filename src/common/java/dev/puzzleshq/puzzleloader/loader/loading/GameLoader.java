@@ -5,8 +5,8 @@ import dev.puzzleshq.puzzleloader.loader.loading.events.EventGameLoaderFinish;
 import dev.puzzleshq.puzzleloader.loader.loading.events.EventRegisterStages;
 import dev.puzzleshq.puzzleloader.loader.mod.entrypoint.GameLoaderEntrypoint;
 import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle | GameLoader");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | GameLoader");
 
     public static final ArrayList<GameLoader> INSTANCES = new ArrayList<>();
     public final AtomicBoolean finished = new AtomicBoolean();

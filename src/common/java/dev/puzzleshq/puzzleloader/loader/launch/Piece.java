@@ -14,8 +14,6 @@ import dev.puzzleshq.puzzleloader.loader.util.*;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -25,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Piece {
 
@@ -35,7 +35,7 @@ public class Piece {
 
     static AtomicReference<EnvType> env = new AtomicReference<>();
 
-    public static final Logger LOGGER = LogManager.getLogger("Puzzle | Piece");
+    public static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | Piece");
 
     public static Piece INSTANCE;
 
@@ -206,7 +206,7 @@ public class Piece {
                 try {
                     AccessWriters.MERGED.add(format.parse(handle.getString()));
                 } catch (Exception e) {
-                    LOGGER.error("Error on File: {}", handle.getFile(), e);
+                    LOGGER.warn("Error on File:  {}", handle.getFile(), e);
                 }
             }
         }

@@ -6,12 +6,13 @@ import com.bawnorton.mixinsquared.api.MixinCanceller;
 import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import dev.puzzleshq.puzzleloader.loader.provider.ProviderException;
 import dev.puzzleshq.puzzleloader.loader.util.PuzzleEntrypointUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MixinSquaredApiImplLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger("Mixin Squared");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Mixin Squared");
 
     public static void load() {
         for (PuzzleEntrypointUtil.Entrypoint<MixinCanceller> container : PuzzleEntrypointUtil.getEntrypoints("mixinsquared", MixinCanceller.class)) {

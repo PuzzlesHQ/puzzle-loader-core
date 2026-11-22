@@ -1,11 +1,11 @@
 package dev.puzzleshq.puzzleloader.loader.launch;
 
 import dev.puzzleshq.puzzleloader.loader.util.EnvType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.net.URISyntaxException;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sets the log4j config before any initialization to make sure logging works correctly.
@@ -27,7 +27,7 @@ public class PrePiece {
         try {
             System.getProperties().setProperty(
                     "log4j.configurationFile",
-                    Objects.requireNonNull(PrePiece.class.getResource("/log4j2.xml")).toURI().toString()
+                    Objects.requireNonNull(PrePiece.class.getResource("/logback.xml")).toURI().toString()
             );
         } catch (URISyntaxException e) {
             getLogger().error("PrePiece seemed to have crashed when setting the LOG4J file, please contact a puzzle developer in the PuzzleHQ, https://discord.com/invite/XeVud4RC9U", e);
@@ -44,7 +44,7 @@ public class PrePiece {
 
     public static Logger getLogger() {
         if (LOGGER == null)
-            LOGGER = LogManager.getLogger("Puzzle | Emergency Piece");
+            LOGGER = LoggerFactory.getLogger("Puzzle | Emergency Piece");
         return LOGGER;
     }
 }

@@ -52,34 +52,36 @@ sourceSets {
 configurations {
 
     allCompileOnly
+    allCompileOnly.transitive(false)
     clientCompilyOnly.extendsFrom(allCompileOnly)
     commonCompilyOnly.extendsFrom(allCompileOnly)
 
     clientBundle
+    clientBundle.transitive(false)
     clientImplementation.extendsFrom(clientBundle)
 
     clientInternal
+    clientInternal.transitive(false)
     clientImplementation.extendsFrom(clientInternal)
 
     serverInternal
+    serverInternal.transitive(false)
     serverImplementation.extendsFrom(serverInternal)
 
-    commonBundle
-    commonImplementation.extendsFrom(commonBundle)
-    clientImplementation.extendsFrom(commonBundle)
-    serverImplementation.extendsFrom(commonBundle)
-
-    serverBundle
-    commonImplementation.extendsFrom(serverBundle)
-    serverImplementation.extendsFrom(serverBundle)
-
     clientNative
+    clientNative.transitive(false)
     clientImplementation.extendsFrom(clientNative)
 
     clientImpl
+    clientImpl.transitive(false)
     clientImplementation.extendsFrom(clientImpl)
 
+    commonImpl
+    commonImpl.transitive(false)
+    commonImplementation.extendsFrom(commonImpl)
+
     serverImpl
+    serverImpl.transitive(false)
     serverImplementation.extendsFrom(serverImpl)
 }
 
@@ -91,39 +93,15 @@ def natives(String lwjgl_natives) {
     }
 }
 
-final HashMap<String, String>[] excludes = new HashMap<String, String>[]{
-        ["group": "org.slf4j", "module": "slf4j-api"] as HashMap,
-        ["group": "com.google.code.gson", "module": "gson"] as HashMap,
-        ["group": "org.apache.logging.log4j", "module": "log4j-core"] as HashMap,
-        ["group": "org.apache.logging.log4j", "module": "log4j-api"] as HashMap,
-        ["group": "org.javassist", "module": "javassist"] as HashMap,
-        ["group": "com.google.errorprone", "module": "error_prone_annotations"] as HashMap,
-        ["group": "com.google.guava", "module": "guava"] as HashMap,
-        ["group": "com.google.guava", "module": "failureaccess"] as HashMap,
-        ["group": "com.google.guava", "module": "listenablefuture"] as HashMap,
-        ["group": "com.google.j2objc", "module": "j2objc-annotations"] as HashMap,
-        ["group": "org.jspecify", "module": "jspecify"] as HashMap,
-        ["group": "org.apache.commons", "module": "commons-compress"] as HashMap,
-        ["group": "org.apache.commons", "module": "commons-lang3"] as HashMap,
-        ["group": "commons-io", "module": "commons-io"] as HashMap,
-        ["group": "commons-codec", "module": "commons-codec"] as HashMap,
-        ["group": "com.google.code.findbugs", "module": "jsr305"] as HashMap,
-        ["group": "org.ow2.asm", "module": "asm"] as HashMap,
-        ["group": "org.ow2.asm", "module": "asm-tree"] as HashMap,
-        ["group": "org.ow2.asm", "module": "asm-commons"] as HashMap,
-        ["group": "org.ow2.asm", "module": "asm-analysis"] as HashMap,
-        ["group": "org.ow2.asm", "module": "asm-util"] as HashMap,
-}
-
 // Common Dependencies
 dependencies {
     clientCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
     commonCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
     serverCompileOnly "org.jetbrains:annotations:$jetbrains_annotations_version"
 
-    clientImpl "org.lwjgl:lwjgl:$lwjgl_version"
-    clientImpl "org.lwjgl:lwjgl-opengl:$lwjgl_version"
-    clientImpl "org.lwjgl:lwjgl-glfw:$lwjgl_version"
+    clientCompileOnly "org.lwjgl:lwjgl:$lwjgl_version"
+    clientCompileOnly "org.lwjgl:lwjgl-opengl:$lwjgl_version"
+    clientCompileOnly "org.lwjgl:lwjgl-glfw:$lwjgl_version"
 
     natives("natives-linux")
     natives("natives-linux-arm32")
@@ -138,55 +116,52 @@ dependencies {
     serverInternal sourceSets.common.output
 
     // Common
-    commonBundle ("io.sigpipe:jbsdiff:$jbsdiff_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("io.sigpipe:jbsdiff:$jbsdiff_version")
 
-    commonBundle("net.fabricmc:sponge-mixin:$mixin_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle annotationProcessor("io.github.llamalad7:mixinextras-common:$mixin_extras_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:$mixin_squared_version")) { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle("com.github.PuzzlesHQ:mixinconstraints-java8:$mixin_constraints_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl("net.fabricmc:sponge-mixin:$mixin_version")
+    commonImpl annotationProcessor("io.github.llamalad7:mixinextras-common:$mixin_extras_version")
+    commonImpl(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:$mixin_squared_version"))
+    commonImpl("com.github.PuzzlesHQ:mixinconstraints-java8:$mixin_constraints_version")
 
-    commonBundle ("net.sf.jopt-simple:jopt-simple:$jopt_simple_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.guava:guava:$google_guava_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.code.gson:gson:$gson_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.javassist:javassist:$javassist_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("net.sf.jopt-simple:jopt-simple:$jopt_simple_version")
+    commonImpl ("com.google.guava:guava:$google_guava_version")
 
-    commonBundle ("com.github.villadora:semver:$semver_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("com.github.villadora:semver:$semver_version")
+    commonImpl ("com.google.code.gson:gson:$gson_version")
+    commonImpl ("org.hjson:hjson:$hjson_version")
 
-    commonBundle ("org.apache.logging.log4j:log4j-api:$log4j_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.apache.logging.log4j:log4j-core:$log4j_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.reflections:reflections:$reflections_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("org.javassist:javassist:$javassist_version")
+    commonImpl ("org.reflections:reflections:$reflections_version")
 
-    commonBundle ("org.ow2.asm:asm:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.ow2.asm:asm-tree:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.ow2.asm:asm-util:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.ow2.asm:asm-analysis:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.ow2.asm:asm-commons:$asm_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("org.ow2.asm:asm:$asm_version")
+    commonImpl ("org.ow2.asm:asm-tree:$asm_version")
+    commonImpl ("org.ow2.asm:asm-util:$asm_version")
+    commonImpl ("org.ow2.asm:asm-analysis:$asm_version")
+    commonImpl ("org.ow2.asm:asm-commons:$asm_version")
 
-    commonBundle ("dev.puzzleshq:puzzle-annotations:$puzzle_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("dev.puzzleshq:access-writer:$puzzle_access_writer_version" ) { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("dev.puzzleshq:mod-format-framework:$puzzle_mod_format_framework_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("dev.puzzleshq:puzzle-annotations:$puzzle_annotations_version")
+    commonImpl ("dev.puzzleshq:access-writer:$puzzle_access_writer_version" )
+    commonImpl ("dev.puzzleshq:mod-format-framework:$puzzle_mod_format_framework_version")
 
-    commonBundle ("org.jspecify:jspecify:$jspecify_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.errorprone:error_prone_annotations:$google_error_prone_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.guava:failureaccess:$google_failureaccess_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.guava:listenablefuture:$google_listenablefuture_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.j2objc:j2objc-annotations:$google_j2objc_annotations_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("com.google.code.findbugs:jsr305:$google_findbugs_jsr305_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("org.jspecify:jspecify:$jspecify_version")
+    commonImpl ("com.google.errorprone:error_prone_annotations:$google_error_prone_annotations_version")
+    commonImpl ("com.google.guava:failureaccess:$google_failureaccess_version")
+    commonImpl ("com.google.j2objc:j2objc-annotations:$google_j2objc_annotations_version")
+    commonImpl ("com.google.code.findbugs:jsr305:$google_findbugs_jsr305_version")
 
-    commonBundle ("org.apache.commons:commons-compress:$apache_commons_compress_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.apache.commons:commons-lang3:$apache_commons_lang3_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("commons-codec:commons-codec:$apache_commons_codec_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("commons-io:commons-io:$apache_commons_io_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("org.apache.commons:commons-compress:$apache_commons_compress_version")
+    commonImpl ("org.apache.commons:commons-lang3:$apache_commons_lang3_version")
+    commonImpl ("commons-codec:commons-codec:$apache_commons_codec_version")
+    commonImpl ("commons-io:commons-io:$apache_commons_io_version")
 
-    commonBundle ("org.hjson:hjson:$hjson_version") {for (HashMap<String, String> map : excludes) exclude map }
-
-    commonBundle ("org.slf4j:log4j-over-slf4j:$slf4j_version") { for (HashMap<String, String> map : excludes) exclude map }
-    commonBundle ("org.slf4j:slf4j-api:$slf4j_version") { for (HashMap<String, String> map : excludes) exclude map }
+    commonImpl ("ch.qos.logback:logback-core:$logback_version")
+    commonImpl ("ch.qos.logback:logback-classic:$logback_version")
+    commonImpl ("org.slf4j:slf4j-api:$slf4j_version")
 }
 
 tasks.register("buildMergedTestJar", ShadowJar) {
     ArrayList t = new ArrayList();
-    Collections.addAll(t, project.configurations.clientInternal, project.configurations.commonBundle, project.configurations.clientBundle)
+    Collections.addAll(t, project.configurations.clientInternal, project.configurations.commonImpl, project.configurations.clientBundle)
     configurations = t
 
     mergeServiceFiles()
@@ -258,7 +233,7 @@ static def add(String side, JsonObject o, Configuration configuration, String ty
         object.add("type", type);
         array.add(object)
     }
-    o.add(side, array)
+    o.set(side, array)
 }
 
 tasks.register("mkDeps") {
@@ -267,13 +242,18 @@ tasks.register("mkDeps") {
     JsonObject object = new JsonObject();
     add("client", object, configurations.clientImpl, "implementation")
     add("server", object, configurations.serverImpl, "implementation")
-    add("common", object, configurations.commonBundle, "implementation")
+    add("common", object, configurations.commonImpl, "implementation")
+    add("client", object, configurations.clientCompileOnly, "compileOnly")
+    add("server", object, configurations.serverCompileOnly, "compileOnly")
+    add("common", object, configurations.commonCompileOnly, "compileOnly")
 
+    Set<String> addedRepos = new HashSet<>()
     JsonArray repos = new JsonArray()
     for (i in 0..<project.repositories.size()) {
         def dependency = project.repositories[i];
         if (dependency instanceof MavenArtifactRepository) {
             if (dependency.name == "MavenLocal") continue
+            if (!addedRepos.add(dependency.url.toString())) continue
             JsonObject repo = new JsonObject()
             repo.add("name", dependency.name)
             repo.add("url", dependency.url.toString())

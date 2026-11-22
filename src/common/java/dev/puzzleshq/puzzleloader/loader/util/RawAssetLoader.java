@@ -1,12 +1,11 @@
 package dev.puzzleshq.puzzleloader.loader.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -18,7 +17,7 @@ import java.util.zip.ZipFile;
  */
 public class RawAssetLoader {
 
-    private static final Logger LOGGER = LogManager.getLogger("Puzzle | RawAssetLoader");
+    private static final Logger LOGGER = LoggerFactory.getLogger("Puzzle | RawAssetLoader");
 
     /**
      * Gets the bytes from a {@link InputStream}.
@@ -41,7 +40,7 @@ public class RawAssetLoader {
             String[] strings = entry.getName().split("/");
             return new RawFileHandle(getBytesFromStream(stream), strings[strings.length - 1]);
         } catch (Exception ignore) {
-            if (errorOut) LOGGER.error("Cannot find resoxurce {} in zip {}.", path, file);
+            if (errorOut) LOGGER.error("Cannot find resource {} in zip {}.", path, file);
             return null;
         }
     }
