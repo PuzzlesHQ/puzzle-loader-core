@@ -68,17 +68,8 @@ public class Piece {
         parser.allowsUnrecognizedOptions();
 
         try {
-            OptionSpec<String> mod_folder = parser.accepts("mod-folder")
-                    .withOptionalArg().ofType(String.class).defaultsTo(new File("pmods").getAbsolutePath());
-
             OptionSpec<String> mod_paths = parser.accepts("mod-paths")
                     .withOptionalArg().ofType(String.class);
-
-            OptionSpec<Boolean> do_title_transformer = parser.accepts("do-title-transformer")
-                    .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
-
-            OptionSpec<String> custom_title_format = parser.accepts("custom-title-formatter")
-                    .withOptionalArg().ofType(String.class).defaultsTo("Puzzle Loader: %s");
 
             OptionSpec<Boolean> transformers_enabled = parser.accepts("transformers-enabled")
                     .withOptionalArg().ofType(Boolean.class).defaultsTo(true);
@@ -93,9 +84,6 @@ public class Piece {
 
             LoaderConfig.PATCH_PAMPHLET_FILE = patch_file.value(options);
 
-            LoaderConfig.DO_TITLE_TRANSFORMER = do_title_transformer.value(options);
-            LoaderConfig.CUSTOM_TITLE_FORMAT = custom_title_format.value(options);
-
             LoaderConfig.TRANSFORMERS_ENABLED = transformers_enabled.value(options);
             LoaderConfig.USER_TRANSFORMERS_ENABLED = user_transformers_enabled.value(options) && transformers_enabled.value(options);
 
@@ -109,7 +97,7 @@ public class Piece {
                 }
             }
 
-            ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
+            ModFinder.setModFolder(new File(System.getProperty("puzzle.core.mod-folder", new File("pmods").getAbsolutePath())));
             ModFinder.crawlModsFolder();
 
             gameProvider = IGameProvider.findValidProvider();
