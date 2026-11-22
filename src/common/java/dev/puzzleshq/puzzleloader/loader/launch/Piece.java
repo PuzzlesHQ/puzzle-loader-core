@@ -103,7 +103,6 @@ public class Piece {
             }
 
             ModFinder.setModFolder(new File(mod_folder.value(options)));
-            ModFinder.crawlModsFolder();
 
             gameProvider = IGameProvider.findValidProvider();
 
