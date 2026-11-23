@@ -70,7 +70,7 @@ public class Piece {
         try {
             OptionSpec<String> mod_folder = parser.accepts("mod-folder")
                     .withOptionalArg().ofType(String.class).defaultsTo(
-                            System.getProperty("puzzle.core.mod-folder", new File("pmods").getAbsolutePath())
+                            System.getProperty("puzzle.core.mod-folder", "pmods")
                     );
 
             OptionSpec<String> mod_paths = parser.accepts("mod-paths")
@@ -102,7 +102,7 @@ public class Piece {
                 }
             }
 
-            ModFinder.setModFolder(new File(mod_folder.value(options)));
+            ModFinder.setModFolder(new File(mod_folder.value(options)).getAbsoluteFile());
 
             gameProvider = IGameProvider.findValidProvider();
 
