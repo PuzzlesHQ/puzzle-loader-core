@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <conversionRule conversionWord="lvlcolor" converterClass="dev.puzzleshq.puzzleloader.loader.util.LevelColorConverter" />
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <target>System.out</target>
         <encoder>
-            <pattern>%blue([%thread]) [%replace(%replace(%replace(%replace(%replace(%level){'^ERROR$','\u001b[38;5;196mERROR\u001b[0m'}){'^WARN$','\u001b[38;5;220mWARN\u001b[0m'}){'^INFO$','\u001b[38;5;40mINFO\u001b[0m'}){'^DEBUG$','\u001b[38;5;79mDEBUG\u001b[0m'}){'^TRACE$','\u001b[38;5;33mTRACE\u001b[0m'}] %magenta([%logger{36}]): %white(%msg)%n</pattern>
+            <pattern>%blue([%thread]) [%lvlcolor(%level)] %magenta([%logger{36}]): %white(%msg)\n</pattern>
         </encoder>
     </appender>
 
